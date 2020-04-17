@@ -35,9 +35,13 @@ void seq_read(Mapping mapping, Results &results)
         counter++;
     }
     double bandwidth = counter / results.runtime * (double)mapping.pmem_len / 1024.0 / 1024.0;
-    std::cout << mapping.pmem_len << std::endl;
 
     results.seq_read = bandwidth;
+}
+
+void seq_write(Mapping mapping, Results &results)
+{
+    results.seq_write = 10;
 }
 
 void prepare_mapping(Mapping &mapping)

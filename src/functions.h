@@ -10,6 +10,7 @@ struct Mapping
 };
 
 void seq_read(Mapping, Results &);
+void seq_write(Mapping, Results &);
 void prepare_mapping(Mapping &);
 void initialize_pmem(Mapping);
 
