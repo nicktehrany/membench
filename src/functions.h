@@ -2,6 +2,15 @@
 #define FUNCTIONS_H
 #include "results.h"
 
-void seq_read(Results &);
+struct Mapping
+{
+    int *pmem_addr;
+    int is_pmem;
+    int pmem_len;
+};
+
+void seq_read(Mapping, Results &);
+void prepare_mapping(Mapping &);
+void initialize_pmem(Mapping);
 
 #endif
