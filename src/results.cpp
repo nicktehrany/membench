@@ -2,6 +2,7 @@
 #include <fstream>
 #include "results.h"
 
+// Summarize all Arguments and Results in a file
 void dump_results(Results results, Arguments args)
 {
     std::ofstream outfile;
@@ -9,7 +10,18 @@ void dump_results(Results results, Arguments args)
     outfile << "\t\t==== SUMMARY ====\n";
     outfile << "Runtime \t\t\t\t" << args.runtime << " sec\n";
     outfile << "Directory \t\t\t\t" << args.path << "\n";
-    outfile << "Pmem Size \t\t\t\t" << args.pmem_len << "\n";
+
+    switch (args.raw_pmem)
+    {
+    case 1:
+        outfile << "Raw PMEM \t\t\t\tYes\n";
+        break;
+    default:
+        outfile << "Raw PMEM \t\t\t\tNo\n";
+        break;
+    }
+
+    outfile << "Mem Size \t\t\t\t" << args.len << "\n";
 
     switch (args.mode)
     {

@@ -11,10 +11,8 @@ int main()
     //TODO Implement Parsing args
     parse_args(args);
 
-    prepare_mapping(mapping, args.path, args.pmem_len);
-
+    prepare_mapping(mapping, args.path, args.len, args.raw_pmem);
     run_benchmark(mapping, args, results);
-
     cleanup_mapping(mapping);
     dump_results(results, args);
 
