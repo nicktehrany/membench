@@ -4,8 +4,7 @@
 
 struct Results
 {
-    double seq_read;
-    double seq_write;
+    double bandwidth;
 };
 
 void dump_results(Results, Arguments);

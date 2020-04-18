@@ -10,9 +10,10 @@ struct Mapping
 };
 
 void seq_read(Mapping, Results &, int);
-void seq_write(Mapping, Results &);
+void seq_write(Mapping, Results &, int);
 void prepare_mapping(Mapping &, const char *, int);
 void initialize_pmem(Mapping);
 void cleanup_mapping(Mapping);
+void run_benchmark(Mapping, Arguments, Results &);
 
 #endif
