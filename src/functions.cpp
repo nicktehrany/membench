@@ -96,7 +96,7 @@ void prepare_mapping(Mapping &mapping, const char *dir, int len, int raw_pmem)
             exit(1);
         }
         // init file to avoid mmap on empty file (BUS_ERROR)
-        initialize_file(fd, mapping.len);
+        initialize_file(fd, len);
 
         if ((mapping.addr = (int *)mmap(0, len, PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0)) == NULL)
         {
@@ -158,9 +158,14 @@ void initialize_file(int fd, int len)
     for (int i = 0; i < len; i++)
         buf[i] = 'b';
 
-    //Some calculations to fill a[]
     if (write(fd, buf, len) < 0)
     {
         perror("File Error");
     }
+}
+
+// TEMPORARY
+void DEBUG_LINE(char *msg)
+{
+    std::cout << msg << std::endl;
 }
