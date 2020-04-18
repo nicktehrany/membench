@@ -7,13 +7,16 @@ int main()
 {
     Results results;
     Mapping mapping;
+    Arguments args;
 
-    //TODO Take as parameter
-    results.runtime = 10;
-    prepare_mapping(mapping);
-    seq_read(mapping, results);
+    //TODO Implement Parsing args
+    parse_args(args);
+
+    prepare_mapping(mapping, args.dir, args.pmem_len);
+    seq_read(mapping, results, args.runtime);
     seq_write(mapping, results);
-    dump_results(results);
+    cleanup_mapping(mapping);
+    dump_results(results, args);
 
     return 0;
 }

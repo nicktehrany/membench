@@ -9,9 +9,10 @@ struct Mapping
     int pmem_len;
 };
 
-void seq_read(Mapping, Results &);
+void seq_read(Mapping, Results &, int);
 void seq_write(Mapping, Results &);
-void prepare_mapping(Mapping &);
+void prepare_mapping(Mapping &, const char *, int);
 void initialize_pmem(Mapping);
+void cleanup_mapping(Mapping);
 
 #endif

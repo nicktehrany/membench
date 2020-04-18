@@ -15,10 +15,7 @@
 
 #include <chrono>
 
-// Currently HardCoded TODO Take size as parameter
-#define PMEM_LEN 4096
-
-void seq_read(Mapping mapping, Results &results)
+void seq_read(Mapping mapping, Results &results, int runtime)
 {
     int counter = 0;
     int buf[mapping.pmem_len];
@@ -28,13 +25,13 @@ void seq_read(Mapping mapping, Results &results)
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    while (std::chrono::duration_cast<std::chrono::seconds>(end - start).count() < results.runtime)
+    while (std::chrono::duration_cast<std::chrono::seconds>(end - start).count() < runtime)
     {
         pmem_memcpy(buf, mapping.pmem_addr, mapping.pmem_len, 0);
         end = std::chrono::high_resolution_clock::now();
         counter++;
     }
-    double bandwidth = counter / results.runtime * (double)mapping.pmem_len / 1024.0 / 1024.0;
+    double bandwidth = counter / runtime * (double)mapping.pmem_len / 1024.0 / 1024.0;
 
     results.seq_read = bandwidth;
 }
@@ -44,18 +41,18 @@ void seq_write(Mapping mapping, Results &results)
     results.seq_write = 10;
 }
 
-void prepare_mapping(Mapping &mapping)
+void prepare_mapping(Mapping &mapping, const char *dir, int pmem_len)
 {
 
     size_t *mapped_plen = NULL;
-    /* memory mapping it */ //Hardcoded path TODO: Change to to parameter
-    if ((mapping.pmem_addr = (int *)pmem_map_file("/mnt/mem/file", PMEM_LEN, PMEM_FILE_CREATE, 0666, mapped_plen, &mapping.is_pmem)) == NULL)
+    /* memory mapping it */
+    if ((mapping.pmem_addr = (int *)pmem_map_file(dir, pmem_len, PMEM_FILE_CREATE, 0666, mapped_plen, &mapping.is_pmem)) == NULL)
     {
         perror("pmem_map");
         exit(1);
     }
 
-    mapping.pmem_len = PMEM_LEN;
+    mapping.pmem_len = pmem_len;
 }
 
 void initialize_pmem(Mapping mapping)
@@ -66,4 +63,9 @@ void initialize_pmem(Mapping mapping)
         buf[i] = 12;
 
     pmem_memcpy(mapping.pmem_addr, buf, mapping.pmem_len, 0);
+}
+
+void cleanup_mapping(Mapping mapping)
+{
+    pmem_unmap(mapping.pmem_addr, mapping.pmem_len);
 }
