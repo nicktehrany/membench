@@ -21,7 +21,8 @@ void dump_results(Results results, Arguments args)
         break;
     }
 
-    outfile << "Mem Size \t\t\t\t" << args.len << "Bytes\n";
+    outfile << "File Size \t\t\t\t" << args.fsize << " Bytes\n";
+    outfile << "Block Size \t\t\t\t" << args.bsize << " Bytes\n";
 
     switch (args.mode)
     {

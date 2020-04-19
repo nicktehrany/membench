@@ -11,8 +11,9 @@
 void seq_read(Mapping mapping, Results &results, int runtime)
 {
     int counter = 0;
+    int block_index = 0;
     auto end = std::chrono::high_resolution_clock::now();
-    unsigned char buf[mapping.len] = {0};
+    unsigned char buf[mapping.bsize] = {0};
 
     initialize_mem(mapping);
 
@@ -20,13 +21,17 @@ void seq_read(Mapping mapping, Results &results, int runtime)
 
     while (std::chrono::duration_cast<std::chrono::seconds>(end - start).count() < runtime)
     {
-        memcpy(buf, mapping.addr, mapping.len);
+        // Read all blocks from mapped area, start over
+        if (block_index * mapping.bsize >= mapping.fsize)
+            block_index = 0;
+        memcpy(buf, mapping.addr + (mapping.bsize * block_index), mapping.bsize);
         end = std::chrono::high_resolution_clock::now();
+        block_index++;
         counter++;
     }
 
     //Calculating per second memcpy * size of memcpy and convert to MiB
-    double bandwidth = counter / runtime * (double)mapping.len / 1024.0 / 1024.0;
+    double bandwidth = counter / runtime * (double)mapping.bsize / 1024.0 / 1024.0;
 
     results.bandwidth = bandwidth;
 }
@@ -34,10 +39,11 @@ void seq_read(Mapping mapping, Results &results, int runtime)
 void seq_write(Mapping mapping, Results &results, int runtime)
 {
     int counter = 0;
-    unsigned char buf[mapping.len];
+    int block_index = 0;
+    unsigned char buf[mapping.bsize];
     auto end = std::chrono::high_resolution_clock::now();
 
-    for (int i = 0; i < mapping.len; i++)
+    for (int i = 0; i < mapping.bsize; i++)
         buf[i] = 'b';
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -47,9 +53,11 @@ void seq_write(Mapping mapping, Results &results, int runtime)
     {
         while (std::chrono::duration_cast<std::chrono::seconds>(end - start).count() < runtime)
         {
-            pmem_memcpy_persist(mapping.addr, buf, mapping.len);
+            if (block_index * mapping.bsize >= mapping.fsize)
+                block_index = 0;
+            pmem_memcpy_persist(mapping.addr + (block_index * mapping.bsize), buf, mapping.bsize);
             end = std::chrono::high_resolution_clock::now();
-            // pmem_memset(mapping.addr, 0, mapping.len, 0); WRONG BUT HELPS
+            block_index++;
             counter++;
         }
     }
@@ -58,19 +66,22 @@ void seq_write(Mapping mapping, Results &results, int runtime)
     {
         while (std::chrono::duration_cast<std::chrono::seconds>(end - start).count() < runtime)
         {
-            memcpy(mapping.addr, buf, mapping.len);
+            if (block_index * mapping.bsize >= mapping.fsize)
+                block_index = 0;
+            memcpy(mapping.addr + (block_index * mapping.bsize), buf, mapping.bsize);
             end = std::chrono::high_resolution_clock::now();
+            block_index++;
             counter++;
         }
     }
 
     //Calculating per second memcpy * size of memcpy and convert to MiB
-    double bandwidth = counter / runtime * (double)mapping.len / 1024.0 / 1024.0;
+    double bandwidth = counter / runtime * (double)mapping.fsize / 1024.0 / 1024.0;
 
     results.bandwidth = bandwidth;
 }
 
-void prepare_mapping(Mapping &mapping, const char *dir, int len, int raw_pmem)
+void prepare_mapping(Mapping &mapping, const char *dir, int fsize, int raw_pmem)
 {
 
     // Supporting raw persistent memory access
@@ -78,8 +89,8 @@ void prepare_mapping(Mapping &mapping, const char *dir, int len, int raw_pmem)
     {
         size_t *mapped_plen = NULL;
         /* memory mapping it */
-        if ((mapping.addr = (int *)pmem_map_file(dir, len, PMEM_FILE_CREATE, 0666,
-                                                 mapped_plen, &mapping.is_pmem)) == NULL)
+        if ((mapping.addr = (char *)pmem_map_file(dir, fsize, PMEM_FILE_CREATE, 0666,
+                                                  mapped_plen, &mapping.is_pmem)) == NULL)
         {
             perror("pmem_map");
             exit(1);
@@ -96,9 +107,9 @@ void prepare_mapping(Mapping &mapping, const char *dir, int len, int raw_pmem)
             exit(1);
         }
         // init file to avoid mmap on empty file (BUS_ERROR)
-        initialize_file(fd, len);
+        initialize_file(fd, fsize);
 
-        if ((mapping.addr = (int *)mmap(0, len, PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0)) == NULL)
+        if ((mapping.addr = (char *)mmap(0, fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0)) == NULL)
         {
             perror("mmap");
             exit(1);
@@ -108,25 +119,30 @@ void prepare_mapping(Mapping &mapping, const char *dir, int len, int raw_pmem)
 
         mapping.is_pmem = 0;
     }
-    mapping.len = len;
+    mapping.fsize = fsize;
 }
 
 void initialize_mem(Mapping mapping)
 {
-    //TODO better initializing
-    unsigned char buf[mapping.len];
-    for (int i = 0; i < mapping.len; i++)
+    //TODO better initializing INEFFICIENT to create huge buf
+    unsigned char *buf = new unsigned char[mapping.fsize]; //Handle large sizes
+
+    for (int i = 0; i < mapping.fsize; i++)
         buf[i] = 'b';
 
     if (mapping.is_pmem)
-        pmem_memcpy_persist(mapping.addr, buf, mapping.len);
+        pmem_memcpy_persist(mapping.addr, buf, mapping.fsize);
     else
-        memcpy(mapping.addr, buf, mapping.len);
+        memcpy(mapping.addr, buf, mapping.fsize);
+    delete[] buf;
 }
 
 void cleanup_mapping(Mapping mapping)
 {
-    pmem_unmap(mapping.addr, mapping.len);
+    if (mapping.is_pmem)
+        pmem_unmap(mapping.addr, mapping.fsize);
+    else
+        munmap(mapping.addr, mapping.fsize);
 }
 
 void run_benchmark(Mapping mapping, Arguments args, Results &results)
@@ -150,18 +166,20 @@ void run_benchmark(Mapping mapping, Arguments args, Results &results)
     }
 }
 
-void initialize_file(int fd, int len)
+void initialize_file(int fd, int fsize)
 {
-    unsigned char buf[len];
+    unsigned char *buf = new unsigned char[fsize]; // Handle large sizes
 
     // TODO BETTER INITIALIZING
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < fsize; i++)
         buf[i] = 'b';
 
-    if (write(fd, buf, len) < 0)
+    if (write(fd, buf, fsize) < 0)
     {
         perror("File Error");
+        exit(1);
     }
+    delete[] buf;
 }
 
 // TEMPORARY

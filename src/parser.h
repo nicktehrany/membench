@@ -5,7 +5,8 @@ struct Arguments
 {
     int runtime;
     const char *path;
-    int len;
+    int fsize;
+    int bsize;
     int mode;     //0=read 1=write 2=randread 3=randwrite
     int raw_pmem; // Used to check to map raw persistent memory
 };

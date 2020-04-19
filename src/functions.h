@@ -4,9 +4,10 @@
 
 struct Mapping
 {
-    int *addr;
+    char *addr;
     int is_pmem;
-    int len;
+    int fsize = 0;
+    int bsize = 0;
 };
 
 void seq_read(Mapping, Results &, int);
