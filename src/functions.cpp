@@ -10,7 +10,7 @@
 
 void seq_read(Mapping mapping, Results &results, int runtime)
 {
-    int counter = 0;
+    long counter = 0;
     int block_index = 0;
     auto end = std::chrono::high_resolution_clock::now();
     unsigned char buf[mapping.bsize] = {0};
@@ -31,20 +31,22 @@ void seq_read(Mapping mapping, Results &results, int runtime)
     }
 
     //Calculating per second memcpy * size of memcpy and convert to MiB
-    double bandwidth = counter / runtime * (double)mapping.bsize / 1024.0 / 1024.0;
+    double bandwidth = (double)counter / (double)runtime * (double)mapping.bsize / 1024.0 / 1024.0;
 
     results.bandwidth = bandwidth;
+    results.io_data = (double)counter * (double)mapping.bsize / 1024.0 / 1024.0 / 1024.0;
 }
 
 void seq_write(Mapping mapping, Results &results, int runtime)
 {
-    int counter = 0;
+    long counter = 0;
     int block_index = 0;
     unsigned char buf[mapping.bsize];
     auto end = std::chrono::high_resolution_clock::now();
 
+    srand(time(NULL));
     for (int i = 0; i < mapping.bsize; i++)
-        buf[i] = 'b';
+        buf[i] = rand() % 256;
 
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -76,9 +78,10 @@ void seq_write(Mapping mapping, Results &results, int runtime)
     }
 
     //Calculating per second memcpy * size of memcpy and convert to MiB
-    double bandwidth = counter / runtime * (double)mapping.fsize / 1024.0 / 1024.0;
+    double bandwidth = (double)counter / (double)runtime * (double)mapping.bsize / 1024.0 / 1024.0;
 
     results.bandwidth = bandwidth;
+    results.io_data = (double)counter * (double)mapping.bsize / 1024.0 / 1024.0 / 1024.0;
 }
 
 void prepare_mapping(Mapping &mapping, const char *dir, int fsize, int raw_pmem)
@@ -100,7 +103,7 @@ void prepare_mapping(Mapping &mapping, const char *dir, int fsize, int raw_pmem)
     else
     {
         int fd;
-        //Add file path from args
+
         if ((fd = open(dir, O_CREAT | O_RDWR, 0666)) < 0)
         {
             perror("File Open");
@@ -127,8 +130,9 @@ void initialize_mem(Mapping mapping)
     //TODO better initializing INEFFICIENT to create huge buf
     unsigned char *buf = new unsigned char[mapping.fsize]; //Handle large sizes
 
+    srand(time(NULL));
     for (int i = 0; i < mapping.fsize; i++)
-        buf[i] = 'b';
+        buf[i] = rand() % 256;
 
     if (mapping.is_pmem)
         pmem_memcpy_persist(mapping.addr, buf, mapping.fsize);
@@ -147,6 +151,7 @@ void cleanup_mapping(Mapping mapping)
 
 void run_benchmark(Mapping mapping, Arguments args, Results &results)
 {
+    mapping.bsize = args.bsize;
     switch (args.mode)
     {
     case 0:
@@ -168,11 +173,12 @@ void run_benchmark(Mapping mapping, Arguments args, Results &results)
 
 void initialize_file(int fd, int fsize)
 {
+    // TODO BETTER INITIALIZING INEFFICIENT to create huge buf
     unsigned char *buf = new unsigned char[fsize]; // Handle large sizes
 
-    // TODO BETTER INITIALIZING
+    srand(time(NULL));
     for (int i = 0; i < fsize; i++)
-        buf[i] = 'b';
+        buf[i] = rand() % 256;
 
     if (write(fd, buf, fsize) < 0)
     {

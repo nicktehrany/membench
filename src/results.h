@@ -5,6 +5,7 @@
 struct Results
 {
     double bandwidth;
+    double io_data;
 };
 
 void dump_results(Results, Arguments);

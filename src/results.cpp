@@ -39,6 +39,7 @@ void dump_results(Results results, Arguments args)
         outfile << "Random Write\t\t\t" << results.bandwidth << " MiB/s\n";
         break;
     }
+    outfile << "I/O Data \t\t\t\t" << results.io_data << " GiB\n";
 
     outfile.close();
 }
