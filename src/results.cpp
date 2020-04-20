@@ -21,6 +21,16 @@ void dump_results(Results results, Arguments args)
         break;
     }
 
+    switch (args.raw_mem)
+    {
+    case 1:
+        outfile << "Raw MEM \t\t\t\tYes\n";
+        break;
+    default:
+        outfile << "Raw MEM \t\t\t\tNo\n";
+        break;
+    }
+
     outfile << "File Size \t\t\t\t" << args.fsize << " Bytes\n";
     outfile << "Block Size \t\t\t\t" << args.bsize << " Bytes\n";
 
