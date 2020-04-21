@@ -11,7 +11,6 @@
  * Engine that uses mmap to map files into memory and then measures throughput by 
  * reading/writing from and to it using memcpy. Possible file options are a usual
  * file from any file system, no file (mmap will be called with MAP_ANONYMOUS),
- * a file on a mounted pmem device, which will be mapped using libpmem functions
 */
 void mmap_engine(Mapping &mapping, Arguments args, Results &results)
 {

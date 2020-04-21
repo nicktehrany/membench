@@ -7,6 +7,12 @@
 #include <chrono>
 #include <libpmem.h>
 
+/*
+ *
+ * Engine that uses libpmem functions to access raw persistent memory, 
+ * which needs to be mounted with a DAX enabled filesystem, and measures
+ * throughput of sequential and random reads and writes
+*/
 void pmem_engine(Mapping &mapping, Arguments args, Results &results)
 {
     pmem_prepare_mapping(mapping, args);
@@ -114,7 +120,8 @@ void pmem_seq_write(Mapping mapping, Results &results, int runtime)
     {
         if (block_index * mapping.buflen >= mapping.fsize)
             block_index = 0;
-        pmem_memcpy_persist(mapping.addr + (block_index * mapping.buflen), src, mapping.buflen);
+        pmem_memcpy(mapping.addr + (block_index * mapping.buflen), src, mapping.buflen, 0);
+        pmem_persist(mapping.addr, mapping.buflen);
         end = std::chrono::high_resolution_clock::now();
         block_index++;
         counter++;
@@ -146,7 +153,8 @@ void pmem_rand_write(Mapping mapping, Results &results, int runtime)
     {
         if (index_counter == max_ind)
             index_counter = 0;
-        pmem_memcpy_persist(mapping.addr + (block_index[index_counter] * mapping.buflen), src, mapping.buflen);
+        pmem_memcpy(mapping.addr + (block_index[index_counter] * mapping.buflen), src, mapping.buflen, 0);
+        pmem_persist(mapping.addr, mapping.buflen);
         end = std::chrono::high_resolution_clock::now();
         index_counter++;
         counter++;

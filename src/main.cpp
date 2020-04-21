@@ -12,8 +12,10 @@ int main()
     //TODO Implement Parsing args
     parse_args(args);
 
-    // Depending on engine run things
-    mmap_engine(mapping, args, results);
+    if (args.raw_pmem)
+        pmem_engine(mapping, args, results);
+    else
+        mmap_engine(mapping, args, results);
 
     return 0;
 }
