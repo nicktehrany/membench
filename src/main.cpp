@@ -1,5 +1,5 @@
 #include "results.h"
-#include "functions.h"
+#include "../engines/mmap.h"
 #include <iostream>
 
 int main()
@@ -11,6 +11,7 @@ int main()
     //TODO Implement Parsing args
     parse_args(args);
 
+    // Depending on engine run things
     prepare_mapping(mapping, args);
     run_benchmark(mapping, args, results);
     cleanup_mapping(mapping);
