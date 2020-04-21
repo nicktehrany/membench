@@ -1,5 +1,7 @@
 #include "results.h"
+#include "functions.h"
 #include "../engines/mmap.h"
+#include "../engines/pmem.h"
 
 int main()
 {

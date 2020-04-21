@@ -1,27 +1,44 @@
-#include "mmap.h"
+#include "pmem.h"
 #include <string.h>
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <iostream>
 #include <chrono>
+#include <libpmem.h>
 
-/*
- *
- * Engine that uses mmap to map files into memory and then measures throughput by 
- * reading/writing from and to it using memcpy. Possible file options are a usual
- * file from any file system, no file (mmap will be called with MAP_ANONYMOUS),
- * a file on a mounted pmem device, which will be mapped using libpmem functions
-*/
-void mmap_engine(Mapping &mapping, Arguments args, Results &results)
+void pmem_engine(Mapping &mapping, Arguments args, Results &results)
 {
-    mmap_prepare_mapping(mapping, args);
-    mmap_run_benchmark(mapping, args, results);
-    mmap_cleanup_mapping(mapping);
+    pmem_prepare_mapping(mapping, args);
+    pmem_run_benchmark(mapping, args, results);
+    pmem_cleanup_mapping(mapping);
     dump_results(results, args);
 }
 
-void mmap_seq_read(Mapping mapping, Results &results, int runtime)
+void pmem_run_benchmark(Mapping mapping, Arguments args, Results &results)
+{
+    mapping.buflen = args.buflen;
+    switch (args.mode)
+    {
+    case 0:
+        pmem_seq_read(mapping, results, args.runtime);
+        break;
+    case 1:
+        pmem_seq_write(mapping, results, args.runtime);
+        break;
+    case 2:
+        pmem_rand_read(mapping, results, args.runtime);
+        break;
+    case 3:
+        pmem_rand_write(mapping, results, args.runtime);
+        break;
+    default:
+        perror("Invalid Mode");
+        exit(1);
+    }
+}
+
+void pmem_seq_read(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
     int block_index = 0;
@@ -47,7 +64,7 @@ void mmap_seq_read(Mapping mapping, Results &results, int runtime)
     delete[] dest;
 }
 
-void mmap_rand_read(Mapping mapping, Results &results, int runtime)
+void pmem_rand_read(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
     int index_counter = 0;
@@ -79,7 +96,7 @@ void mmap_rand_read(Mapping mapping, Results &results, int runtime)
     delete[] block_index;
 }
 
-void mmap_seq_write(Mapping mapping, Results &results, int runtime)
+void pmem_seq_write(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
     int block_index = 0;
@@ -92,11 +109,12 @@ void mmap_seq_write(Mapping mapping, Results &results, int runtime)
 
     auto start = std::chrono::high_resolution_clock::now();
 
+    // If mapping is raw pmem use libpmem functions
     while (std::chrono::duration_cast<std::chrono::seconds>(end - start).count() < runtime)
     {
         if (block_index * mapping.buflen >= mapping.fsize)
             block_index = 0;
-        memcpy(mapping.addr + (block_index * mapping.buflen), src, mapping.buflen);
+        pmem_memcpy_persist(mapping.addr + (block_index * mapping.buflen), src, mapping.buflen);
         end = std::chrono::high_resolution_clock::now();
         block_index++;
         counter++;
@@ -106,7 +124,7 @@ void mmap_seq_write(Mapping mapping, Results &results, int runtime)
     delete[] src;
 }
 
-void mmap_rand_write(Mapping mapping, Results &results, int runtime)
+void pmem_rand_write(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
     int index_counter = 0;
@@ -123,11 +141,12 @@ void mmap_rand_write(Mapping mapping, Results &results, int runtime)
         block_index[i] = rand() % max_ind;
 
     auto start = std::chrono::high_resolution_clock::now();
+
     while (std::chrono::duration_cast<std::chrono::seconds>(end - start).count() < runtime)
     {
         if (index_counter == max_ind)
             index_counter = 0;
-        memcpy(mapping.addr + (block_index[index_counter] * mapping.buflen), src, mapping.buflen);
+        pmem_memcpy_persist(mapping.addr + (block_index[index_counter] * mapping.buflen), src, mapping.buflen);
         end = std::chrono::high_resolution_clock::now();
         index_counter++;
         counter++;
@@ -138,105 +157,25 @@ void mmap_rand_write(Mapping mapping, Results &results, int runtime)
     delete[] block_index;
 }
 
-void mmap_prepare_mapping(Mapping &mapping, Arguments args)
+void pmem_prepare_mapping(Mapping &mapping, Arguments args)
 {
-    if (args.map_anon)
-        mmap_prepare_map_anon(mapping, args.fsize);
-    else
+    // Supporting raw persistent memory access
+    if (args.raw_pmem)
     {
-        int fd;
-        if ((fd = open(args.path, O_CREAT | O_RDWR, 0666)) < 0)
+        size_t *mapped_plen = NULL;
+        /* memory mapping it */
+        if ((mapping.addr = (char *)pmem_map_file(args.path, args.fsize, PMEM_FILE_CREATE, 0666,
+                                                  mapped_plen, &mapping.is_pmem)) == NULL)
         {
-            perror("File Open");
+            perror("pmem_map");
             exit(1);
         }
-        // init file to avoid mmap on empty file (BUS_ERROR)
-        mmap_init_file(fd, args.fsize);
-
-        if ((mapping.addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0)) == NULL)
-        {
-            perror("mmap");
-            exit(1);
-        }
-
-        close(fd);
-
-        mapping.is_pmem = 0;
-        mapping.map_anon = 0;
         mapping.fsize = args.fsize;
     }
 }
 
-// Mapping is anonymous
-void mmap_prepare_map_anon(Mapping &mapping, int fsize)
+// TODO reset mapping vars
+void pmem_cleanup_mapping(Mapping mapping)
 {
-    // MAP_ANONYMOUS not backed by file on file system
-    if ((mapping.addr = (char *)mmap(0, fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_ANONYMOUS | MAP_POPULATE, -1, 0)) == NULL)
-    {
-        perror("mmap");
-        exit(1);
-    }
-
-    mapping.is_pmem = 0;
-    mapping.map_anon = 1;
-    mapping.fsize = fsize;
-    mmap_init_mem(mapping);
-}
-
-void mmap_cleanup_mapping(Mapping mapping)
-{
-    munmap(mapping.addr, mapping.fsize);
-}
-
-void mmap_run_benchmark(Mapping mapping, Arguments args, Results &results)
-{
-    mapping.buflen = args.buflen;
-    switch (args.mode)
-    {
-    case 0:
-        mmap_seq_read(mapping, results, args.runtime);
-        break;
-    case 1:
-        mmap_seq_write(mapping, results, args.runtime);
-        break;
-    case 2:
-        mmap_rand_read(mapping, results, args.runtime);
-        break;
-    case 3:
-        mmap_rand_write(mapping, results, args.runtime);
-        break;
-    default:
-        perror("Invalid Mode");
-        exit(1);
-    }
-}
-
-void mmap_init_file(int fd, int fsize)
-{
-    // TODO BETTER INITIALIZING INEFFICIENT to create huge buf
-    unsigned char *buf = new unsigned char[fsize];
-
-    srand(time(NULL));
-    for (int i = 0; i < fsize; i++)
-        buf[i] = rand() % 256;
-
-    if (write(fd, buf, fsize) < 0)
-    {
-        perror("File Error");
-        exit(1);
-    }
-    delete[] buf;
-}
-
-void mmap_init_mem(Mapping mapping)
-{
-    // TODO BETTER INITIALIZING INEFFICIENT to create huge buf
-    unsigned char *buf = new unsigned char[mapping.fsize];
-
-    srand(time(NULL));
-    for (int i = 0; i < mapping.fsize; i++)
-        buf[i] = rand() % 256;
-
-    memcpy(mapping.addr, buf, mapping.fsize);
-    delete[] buf;
+    pmem_unmap(mapping.addr, mapping.fsize);
 }
