@@ -7,9 +7,9 @@ struct Mapping
 {
     char *addr;
     int is_pmem;
-    int is_raw_mem;
+    int map_anon; // MAP_ANONYMOUS (not backed by file)
     int fsize = 0;
-    int bsize = 0;
+    int buflen = 0;
 };
 
 void mmap_engine(Mapping &, Arguments, Results &);
@@ -20,10 +20,6 @@ void prepare_mapping(Mapping &, Arguments);
 void cleanup_mapping(Mapping);
 void run_benchmark(Mapping, Arguments, Results &);
 void init_file(int, int);
-void prepare_raw_mem(Mapping &, int);
+void prepare_map_anon(Mapping &, int);
 void init_mem(Mapping);
-
-// Temporary
-void DEBUG_LINE(char *);
-
 #endif

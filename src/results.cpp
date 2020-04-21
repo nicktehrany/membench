@@ -21,7 +21,7 @@ void dump_results(Results results, Arguments args)
         break;
     }
 
-    switch (args.raw_mem)
+    switch (args.map_anon)
     {
     case 1:
         outfile << "Raw MEM \t\t\t\tYes\n";
@@ -32,7 +32,7 @@ void dump_results(Results results, Arguments args)
     }
 
     outfile << "File Size \t\t\t\t" << args.fsize << " Bytes\n";
-    outfile << "Block Size \t\t\t\t" << args.bsize << " Bytes\n";
+    outfile << "Block Size \t\t\t\t" << args.buflen << " Bytes\n";
 
     switch (args.mode)
     {
