@@ -4,11 +4,11 @@
 //TODO Parse cmd line args give all default values
 void parse_args(Arguments &args)
 {
-    args.runtime = 60;
+    args.runtime = 10;
     args.fsize = 268435456; // file size needs to be multiple of block size for alignment and limited to 1GB
-    args.bsize = 4096;
-    //args.path = "/mnt/mem/benchmark"; // For DAX-mmap and Raw pmem using mounted fs
-    args.path = "file"; // For regular mmap any name works, will create if doesn't exist
+    args.bsize = 4096 * 4 * 4;
+    args.path = "/mnt/mem/benchmark"; // For DAX-mmap and Raw pmem using mounted fs
+    //args.path = "file"; // For regular mmap any name works, will create if doesn't exist
     args.mode = 0;
     args.raw_pmem = 0; // For Raw pmem access
     args.raw_mem = 1;  // For MAP_ANONYMOUS

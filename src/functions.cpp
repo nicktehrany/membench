@@ -12,7 +12,7 @@ void seq_read(Mapping mapping, Results &results, int runtime)
     long counter = 0;
     int block_index = 0;
     auto end = std::chrono::high_resolution_clock::now();
-    unsigned char buf[mapping.bsize] = {0};
+    unsigned char *dest = new unsigned char[mapping.bsize];
 
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -21,8 +21,8 @@ void seq_read(Mapping mapping, Results &results, int runtime)
         // Read all blocks from mapped area, start over
         if (block_index * mapping.bsize >= mapping.fsize)
             block_index = 0;
-        memcpy(buf, mapping.addr + (mapping.bsize * block_index), mapping.bsize);
-        msync(mapping.addr + (mapping.bsize * block_index), mapping.bsize, MS_ASYNC); // Drop pages from cache
+
+        memcpy(dest, mapping.addr + (mapping.bsize * block_index), mapping.bsize);
         end = std::chrono::high_resolution_clock::now();
         block_index++;
         counter++;
@@ -56,7 +56,6 @@ void seq_write(Mapping mapping, Results &results, int runtime)
             if (block_index * mapping.bsize >= mapping.fsize)
                 block_index = 0;
             pmem_memcpy_persist(mapping.addr + (block_index * mapping.bsize), buf, mapping.bsize);
-            msync(mapping.addr + (mapping.bsize * block_index), mapping.bsize, MS_ASYNC); // Drop pages from cache
             end = std::chrono::high_resolution_clock::now();
             block_index++;
             counter++;
@@ -70,7 +69,6 @@ void seq_write(Mapping mapping, Results &results, int runtime)
             if (block_index * mapping.bsize >= mapping.fsize)
                 block_index = 0;
             memcpy(mapping.addr + (block_index * mapping.bsize), buf, mapping.bsize);
-            msync(mapping.addr + (mapping.bsize * block_index), mapping.bsize, MS_ASYNC); // Drop pages from cache
             end = std::chrono::high_resolution_clock::now();
             block_index++;
             counter++;
@@ -141,6 +139,7 @@ void prepare_raw_mem(Mapping &mapping, int fsize)
     mapping.is_pmem = 0;
     mapping.is_raw_mem = 1;
     mapping.fsize = fsize;
+    init_mem(mapping);
 }
 
 void cleanup_mapping(Mapping mapping)
@@ -187,6 +186,19 @@ void init_file(int fd, int fsize)
         perror("File Error");
         exit(1);
     }
+    delete[] buf;
+}
+
+void init_mem(Mapping mapping)
+{
+    // TODO BETTER INITIALIZING INEFFICIENT to create huge buf
+    unsigned char *buf = new unsigned char[mapping.fsize]; // Handle large sizes
+
+    srand(time(NULL));
+    for (int i = 0; i < mapping.fsize; i++)
+        buf[i] = rand() % 256;
+
+    memcpy(mapping.addr, buf, mapping.fsize);
     delete[] buf;
 }
 

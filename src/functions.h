@@ -18,6 +18,7 @@ void cleanup_mapping(Mapping);
 void run_benchmark(Mapping, Arguments, Results &);
 void init_file(int, int);
 void prepare_raw_mem(Mapping &, int);
+void init_mem(Mapping);
 
 // Temporary
 void DEBUG_LINE(char *);
