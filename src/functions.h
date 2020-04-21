@@ -13,7 +13,7 @@ struct Mapping
 
 void seq_read(Mapping, Results &, int);
 void seq_write(Mapping, Results &, int);
-void prepare_mapping(Mapping &, const char *, int, Arguments);
+void prepare_mapping(Mapping &, Arguments);
 void cleanup_mapping(Mapping);
 void run_benchmark(Mapping, Arguments, Results &);
 void init_file(int, int);

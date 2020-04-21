@@ -82,10 +82,10 @@ void seq_write(Mapping mapping, Results &results, int runtime)
     results.io_data = (double)counter * (double)mapping.bsize / 1024.0 / 1024.0 / 1024.0;
 }
 
-void prepare_mapping(Mapping &mapping, const char *dir, int fsize, Arguments args)
+void prepare_mapping(Mapping &mapping, Arguments args)
 {
     if (args.raw_mem)
-        prepare_raw_mem(mapping, fsize);
+        prepare_raw_mem(mapping, args.fsize);
     else
     {
         // Supporting raw persistent memory access
@@ -93,7 +93,7 @@ void prepare_mapping(Mapping &mapping, const char *dir, int fsize, Arguments arg
         {
             size_t *mapped_plen = NULL;
             /* memory mapping it */
-            if ((mapping.addr = (char *)pmem_map_file(dir, fsize, PMEM_FILE_CREATE, 0666,
+            if ((mapping.addr = (char *)pmem_map_file(args.path, args.fsize, PMEM_FILE_CREATE, 0666,
                                                       mapped_plen, &mapping.is_pmem)) == NULL)
             {
                 perror("pmem_map");
@@ -105,15 +105,15 @@ void prepare_mapping(Mapping &mapping, const char *dir, int fsize, Arguments arg
         {
             int fd;
 
-            if ((fd = open(dir, O_CREAT | O_RDWR, 0666)) < 0)
+            if ((fd = open(args.path, O_CREAT | O_RDWR, 0666)) < 0)
             {
                 perror("File Open");
                 exit(1);
             }
             // init file to avoid mmap on empty file (BUS_ERROR)
-            init_file(fd, fsize);
+            init_file(fd, args.fsize);
 
-            if ((mapping.addr = (char *)mmap(0, fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0)) == NULL)
+            if ((mapping.addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0)) == NULL)
             {
                 perror("mmap");
                 exit(1);
@@ -123,7 +123,7 @@ void prepare_mapping(Mapping &mapping, const char *dir, int fsize, Arguments arg
 
             mapping.is_pmem = 0;
         }
-        mapping.fsize = fsize;
+        mapping.fsize = args.fsize;
     }
 }
 
