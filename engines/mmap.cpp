@@ -7,6 +7,14 @@
 #include <iostream>
 #include <chrono>
 
+void mmap_engine(Mapping &mapping, Arguments args, Results &results)
+{
+    prepare_mapping(mapping, args);
+    run_benchmark(mapping, args, results);
+    cleanup_mapping(mapping);
+    dump_results(results, args);
+}
+
 void seq_read(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
@@ -29,6 +37,36 @@ void seq_read(Mapping mapping, Results &results, int runtime)
     }
 
     //Calculating per second memcpy * size of memcpy and convert to MiB
+    get_bandwidth(counter, runtime, mapping.bsize, results);
+}
+
+void rand_read(Mapping mapping, Results &results, int runtime)
+{
+    long counter = 0;
+    int index_counter = 0;
+    auto end = std::chrono::high_resolution_clock::now();
+    unsigned char *dest = new unsigned char[mapping.bsize];
+    int max_ind = mapping.fsize / mapping.bsize;
+    int *block_index = new int[max_ind];
+
+    srand(time(NULL));
+    for (int i = 0; i < max_ind; i++)
+        block_index[i] = rand() % max_ind;
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    while (std::chrono::duration_cast<std::chrono::seconds>(end - start).count() < runtime)
+    {
+        // Read all blocks from mapped area, start over
+        if (index_counter == max_ind)
+            index_counter = 0;
+
+        memcpy(dest, mapping.addr + (mapping.bsize * block_index[index_counter]), mapping.bsize);
+        end = std::chrono::high_resolution_clock::now();
+        index_counter++;
+        counter++;
+    }
+
     get_bandwidth(counter, runtime, mapping.bsize, results);
 }
 
@@ -72,11 +110,7 @@ void seq_write(Mapping mapping, Results &results, int runtime)
         }
     }
 
-    //Calculating per second memcpy * size of memcpy and convert to MiB
-    double bandwidth = (double)counter / (double)runtime * (double)mapping.bsize / 1024.0 / 1024.0;
-
-    results.bandwidth = bandwidth;
-    results.io_data = (double)counter * (double)mapping.bsize / 1024.0 / 1024.0 / 1024.0;
+    get_bandwidth(counter, runtime, mapping.bsize, results);
 }
 
 void prepare_mapping(Mapping &mapping, Arguments args)
@@ -157,8 +191,9 @@ void run_benchmark(Mapping mapping, Arguments args, Results &results)
         break;
     case 1:
         seq_write(mapping, results, args.runtime);
+        break;
     case 2:
-        //random read
+        rand_read(mapping, results, args.runtime);
         break;
     case 3:
         //random write

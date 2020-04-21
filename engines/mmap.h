@@ -12,7 +12,9 @@ struct Mapping
     int bsize = 0;
 };
 
+void mmap_engine(Mapping &, Arguments, Results &);
 void seq_read(Mapping, Results &, int);
+void rand_read(Mapping, Results &, int);
 void seq_write(Mapping, Results &, int);
 void prepare_mapping(Mapping &, Arguments);
 void cleanup_mapping(Mapping);

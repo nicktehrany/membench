@@ -43,7 +43,7 @@ void dump_results(Results results, Arguments args)
         outfile << "Sequential Write\t\t" << results.bandwidth << " MiB/s\n";
         break;
     case 2:
-        outfile << "Random Read\t\t\t" << results.bandwidth << " MiB/s\n";
+        outfile << "Random Read\t\t\t\t" << results.bandwidth << " MiB/s\n";
         break;
     case 3:
         outfile << "Random Write\t\t\t" << results.bandwidth << " MiB/s\n";
