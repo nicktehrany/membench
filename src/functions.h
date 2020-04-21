@@ -2,6 +2,7 @@
 #define FUNCTIONS_H
 #include "results.h"
 
-void seq_read(Results &);
+void get_bandwidth(int, int, int, Results &);
 
 #endif
+

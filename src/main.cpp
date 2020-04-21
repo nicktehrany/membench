@@ -1,13 +1,21 @@
 #include "results.h"
-#include "functions.h"
+#include "../engines/mmap.h"
+#include <iostream>
 
 int main()
 {
     Results results;
-    results.seq_read = 1;
-    results.runtime = 10;
-    seq_read(results);
-    dump_results(results);
+    Mapping mapping;
+    Arguments args;
+
+    //TODO Implement Parsing args
+    parse_args(args);
+
+    // Depending on engine run things
+    prepare_mapping(mapping, args);
+    run_benchmark(mapping, args, results);
+    cleanup_mapping(mapping);
+    dump_results(results, args);
 
     return 0;
 }

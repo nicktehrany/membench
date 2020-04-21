@@ -1,8 +1,8 @@
 #include "functions.h"
-#include <libpmem.h>
-#define	PMEM_LEN 4096
 
-void seq_read(Results &results)
+// Calculates bandwidth using the counter, runtime, and block size
+void get_bandwidth(int counter, int runtime, int bsize, Results &results)
 {
-    results.seq_read = 100;
+    results.bandwidth = (double)counter / (double)runtime * (double)bsize / 1024.0 / 1024.0;
+    results.io_data = (double)counter * (double)bsize / 1024.0 / 1024.0 / 1024.0;
 }

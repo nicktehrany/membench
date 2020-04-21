@@ -1,13 +1,13 @@
 #ifndef RESULTS_H
 #define RESULTS_H
+#include "parser.h"
 
 struct Results
 {
-    double seq_read;
-    double seq_write;
-    int runtime;
+    double bandwidth;
+    double io_data;
 };
 
-void dump_results(Results);
+void dump_results(Results, Arguments);
 
 #endif
