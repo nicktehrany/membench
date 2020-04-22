@@ -8,26 +8,31 @@ void dump_results(Results results, Arguments args)
     std::ofstream outfile;
     outfile.open("results.out");
     outfile << "\t\t==== SUMMARY ====\n";
-    outfile << "Runtime \t\t\t\t" << args.runtime << " sec\n";
-    outfile << "Directory \t\t\t\t" << args.path << "\n";
+    outfile << "Runtime\t\t\t\t\t" << args.runtime << " sec\n";
+    outfile << "Directory\t\t\t\t" << args.path << "\n";
 
-    if (args.engine == 1)
-        outfile << "Raw PMEM \t\t\t\tYes\n";
-    else
-        outfile << "Raw PMEM \t\t\t\tNo\n";
+    switch (args.engine)
+    {
+    case 0:
+        outfile << "Engine\t\t\t\t\tmmap\n";
+        break;
+    case 1:
+        outfile << "Engine\t\t\t\t\tpmem\n";
+        break;
+    }
 
     switch (args.map_anon)
     {
     case 1:
-        outfile << "Map_ANONYMOUS \t\t\t\tYes\n";
+        outfile << "Map_ANONYMOUS\t\t\t\tYes\n";
         break;
     default:
-        outfile << "Map_ANONYMOUS \t\t\t\tNo\n";
+        outfile << "Map_ANONYMOUS\t\t\tNo\n";
         break;
     }
 
-    outfile << "File Size \t\t\t\t" << args.fsize << " Bytes\n";
-    outfile << "Block Size \t\t\t\t" << args.buflen << " Bytes\n";
+    outfile << "File Size\t\t\t\t" << args.fsize << " Bytes\n";
+    outfile << "Block Size\t\t\t\t" << args.buflen << " Bytes\n";
 
     switch (args.mode)
     {
@@ -44,7 +49,7 @@ void dump_results(Results results, Arguments args)
         outfile << "Random Write\t\t\t" << results.bandwidth << " MiB/s\n";
         break;
     }
-    outfile << "I/O Data \t\t\t\t" << results.io_data << " GiB\n";
+    outfile << "I/O Data\t\t\t\t" << results.io_data << " GiB\n";
 
     outfile.close();
 }

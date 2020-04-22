@@ -20,7 +20,7 @@ public:
 
 private:
     void display_help();
-    void parse_cmd_line(Arguments &, int, char **);
+    void parse_cmd_line(Arguments &args, char *tokens[], int size);
     void set_runtime(char *, Arguments &);
     void set_filesize(char *, Arguments &);
     void set_buflen(char *, Arguments &);

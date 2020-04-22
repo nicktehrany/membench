@@ -6,11 +6,6 @@
 // file size needs to be multiple of block size for alignment and limited to 1GB
 Parser::Parser(Arguments &args, int argc, char **argv)
 {
-    parse_cmd_line(args, argc, argv);
-}
-
-void Parser::parse_cmd_line(Arguments &args, int argc, char **argv)
-{
     char *tokens[argc - 1];
     for (int i = 0; i < argc - 1; i++)
     {
@@ -19,24 +14,28 @@ void Parser::parse_cmd_line(Arguments &args, int argc, char **argv)
 
         tokens[i] = argv[i + 1];
     }
+    parse_cmd_line(args, tokens, argc - 1);
+}
 
-    for (char *token : tokens)
+void Parser::parse_cmd_line(Arguments &args, char *tokens[], int size)
+{
+    for (int i = 0; i < size; i++)
     {
-        if (strncmp(token, "-runtime=", 9) == 0)
-            set_runtime(token, args);
-        else if (strncmp(token, "-filesize=", 10) == 0)
-            set_filesize(token, args);
-        else if (strncmp(token, "-copysize=", 10) == 0)
-            set_buflen(token, args);
-        else if (strncmp(token, "-dir=", 5) == 0)
-            set_path(token, args);
-        else if (strncmp(token, "-mode=", 6) == 0)
-            set_mode(token, args);
-        else if (strncmp(token, "-engine=", 8) == 0)
-            set_engine(token, args);
+        if (strncmp(tokens[i], "-runtime=", 9) == 0)
+            set_runtime(tokens[i], args);
+        else if (strncmp(tokens[i], "-filesize=", 10) == 0)
+            set_filesize(tokens[i], args);
+        else if (strncmp(tokens[i], "-copysize=", 10) == 0)
+            set_buflen(tokens[i], args);
+        else if (strncmp(tokens[i], "-dir=", 5) == 0)
+            set_path(tokens[i], args);
+        else if (strncmp(tokens[i], "-mode=", 6) == 0)
+            set_mode(tokens[i], args);
+        else if (strncmp(tokens[i], "-engine=", 8) == 0)
+            set_engine(tokens[i], args);
         else
         {
-            std::cout << "Unknow command " << token;
+            std::cout << "Unknow command " << tokens[i];
             exit(1);
         }
     }
