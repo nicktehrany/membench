@@ -66,6 +66,12 @@ int Parser::parse_file(Arguments &args, char *token, char *tokens[])
     std::ifstream infile;
     infile.open(temp);
 
+    if (infile.fail())
+    {
+        perror("Invalid file");
+        exit(1);
+    }
+
     std::string cmd;
     int counter = 0;
     while (infile >> cmd)
@@ -86,6 +92,7 @@ int Parser::parse_file(Arguments &args, char *token, char *tokens[])
 void Parser::display_help()
 {
     std::cout << "Possible commands are:" << std::endl;
+    std::cout << "-file=\tProvide an input file with commands" << std::endl;
     std::cout << "-runtime=\tSet runtime seconds (Default 60)" << std::endl;
     std::cout << "-filesize=\tSet file size (Default 2 MiB)" << std::endl;
     std::cout << "-copysize=\tSet copy size for memcpy (Default 4KiB)" << std::endl;
