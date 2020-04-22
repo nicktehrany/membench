@@ -3,7 +3,7 @@
 #include "../engines/mmap.h"
 #include "../engines/pmem.h"
 
-int main()
+int main(int argc, char *argv[])
 {
     Results results;
     Mapping mapping;
@@ -13,9 +13,15 @@ int main()
     parse_args(args);
 
     if (args.raw_pmem)
-        pmem_engine(mapping, args, results);
+    {
+        Eng_pmem engine;
+        engine.pmem_engine(mapping, args, results);
+    }
     else
-        mmap_engine(mapping, args, results);
+    {
+        Eng_mmap engine;
+        engine.mmap_engine(mapping, args, results);
+    }
 
     return 0;
 }

@@ -4,7 +4,7 @@
 //TODO Parse cmd line args give all default values
 void parse_args(Arguments &args)
 {
-    args.runtime = 10;
+    args.runtime = 60;
     args.fsize = 268435456; // file size needs to be multiple of block size for alignment and limited to 1GB
     args.buflen = 4096;
     //args.path = "/mnt/mem/benchmark"; // For DAX-mmap and Raw pmem using mounted fs

@@ -13,7 +13,7 @@
  * which needs to be mounted with a DAX enabled filesystem, and measures
  * throughput of sequential and random reads and writes
 */
-void pmem_engine(Mapping &mapping, Arguments args, Results &results)
+void Eng_pmem::pmem_engine(Mapping &mapping, Arguments args, Results &results)
 {
     pmem_prepare_mapping(mapping, args);
     pmem_run_benchmark(mapping, args, results);
@@ -21,7 +21,7 @@ void pmem_engine(Mapping &mapping, Arguments args, Results &results)
     dump_results(results, args);
 }
 
-void pmem_run_benchmark(Mapping mapping, Arguments args, Results &results)
+void Eng_pmem::pmem_run_benchmark(Mapping mapping, Arguments args, Results &results)
 {
     mapping.buflen = args.buflen;
     switch (args.mode)
@@ -44,7 +44,7 @@ void pmem_run_benchmark(Mapping mapping, Arguments args, Results &results)
     }
 }
 
-void pmem_seq_read(Mapping mapping, Results &results, int runtime)
+void Eng_pmem::pmem_seq_read(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
     int block_index = 0;
@@ -70,7 +70,7 @@ void pmem_seq_read(Mapping mapping, Results &results, int runtime)
     delete[] dest;
 }
 
-void pmem_rand_read(Mapping mapping, Results &results, int runtime)
+void Eng_pmem::pmem_rand_read(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
     int index_counter = 0;
@@ -102,7 +102,7 @@ void pmem_rand_read(Mapping mapping, Results &results, int runtime)
     delete[] block_index;
 }
 
-void pmem_seq_write(Mapping mapping, Results &results, int runtime)
+void Eng_pmem::pmem_seq_write(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
     int block_index = 0;
@@ -131,7 +131,7 @@ void pmem_seq_write(Mapping mapping, Results &results, int runtime)
     delete[] src;
 }
 
-void pmem_rand_write(Mapping mapping, Results &results, int runtime)
+void Eng_pmem::pmem_rand_write(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
     int index_counter = 0;
@@ -165,7 +165,7 @@ void pmem_rand_write(Mapping mapping, Results &results, int runtime)
     delete[] block_index;
 }
 
-void pmem_prepare_mapping(Mapping &mapping, Arguments args)
+void Eng_pmem::pmem_prepare_mapping(Mapping &mapping, Arguments args)
 {
     // Supporting raw persistent memory access
     if (args.raw_pmem)
@@ -183,7 +183,7 @@ void pmem_prepare_mapping(Mapping &mapping, Arguments args)
 }
 
 // TODO reset mapping vars
-void pmem_cleanup_mapping(Mapping mapping)
+void Eng_pmem::pmem_cleanup_mapping(Mapping mapping)
 {
     pmem_unmap(mapping.addr, mapping.fsize);
 }
