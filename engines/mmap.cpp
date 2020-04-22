@@ -14,13 +14,13 @@
 */
 void Eng_mmap::mmap_engine(Mapping &mapping, Arguments args, Results &results)
 {
-    mmap_prepare_mapping(mapping, args);
-    mmap_run_benchmark(mapping, args, results);
-    mmap_cleanup_mapping(mapping);
+    prepare_mapping(mapping, args);
+    run_benchmark(mapping, args, results);
+    cleanup_mapping(mapping);
     dump_results(results, args);
 }
 
-void Eng_mmap::mmap_seq_read(Mapping mapping, Results &results, int runtime)
+void Eng_mmap::seq_read(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
     int block_index = 0;
@@ -46,7 +46,7 @@ void Eng_mmap::mmap_seq_read(Mapping mapping, Results &results, int runtime)
     delete[] dest;
 }
 
-void Eng_mmap::mmap_rand_read(Mapping mapping, Results &results, int runtime)
+void Eng_mmap::rand_read(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
     int index_counter = 0;
@@ -78,7 +78,7 @@ void Eng_mmap::mmap_rand_read(Mapping mapping, Results &results, int runtime)
     delete[] block_index;
 }
 
-void Eng_mmap::mmap_seq_write(Mapping mapping, Results &results, int runtime)
+void Eng_mmap::seq_write(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
     int block_index = 0;
@@ -105,7 +105,7 @@ void Eng_mmap::mmap_seq_write(Mapping mapping, Results &results, int runtime)
     delete[] src;
 }
 
-void Eng_mmap::mmap_rand_write(Mapping mapping, Results &results, int runtime)
+void Eng_mmap::rand_write(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
     int index_counter = 0;
@@ -137,10 +137,10 @@ void Eng_mmap::mmap_rand_write(Mapping mapping, Results &results, int runtime)
     delete[] block_index;
 }
 
-void Eng_mmap::mmap_prepare_mapping(Mapping &mapping, Arguments args)
+void Eng_mmap::prepare_mapping(Mapping &mapping, Arguments args)
 {
     if (args.map_anon)
-        mmap_prepare_map_anon(mapping, args.fsize);
+        prepare_map_anon(mapping, args.fsize);
     else
     {
         int fd;
@@ -150,7 +150,7 @@ void Eng_mmap::mmap_prepare_mapping(Mapping &mapping, Arguments args)
             exit(1);
         }
         // init file to avoid mmap on empty file (BUS_ERROR)
-        mmap_init_file(fd, args.fsize);
+        init_file(fd, args.fsize);
 
         if ((mapping.addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0)) == NULL)
         {
@@ -167,7 +167,7 @@ void Eng_mmap::mmap_prepare_mapping(Mapping &mapping, Arguments args)
 }
 
 // Mapping is anonymous
-void Eng_mmap::mmap_prepare_map_anon(Mapping &mapping, int fsize)
+void Eng_mmap::prepare_map_anon(Mapping &mapping, int fsize)
 {
     // MAP_ANONYMOUS not backed by file on file system
     if ((mapping.addr = (char *)mmap(0, fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_ANONYMOUS | MAP_POPULATE, -1, 0)) == NULL)
@@ -179,30 +179,30 @@ void Eng_mmap::mmap_prepare_map_anon(Mapping &mapping, int fsize)
     mapping.is_pmem = 0;
     mapping.map_anon = 1;
     mapping.fsize = fsize;
-    mmap_init_mem(mapping);
+    init_mem(mapping);
 }
 
-void Eng_mmap::mmap_cleanup_mapping(Mapping mapping)
+void Eng_mmap::cleanup_mapping(Mapping mapping)
 {
     munmap(mapping.addr, mapping.fsize);
 }
 
-void Eng_mmap::mmap_run_benchmark(Mapping mapping, Arguments args, Results &results)
+void Eng_mmap::run_benchmark(Mapping mapping, Arguments args, Results &results)
 {
     mapping.buflen = args.buflen;
     switch (args.mode)
     {
     case 0:
-        mmap_seq_read(mapping, results, args.runtime);
+        seq_read(mapping, results, args.runtime);
         break;
     case 1:
-        mmap_seq_write(mapping, results, args.runtime);
+        seq_write(mapping, results, args.runtime);
         break;
     case 2:
-        mmap_rand_read(mapping, results, args.runtime);
+        rand_read(mapping, results, args.runtime);
         break;
     case 3:
-        mmap_rand_write(mapping, results, args.runtime);
+        rand_write(mapping, results, args.runtime);
         break;
     default:
         perror("Invalid Mode");
@@ -210,7 +210,7 @@ void Eng_mmap::mmap_run_benchmark(Mapping mapping, Arguments args, Results &resu
     }
 }
 
-void Eng_mmap::mmap_init_file(int fd, int fsize)
+void Eng_mmap::init_file(int fd, int fsize)
 {
     // TODO BETTER INITIALIZING INEFFICIENT to create huge buf
     unsigned char *buf = new unsigned char[fsize];
@@ -227,7 +227,7 @@ void Eng_mmap::mmap_init_file(int fd, int fsize)
     delete[] buf;
 }
 
-void Eng_mmap::mmap_init_mem(Mapping mapping)
+void Eng_mmap::init_mem(Mapping mapping)
 {
     // TODO BETTER INITIALIZING INEFFICIENT to create huge buf
     unsigned char *buf = new unsigned char[mapping.fsize];

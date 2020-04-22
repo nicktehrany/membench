@@ -15,28 +15,28 @@
 */
 void Eng_pmem::pmem_engine(Mapping &mapping, Arguments args, Results &results)
 {
-    pmem_prepare_mapping(mapping, args);
-    pmem_run_benchmark(mapping, args, results);
-    pmem_cleanup_mapping(mapping);
+    prepare_mapping(mapping, args);
+    run_benchmark(mapping, args, results);
+    cleanup_mapping(mapping);
     dump_results(results, args);
 }
 
-void Eng_pmem::pmem_run_benchmark(Mapping mapping, Arguments args, Results &results)
+void Eng_pmem::run_benchmark(Mapping mapping, Arguments args, Results &results)
 {
     mapping.buflen = args.buflen;
     switch (args.mode)
     {
     case 0:
-        pmem_seq_read(mapping, results, args.runtime);
+        seq_read(mapping, results, args.runtime);
         break;
     case 1:
-        pmem_seq_write(mapping, results, args.runtime);
+        seq_write(mapping, results, args.runtime);
         break;
     case 2:
-        pmem_rand_read(mapping, results, args.runtime);
+        rand_read(mapping, results, args.runtime);
         break;
     case 3:
-        pmem_rand_write(mapping, results, args.runtime);
+        rand_write(mapping, results, args.runtime);
         break;
     default:
         perror("Invalid Mode");
@@ -44,7 +44,7 @@ void Eng_pmem::pmem_run_benchmark(Mapping mapping, Arguments args, Results &resu
     }
 }
 
-void Eng_pmem::pmem_seq_read(Mapping mapping, Results &results, int runtime)
+void Eng_pmem::seq_read(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
     int block_index = 0;
@@ -70,7 +70,7 @@ void Eng_pmem::pmem_seq_read(Mapping mapping, Results &results, int runtime)
     delete[] dest;
 }
 
-void Eng_pmem::pmem_rand_read(Mapping mapping, Results &results, int runtime)
+void Eng_pmem::rand_read(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
     int index_counter = 0;
@@ -102,7 +102,7 @@ void Eng_pmem::pmem_rand_read(Mapping mapping, Results &results, int runtime)
     delete[] block_index;
 }
 
-void Eng_pmem::pmem_seq_write(Mapping mapping, Results &results, int runtime)
+void Eng_pmem::seq_write(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
     int block_index = 0;
@@ -131,7 +131,7 @@ void Eng_pmem::pmem_seq_write(Mapping mapping, Results &results, int runtime)
     delete[] src;
 }
 
-void Eng_pmem::pmem_rand_write(Mapping mapping, Results &results, int runtime)
+void Eng_pmem::rand_write(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
     int index_counter = 0;
@@ -165,7 +165,7 @@ void Eng_pmem::pmem_rand_write(Mapping mapping, Results &results, int runtime)
     delete[] block_index;
 }
 
-void Eng_pmem::pmem_prepare_mapping(Mapping &mapping, Arguments args)
+void Eng_pmem::prepare_mapping(Mapping &mapping, Arguments args)
 {
     // Supporting raw persistent memory access
     if (args.raw_pmem)
@@ -183,7 +183,7 @@ void Eng_pmem::pmem_prepare_mapping(Mapping &mapping, Arguments args)
 }
 
 // TODO reset mapping vars
-void Eng_pmem::pmem_cleanup_mapping(Mapping mapping)
+void Eng_pmem::cleanup_mapping(Mapping mapping)
 {
     pmem_unmap(mapping.addr, mapping.fsize);
 }

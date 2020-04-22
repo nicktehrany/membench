@@ -9,13 +9,13 @@ public:
     void pmem_engine(Mapping &, Arguments, Results &);
 
 private:
-    void pmem_seq_read(Mapping, Results &, int);
-    void pmem_rand_read(Mapping, Results &, int);
-    void pmem_seq_write(Mapping, Results &, int);
-    void pmem_rand_write(Mapping, Results &, int);
-    void pmem_prepare_mapping(Mapping &, Arguments);
-    void pmem_cleanup_mapping(Mapping);
-    void pmem_run_benchmark(Mapping, Arguments, Results &);
+    void seq_read(Mapping, Results &, int);
+    void rand_read(Mapping, Results &, int);
+    void seq_write(Mapping, Results &, int);
+    void rand_write(Mapping, Results &, int);
+    void prepare_mapping(Mapping &, Arguments);
+    void cleanup_mapping(Mapping);
+    void run_benchmark(Mapping, Arguments, Results &);
 };
 
 #endif
