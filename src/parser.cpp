@@ -1,17 +1,28 @@
 #include "parser.h"
 #include <iostream>
 #include <string.h>
+#include <fstream>
 
-// TODO CHECK IF READ FROM FILE OR CMD LINE
 // file size needs to be multiple of block size for alignment and limited to 1GB
 Parser::Parser(Arguments &args, int argc, char **argv)
 {
-    char *tokens[argc - 1];
+
+    char *tokens[100]; // If reading from file won;t know how many tokens, 100 max
+
+    if (argc > 100)
+    {
+        perror("Too many commands");
+        exit(1);
+    }
     for (int i = 0; i < argc - 1; i++)
     {
         if (strncmp(argv[i + 1], "-h", 2) == 0)
             display_help();
-
+        else if (strncmp(argv[i + 1], "-file=", 5) == 0)
+        {
+            argc = parse_file(args, argv[i + 1], tokens);
+            break;
+        }
         tokens[i] = argv[i + 1];
     }
     parse_cmd_line(args, tokens, argc - 1);
@@ -47,6 +58,31 @@ void Parser::parse_cmd_line(Arguments &args, char *tokens[], int size)
     }
 }
 
+int Parser::parse_file(Arguments &args, char *token, char *tokens[])
+{
+    std::string temp = token;
+    temp.erase(0, 6);
+
+    std::ifstream infile;
+    infile.open(temp);
+
+    std::string cmd;
+    int counter = 0;
+    while (infile >> cmd)
+    {
+        if (counter > 100)
+        {
+            perror("Too many commands");
+            exit(1);
+        }
+        char *x = new char[cmd.length() + 1];
+        strcpy(x, cmd.c_str());
+        tokens[counter] = x;
+        counter++;
+    }
+
+    return counter + 1; // Account for program call in cmd line
+}
 void Parser::display_help()
 {
     std::cout << "Possible commands are:" << std::endl;
@@ -54,7 +90,7 @@ void Parser::display_help()
     std::cout << "-filesize=\tSet file size (Default 2 MiB)" << std::endl;
     std::cout << "-copysize=\tSet copy size for memcpy (Default 4KiB)" << std::endl;
     std::cout << "-dir=\t\tPath to file (/dev/null or /dev/zero for MAP_ANONYMOUS)" << std::endl;
-    std::cout << "-mode=\t\tPossible modes are:\n\tread\n\twrite\n\trandread\n\trandwrite (Default read)" << std::endl;
+    std::cout << "-mode=\t\tPossible modes are: read write randread randwrite (Default read)" << std::endl;
     std::cout << "-engine=\tPossible engines are mmap and pmem (Default mmap)" << std::endl;
     exit(0);
 }
