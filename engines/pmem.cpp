@@ -15,10 +15,21 @@
 */
 void Eng_pmem::pmem_engine(Mapping &mapping, Arguments args, Results &results)
 {
+    check_args(args);
     prepare_mapping(mapping, args);
     run_benchmark(mapping, args, results);
     cleanup_mapping(mapping);
     dump_results(results, args);
+}
+
+// TODO Check if all args are valid for engine
+void Eng_pmem::check_args(Arguments args)
+{
+    if (args.map_anon)
+    {
+        perror("Pmem engine doesn't support MAP_ANONYMOUS");
+        exit(1);
+    }
 }
 
 void Eng_pmem::run_benchmark(Mapping mapping, Arguments args, Results &results)
@@ -167,19 +178,15 @@ void Eng_pmem::rand_write(Mapping mapping, Results &results, int runtime)
 
 void Eng_pmem::prepare_mapping(Mapping &mapping, Arguments args)
 {
-    // Supporting raw persistent memory access
-    if (args.raw_pmem)
+    size_t *mapped_plen = NULL;
+    /* memory mapping it */
+    if ((mapping.addr = (char *)pmem_map_file(args.path, args.fsize, PMEM_FILE_CREATE, 0666,
+                                              mapped_plen, &mapping.is_pmem)) == NULL)
     {
-        size_t *mapped_plen = NULL;
-        /* memory mapping it */
-        if ((mapping.addr = (char *)pmem_map_file(args.path, args.fsize, PMEM_FILE_CREATE, 0666,
-                                                  mapped_plen, &mapping.is_pmem)) == NULL)
-        {
-            perror("pmem_map");
-            exit(1);
-        }
-        mapping.fsize = args.fsize;
+        perror("pmem_map");
+        exit(1);
     }
+    mapping.fsize = args.fsize;
 }
 
 // TODO reset mapping vars

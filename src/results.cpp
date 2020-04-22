@@ -11,23 +11,18 @@ void dump_results(Results results, Arguments args)
     outfile << "Runtime \t\t\t\t" << args.runtime << " sec\n";
     outfile << "Directory \t\t\t\t" << args.path << "\n";
 
-    switch (args.raw_pmem)
-    {
-    case 1:
+    if (args.engine == 1)
         outfile << "Raw PMEM \t\t\t\tYes\n";
-        break;
-    default:
+    else
         outfile << "Raw PMEM \t\t\t\tNo\n";
-        break;
-    }
 
     switch (args.map_anon)
     {
     case 1:
-        outfile << "Raw MEM \t\t\t\tYes\n";
+        outfile << "Map_ANONYMOUS \t\t\t\tYes\n";
         break;
     default:
-        outfile << "Raw MEM \t\t\t\tNo\n";
+        outfile << "Map_ANONYMOUS \t\t\t\tNo\n";
         break;
     }
 

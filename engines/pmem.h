@@ -16,6 +16,7 @@ private:
     void prepare_mapping(Mapping &, Arguments);
     void cleanup_mapping(Mapping);
     void run_benchmark(Mapping, Arguments, Results &);
+    void check_args(Arguments);
 };
 
 #endif
