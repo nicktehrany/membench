@@ -212,17 +212,22 @@ void Eng_mmap::run_benchmark(Mapping mapping, Arguments args, Results &results)
 
 void Eng_mmap::init_file(int fd, int fsize)
 {
-    srand(time(NULL));
-    for (int i = 0; i < fsize; i++)
-    {
-        int val = rand();
+    // Since file size has to be multiple of 4096
+    unsigned char *buf = new unsigned char[4096];
+    int iter = fsize / 4096;
 
-        if (write(fd, (char *)&val, 1) < 0)
+    srand(time(NULL));
+    for (int i = 0; i < iter; i++)
+    {
+        for (int j = 0; j < 4096; j++)
+            buf[j] = rand() % 256;
+        if (write(fd, buf, 4096) < 0)
         {
             perror("File Error");
             exit(1);
         }
     }
+    delete[] buf;
 }
 
 void Eng_mmap::init_mem(Mapping mapping)

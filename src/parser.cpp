@@ -123,7 +123,7 @@ void Parser::set_filesize(char *token, Arguments &args)
     temp.erase(0, 10);
     try
     {
-        args.fsize = stoi(temp);
+        args.fsize = stol(temp);
     }
     catch (std::invalid_argument &e)
     {
@@ -138,7 +138,7 @@ void Parser::set_buflen(char *token, Arguments &args)
     temp.erase(0, 10);
     try
     {
-        args.buflen = stoi(temp);
+        args.buflen = stol(temp);
     }
     catch (std::invalid_argument &e)
     {
