@@ -212,30 +212,21 @@ void Eng_mmap::run_benchmark(Mapping mapping, Arguments args, Results &results)
 
 void Eng_mmap::init_file(int fd, int fsize)
 {
-    // TODO BETTER INITIALIZING INEFFICIENT to create huge buf
-    unsigned char *buf = new unsigned char[fsize];
-
     srand(time(NULL));
     for (int i = 0; i < fsize; i++)
-        buf[i] = rand() % 256;
-
-    if (write(fd, buf, fsize) < 0)
     {
-        perror("File Error");
-        exit(1);
+        int val = rand();
+
+        if (write(fd, (char *)&val, 1) < 0)
+        {
+            perror("File Error");
+            exit(1);
+        }
     }
-    delete[] buf;
 }
 
 void Eng_mmap::init_mem(Mapping mapping)
 {
-    // TODO BETTER INITIALIZING INEFFICIENT to create huge buf
-    unsigned char *buf = new unsigned char[mapping.fsize];
-
     srand(time(NULL));
-    for (int i = 0; i < mapping.fsize; i++)
-        buf[i] = rand() % 256;
-
-    memcpy(mapping.addr, buf, mapping.fsize);
-    delete[] buf;
+    memset(mapping.addr, rand(), mapping.fsize);
 }

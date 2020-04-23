@@ -24,7 +24,7 @@ void dump_results(Results results, Arguments args)
     switch (args.map_anon)
     {
     case 1:
-        outfile << "Map_ANONYMOUS\t\t\t\tYes\n";
+        outfile << "Map_ANONYMOUS\t\t\tYes\n";
         break;
     default:
         outfile << "Map_ANONYMOUS\t\t\tNo\n";
