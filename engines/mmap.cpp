@@ -152,9 +152,11 @@ void Eng_mmap::prepare_mapping(Mapping &mapping, Arguments args)
         // init file to avoid mmap on empty file (BUS_ERROR)
         init_file(fd, args.fsize);
 
-        if ((mapping.addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0)) == NULL)
+        if ((mapping.addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0)) == MAP_FAILED)
         {
             perror("mmap");
+            close(fd);
+            remove(args.path);
             exit(1);
         }
 
@@ -163,6 +165,7 @@ void Eng_mmap::prepare_mapping(Mapping &mapping, Arguments args)
         mapping.is_pmem = 0;
         mapping.map_anon = 0;
         mapping.fsize = args.fsize;
+        mapping.fpath = args.path;
     }
 }
 
@@ -170,7 +173,7 @@ void Eng_mmap::prepare_mapping(Mapping &mapping, Arguments args)
 void Eng_mmap::prepare_map_anon(Mapping &mapping, int fsize)
 {
     // MAP_ANONYMOUS not backed by file on file system
-    if ((mapping.addr = (char *)mmap(0, fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_ANONYMOUS | MAP_POPULATE, -1, 0)) == NULL)
+    if ((mapping.addr = (char *)mmap(0, fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_ANONYMOUS | MAP_POPULATE, -1, 0)) == MAP_FAILED)
     {
         perror("mmap");
         exit(1);
@@ -185,6 +188,9 @@ void Eng_mmap::prepare_map_anon(Mapping &mapping, int fsize)
 void Eng_mmap::cleanup_mapping(Mapping mapping)
 {
     munmap(mapping.addr, mapping.fsize);
+
+    if (remove(mapping.fpath) != 0)
+        perror("Error deleting file");
 }
 
 void Eng_mmap::run_benchmark(Mapping mapping, Arguments args, Results &results)

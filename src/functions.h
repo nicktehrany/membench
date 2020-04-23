@@ -9,6 +9,7 @@ struct Mapping
     int map_anon; // MAP_ANONYMOUS (not backed by file)
     long fsize = 0;
     long buflen = 0;
+    const char *fpath = "";
 };
 
 void get_bandwidth(int, int, int, Results &);

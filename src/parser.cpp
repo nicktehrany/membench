@@ -20,7 +20,7 @@ Parser::Parser(Arguments &args, int argc, char **argv)
             display_help();
         else if (strncmp(argv[i + 1], "-file=", 5) == 0)
         {
-            argc = parse_file(args, argv[i + 1], tokens);
+            argc = parse_file(argv[i + 1], tokens);
             break;
         }
         tokens[i] = argv[i + 1];
@@ -58,7 +58,7 @@ void Parser::parse_cmd_line(Arguments &args, char *tokens[], int size)
     }
 }
 
-int Parser::parse_file(Arguments &args, char *token, char *tokens[])
+int Parser::parse_file(char *token, char *tokens[])
 {
     std::string temp = token;
     temp.erase(0, 6);

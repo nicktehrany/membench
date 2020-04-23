@@ -181,16 +181,19 @@ void Eng_pmem::prepare_mapping(Mapping &mapping, Arguments args)
     size_t *mapped_plen = NULL;
     /* memory mapping it */
     if ((mapping.addr = (char *)pmem_map_file(args.path, args.fsize, PMEM_FILE_CREATE, 0666,
-                                              mapped_plen, &mapping.is_pmem)) == NULL)
+                                              mapped_plen, &mapping.is_pmem)) == MAP_FAILED)
     {
         perror("pmem_map");
         exit(1);
     }
     mapping.fsize = args.fsize;
+    mapping.fpath = args.path;
 }
 
 // TODO reset mapping vars
 void Eng_pmem::cleanup_mapping(Mapping mapping)
 {
     pmem_unmap(mapping.addr, mapping.fsize);
+    if (remove(mapping.fpath) != 0)
+        perror("Error deleting file");
 }
