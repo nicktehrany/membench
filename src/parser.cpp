@@ -11,6 +11,7 @@ Parser::Parser(Arguments &args, int argc, char **argv)
 
     if (argc > 100)
     {
+        errno = EINVAL;
         perror("Too many commands");
         exit(1);
     }
@@ -50,12 +51,6 @@ void Parser::parse_cmd_line(Arguments &args, char *tokens[], int size)
             exit(1);
         }
     }
-
-    if (args.fsize % args.buflen != 0)
-    {
-        perror("Not aligned sizes");
-        exit(1);
-    }
 }
 
 int Parser::parse_file(char *token, char *tokens[])
@@ -78,6 +73,7 @@ int Parser::parse_file(char *token, char *tokens[])
     {
         if (counter > 100)
         {
+            errno = EINVAL;
             perror("Too many commands");
             exit(1);
         }

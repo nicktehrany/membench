@@ -9,6 +9,7 @@ public:
     void pmem_engine(Mapping &, Arguments, Results &);
 
 private:
+    void check_args(Arguments);
     void seq_read(Mapping, Results &, int);
     void rand_read(Mapping, Results &, int);
     void seq_write(Mapping, Results &, int);
@@ -16,7 +17,6 @@ private:
     void prepare_mapping(Mapping &, Arguments);
     void cleanup_mapping(Mapping);
     void run_benchmark(Mapping, Arguments, Results &);
-    void check_args(Arguments);
 };
 
 #endif

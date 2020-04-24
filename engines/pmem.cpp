@@ -25,8 +25,15 @@ void Eng_pmem::pmem_engine(Mapping &mapping, Arguments args, Results &results)
 // TODO Check if all args are valid for engine
 void Eng_pmem::check_args(Arguments args)
 {
+    if (args.fsize % args.buflen != 0)
+    {
+        errno = EINVAL;
+        perror("Not aligned file size and copy size");
+        exit(1);
+    }
     if (args.map_anon)
     {
+        errno = EINVAL;
         perror("Pmem engine doesn't support MAP_ANONYMOUS");
         exit(1);
     }
@@ -50,6 +57,7 @@ void Eng_pmem::run_benchmark(Mapping mapping, Arguments args, Results &results)
         rand_write(mapping, results, args.runtime);
         break;
     default:
+        errno = EINVAL;
         perror("Invalid Mode");
         exit(1);
     }

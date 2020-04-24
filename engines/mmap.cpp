@@ -14,10 +14,27 @@
 */
 void Eng_mmap::mmap_engine(Mapping &mapping, Arguments args, Results &results)
 {
+    check_args(args);
     prepare_mapping(mapping, args);
     run_benchmark(mapping, args, results);
     cleanup_mapping(mapping);
     dump_results(results, args);
+}
+
+void Eng_mmap::check_args(Arguments args)
+{
+    if (args.buflen > args.fsize)
+    {
+        errno = EINVAL;
+        perror("Copy size can't be larger than file size");
+        exit(1);
+    }
+    if (args.fsize % args.buflen != 0)
+    {
+        errno = EINVAL;
+        perror("Not aligned file size and copy size");
+        exit(1);
+    }
 }
 
 void Eng_mmap::seq_read(Mapping mapping, Results &results, int runtime)
@@ -218,6 +235,7 @@ void Eng_mmap::run_benchmark(Mapping mapping, Arguments args, Results &results)
         rand_write(mapping, results, args.runtime);
         break;
     default:
+        errno = EINVAL;
         perror("Invalid Mode");
         exit(1);
     }

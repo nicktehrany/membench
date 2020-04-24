@@ -9,6 +9,7 @@ public:
     void mmap_engine(Mapping &, Arguments, Results &);
 
 private:
+    void check_args(Arguments);
     void seq_read(Mapping, Results &, int);
     void rand_read(Mapping, Results &, int);
     void seq_write(Mapping, Results &, int);
