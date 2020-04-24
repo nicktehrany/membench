@@ -4,10 +4,10 @@
 // Default values
 struct Arguments
 {
-    int runtime = 60;
-    const char *path = "file";
-    long fsize = 2097152;
-    long buflen = 4096;
+    int runtime = 0;
+    const char *path = "";
+    long fsize = 0;
+    long buflen = 0;
     int mode = 0;     //0=read 1=write 2=randread 3=randwrite
     int map_anon = 0; // Mapping without backing of file on file system
     int engine = 0;   // Default mmap engine

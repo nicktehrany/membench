@@ -22,23 +22,6 @@ void Eng_pmem::pmem_engine(Mapping &mapping, Arguments args, Results &results)
     dump_results(results, args);
 }
 
-// TODO Check if all args are valid for engine
-void Eng_pmem::check_args(Arguments args)
-{
-    if (args.fsize % args.buflen != 0)
-    {
-        errno = EINVAL;
-        perror("Not aligned file size and copy size");
-        exit(1);
-    }
-    if (args.map_anon)
-    {
-        errno = EINVAL;
-        perror("Pmem engine doesn't support MAP_ANONYMOUS");
-        exit(1);
-    }
-}
-
 void Eng_pmem::run_benchmark(Mapping mapping, Arguments args, Results &results)
 {
     mapping.buflen = args.buflen;
@@ -198,10 +181,50 @@ void Eng_pmem::prepare_mapping(Mapping &mapping, Arguments args)
     mapping.fpath = args.path;
 }
 
-// TODO reset mapping vars
 void Eng_pmem::cleanup_mapping(Mapping mapping)
 {
     pmem_unmap(mapping.addr, mapping.fsize);
     if (remove(mapping.fpath) != 0)
         perror("Error deleting file");
+
+    mapping.addr = 0;
+    mapping.buflen = 0;
+    mapping.fpath = "";
+    mapping.fsize = 0;
+    mapping.is_pmem = 0;
+    mapping.map_anon = 0;
+}
+
+void Eng_pmem::check_args(Arguments &args)
+{
+    if (args.buflen == 0 || args.fsize == 0)
+    {
+        errno = EINVAL;
+        perror("Missing file or copy size");
+        exit(1);
+    }
+    if (args.fsize % args.buflen != 0)
+    {
+        errno = EINVAL;
+        perror("Not aligned file size and copy size");
+        exit(1);
+    }
+    if (args.map_anon)
+    {
+        errno = EINVAL;
+        perror("Pmem engine doesn't support MAP_ANONYMOUS");
+        exit(1);
+    }
+    if (strcmp(args.path, "") == 0)
+    {
+        errno = EINVAL;
+        perror("Missing path to mount directory");
+        exit(1);
+    }
+    if (args.runtime < 1)
+    {
+        errno = EINVAL;
+        perror("Runtime should be greater than 1sec");
+        exit(1);
+    }
 }

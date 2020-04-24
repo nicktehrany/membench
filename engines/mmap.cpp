@@ -21,22 +21,6 @@ void Eng_mmap::mmap_engine(Mapping &mapping, Arguments args, Results &results)
     dump_results(results, args);
 }
 
-void Eng_mmap::check_args(Arguments args)
-{
-    if (args.buflen > args.fsize)
-    {
-        errno = EINVAL;
-        perror("Copy size can't be larger than file size");
-        exit(1);
-    }
-    if (args.fsize % args.buflen != 0)
-    {
-        errno = EINVAL;
-        perror("Not aligned file size and copy size");
-        exit(1);
-    }
-}
-
 void Eng_mmap::seq_read(Mapping mapping, Results &results, int runtime)
 {
     long counter = 0;
@@ -215,6 +199,13 @@ void Eng_mmap::cleanup_mapping(Mapping mapping)
 
     if (remove(mapping.fpath) != 0)
         perror("Error deleting file");
+
+    mapping.addr = 0;
+    mapping.buflen = 0;
+    mapping.fpath = "";
+    mapping.fsize = 0;
+    mapping.is_pmem = 0;
+    mapping.map_anon = 0;
 }
 
 void Eng_mmap::run_benchmark(Mapping mapping, Arguments args, Results &results)
@@ -245,4 +236,36 @@ void Eng_mmap::init_mem(Mapping mapping)
 {
     srand(time(NULL));
     memset(mapping.addr, rand(), mapping.fsize);
+}
+
+void Eng_mmap::check_args(Arguments &args)
+{
+    if (args.buflen == 0 || args.fsize == 0)
+    {
+        errno = EINVAL;
+        perror("Missing file or copy size");
+        exit(1);
+    }
+    if (args.buflen > args.fsize)
+    {
+        errno = EINVAL;
+        perror("Copy size can't be larger than file size");
+        exit(1);
+    }
+    if (args.fsize % args.buflen != 0)
+    {
+        errno = EINVAL;
+        perror("Not aligned file size and copy size");
+        exit(1);
+    }
+    if (strcmp(args.path, "") == 0)
+    {
+        args.path = "file";
+    }
+    if (args.runtime < 1)
+    {
+        errno = EINVAL;
+        perror("Runtime should be greater than 1sec");
+        exit(1);
+    }
 }

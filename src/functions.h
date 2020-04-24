@@ -4,9 +4,9 @@
 
 struct Mapping
 {
-    char *addr;
-    int is_pmem;
-    int map_anon; // MAP_ANONYMOUS (not backed by file)
+    char *addr = 0;
+    int is_pmem = 0;
+    int map_anon = 0; // MAP_ANONYMOUS (not backed by file)
     long fsize = 0;
     long buflen = 0;
     const char *fpath = "";

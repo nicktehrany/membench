@@ -89,9 +89,9 @@ void Parser::display_help()
 {
     std::cout << "Possible commands are:" << std::endl;
     std::cout << "-file=\tProvide an input file with commands" << std::endl;
-    std::cout << "-runtime=\tSet runtime seconds (Default 60)" << std::endl;
-    std::cout << "-filesize=\tSet file size (Default 2M)" << std::endl;
-    std::cout << "-copysize=\tSet copy size for memcpy (Default 4KiB)" << std::endl;
+    std::cout << "-runtime=\tSet runtime seconds" << std::endl;
+    std::cout << "-filesize=\tSet file size (For example 2M for 2MiB file)" << std::endl;
+    std::cout << "-copysize=\tSet copy size for memcpy (For example 4K for 4KiB)" << std::endl;
     std::cout << "-dir=\t\tPath to file (/dev/null or /dev/zero for MAP_ANONYMOUS)" << std::endl;
     std::cout << "-mode=\t\tPossible modes are: read write randread randwrite (Default read)" << std::endl;
     std::cout << "-engine=\tPossible engines are mmap and pmem (Default mmap)" << std::endl;
@@ -186,6 +186,9 @@ void Parser::set_path(char *token, Arguments &args)
     strcpy(dir, temp.c_str());
     if (strcmp(dir, "/dev/null") == 0 || strcmp(dir, "/dev/zero") == 0)
         args.map_anon = 1;
+    else
+        dir = strcat(dir, "file");
+    exit(1);
     args.path = dir;
 }
 
@@ -204,7 +207,11 @@ void Parser::set_mode(char *token, Arguments &args)
     else if (strncmp(mode, "randwrite", 9) == 0)
         args.mode = 3;
     else
-        args.mode = 4;
+    {
+        errno = EINVAL;
+        perror("Invalid mode");
+        exit(1);
+    }
 }
 
 void Parser::set_engine(char *token, Arguments &args)
@@ -217,4 +224,10 @@ void Parser::set_engine(char *token, Arguments &args)
         args.engine = 0;
     else if (strncmp(mode, "pmem", 4) == 0)
         args.engine = 1;
+    else
+    {
+        errno = EINVAL;
+        perror("Invalid engine");
+        exit(1);
+    }
 }
