@@ -16,7 +16,6 @@ private:
     void prepare_mapping(Mapping &, Arguments);
     void cleanup_mapping(Mapping);
     void run_benchmark(Mapping, Arguments, Results &);
-    void init_file(int, int);
     void prepare_map_anon(Mapping &, int);
     void init_mem(Mapping);
 };

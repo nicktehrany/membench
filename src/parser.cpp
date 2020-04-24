@@ -94,7 +94,7 @@ void Parser::display_help()
     std::cout << "Possible commands are:" << std::endl;
     std::cout << "-file=\tProvide an input file with commands" << std::endl;
     std::cout << "-runtime=\tSet runtime seconds (Default 60)" << std::endl;
-    std::cout << "-filesize=\tSet file size (Default 2 MiB)" << std::endl;
+    std::cout << "-filesize=\tSet file size (Default 2M)" << std::endl;
     std::cout << "-copysize=\tSet copy size for memcpy (Default 4KiB)" << std::endl;
     std::cout << "-dir=\t\tPath to file (/dev/null or /dev/zero for MAP_ANONYMOUS)" << std::endl;
     std::cout << "-mode=\t\tPossible modes are: read write randread randwrite (Default read)" << std::endl;
@@ -121,9 +121,27 @@ void Parser::set_filesize(char *token, Arguments &args)
 {
     std::string temp = token;
     temp.erase(0, 10);
+    char unit = temp.back();
+    int multiplier = 1;
+    if (unit == 'K')
+    {
+        multiplier = 1024;
+        temp.erase(temp.size() - 1);
+    }
+    else if (unit == 'M')
+    {
+        multiplier = 1024 * 1024;
+        temp.erase(temp.size() - 1);
+    }
+    else if (unit == 'G')
+    {
+        multiplier = 1024 * 1024 * 1024;
+        temp.erase(temp.size() - 1);
+    }
+
     try
     {
-        args.fsize = stol(temp);
+        args.fsize = stol(temp) * multiplier;
     }
     catch (std::invalid_argument &e)
     {
@@ -136,9 +154,26 @@ void Parser::set_buflen(char *token, Arguments &args)
 {
     std::string temp = token;
     temp.erase(0, 10);
+    char unit = temp.back();
+    int multiplier = 1;
+    if (unit == 'K')
+    {
+        multiplier = 1024;
+        temp.erase(temp.size() - 1);
+    }
+    else if (unit == 'M')
+    {
+        multiplier = 1024 * 1024;
+        temp.erase(temp.size() - 1);
+    }
+    else if (unit == 'G')
+    {
+        multiplier = 1024 * 1024 * 1024;
+        temp.erase(temp.size() - 1);
+    }
     try
     {
-        args.buflen = stol(temp);
+        args.buflen = stol(temp) * multiplier;
     }
     catch (std::invalid_argument &e)
     {

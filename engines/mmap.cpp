@@ -149,8 +149,15 @@ void Eng_mmap::prepare_mapping(Mapping &mapping, Arguments args)
             perror("File Open");
             exit(1);
         }
-        // init file to avoid mmap on empty file (BUS_ERROR)
-        init_file(fd, args.fsize);
+
+        // truncate file to size and init with 0s to avoid mmap on empty file (BUS_ERROR on mem access)
+        if (ftruncate(fd, args.fsize) != 0)
+        {
+            perror("truncate");
+            close(fd);
+            remove(args.path);
+            exit(1);
+        }
 
         if ((mapping.addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0)) == MAP_FAILED)
         {
@@ -214,26 +221,6 @@ void Eng_mmap::run_benchmark(Mapping mapping, Arguments args, Results &results)
         perror("Invalid Mode");
         exit(1);
     }
-}
-
-void Eng_mmap::init_file(int fd, int fsize)
-{
-    // Since file size has to be multiple of 4096
-    unsigned char *buf = new unsigned char[4096];
-    int iter = fsize / 4096;
-
-    srand(time(NULL));
-    for (int i = 0; i < iter; i++)
-    {
-        for (int j = 0; j < 4096; j++)
-            buf[j] = rand() % 256;
-        if (write(fd, buf, 4096) < 0)
-        {
-            perror("File Error");
-            exit(1);
-        }
-    }
-    delete[] buf;
 }
 
 void Eng_mmap::init_mem(Mapping mapping)
