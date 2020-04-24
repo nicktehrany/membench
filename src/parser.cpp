@@ -235,10 +235,10 @@ void Parser::set_engine(char *token, Arguments &args)
 // Checking args that all engines have in common
 void Parser::check_args(Arguments args)
 {
-    if (args.buflen == 0 || args.fsize == 0)
+    if (args.buflen <= 0 || args.fsize <= 0)
     {
         errno = EINVAL;
-        perror("Missing file or copy size");
+        perror("Invalid or missing file or copy size");
         exit(1);
     }
     if (args.runtime < 1)
