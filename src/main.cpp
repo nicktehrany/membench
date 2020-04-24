@@ -1,21 +1,25 @@
 #include "results.h"
+#include "functions.h"
 #include "../engines/mmap.h"
-#include <iostream>
+#include "../engines/pmem.h"
 
-int main()
+int main(int argc, char *argv[])
 {
     Results results;
     Mapping mapping;
     Arguments args;
 
-    //TODO Implement Parsing args
-    parse_args(args);
-
-    // Depending on engine run things
-    prepare_mapping(mapping, args);
-    run_benchmark(mapping, args, results);
-    cleanup_mapping(mapping);
-    dump_results(results, args);
+    Parser parser(args, argc, argv);
+    if (args.engine == 0)
+    {
+        Eng_mmap engine;
+        engine.mmap_engine(mapping, args, results);
+    }
+    else if (args.engine == 1)
+    {
+        Eng_pmem engine;
+        engine.pmem_engine(mapping, args, results);
+    }
 
     return 0;
 }

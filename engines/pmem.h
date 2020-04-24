@@ -1,12 +1,12 @@
-#ifndef H
-#define H
+#ifndef PMEM_H
+#define PMEM_H
 #include "../src/results.h"
 #include "../src/functions.h"
 
-class Eng_mmap
+class Eng_pmem
 {
 public:
-    void mmap_engine(Mapping &, Arguments, Results &);
+    void pmem_engine(Mapping &, Arguments, Results &);
 
 private:
     void check_args(Arguments &);
@@ -17,7 +17,6 @@ private:
     void prepare_mapping(Mapping &, Arguments);
     void cleanup_mapping(Mapping);
     void run_benchmark(Mapping, Arguments, Results &);
-    void prepare_map_anon(Mapping &, int);
-    void init_mem(Mapping);
 };
+
 #endif

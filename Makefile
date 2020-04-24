@@ -1,13 +1,12 @@
 SHELL = /bin/sh
 CC = g++
-CFLAGS = -O2 -Wall -g
+CFLAGS = -O2 -Wall -Wextra -g -pedantic-errors
 BM = Benchmark
-BM_DEPS = src/main.cpp src/results.cpp engines/mmap.cpp src/parser.cpp src/functions.cpp
+BM_DEPS = src/main.cpp src/results.cpp engines/mmap.cpp engines/pmem.cpp src/parser.cpp src/functions.cpp
 BM_Target = Benchmark
 OBJ = obj/
 OUT = out
 LPMEM = -lpmem
-
 
 .PHONY: all clean
 
