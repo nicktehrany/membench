@@ -197,18 +197,6 @@ void Eng_pmem::cleanup_mapping(Mapping mapping)
 
 void Eng_pmem::check_args(Arguments &args)
 {
-    if (args.buflen == 0 || args.fsize == 0)
-    {
-        errno = EINVAL;
-        perror("Missing file or copy size");
-        exit(1);
-    }
-    if (args.fsize % args.buflen != 0)
-    {
-        errno = EINVAL;
-        perror("Not aligned file size and copy size");
-        exit(1);
-    }
     if (args.map_anon)
     {
         errno = EINVAL;
@@ -219,12 +207,6 @@ void Eng_pmem::check_args(Arguments &args)
     {
         errno = EINVAL;
         perror("Missing path to mount directory");
-        exit(1);
-    }
-    if (args.runtime < 1)
-    {
-        errno = EINVAL;
-        perror("Runtime should be greater than 1sec");
         exit(1);
     }
 }

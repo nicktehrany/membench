@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <string.h>
 #include "results.h"
 
 // Summarize all Arguments and Results in a file
@@ -9,7 +10,10 @@ void dump_results(Results results, Arguments args)
     outfile.open("results.out");
     outfile << "\t\t==== SUMMARY ====\n";
     outfile << "Runtime\t\t\t\t\t" << args.runtime << " sec\n";
-    outfile << "Directory\t\t\t\t" << args.path << "\n";
+    if (strcmp(args.path, "file") == 0)
+        outfile << "Directory\t\t\t\tCurrent Directory\n";
+    else
+        outfile << "Directory\t\t\t\t" << args.path << "\n";
 
     switch (args.engine)
     {

@@ -3,11 +3,10 @@
 #include <string.h>
 #include <fstream>
 
-// file size needs to be multiple of block size for alignment and limited to 1GB
 Parser::Parser(Arguments &args, int argc, char **argv)
 {
 
-    char *tokens[100]; // If reading from file won;t know how many tokens, 100 max
+    char *tokens[100]; // Max 100 tokens in file or cmd line
 
     if (argc > 100)
     {
@@ -27,6 +26,7 @@ Parser::Parser(Arguments &args, int argc, char **argv)
         tokens[i] = argv[i + 1];
     }
     parse_cmd_line(args, tokens, argc - 1);
+    check_args(args);
 }
 
 void Parser::parse_cmd_line(Arguments &args, char *tokens[], int size)
@@ -88,11 +88,11 @@ int Parser::parse_file(char *token, char *tokens[])
 void Parser::display_help()
 {
     std::cout << "Possible commands are:" << std::endl;
-    std::cout << "-file=\tProvide an input file with commands" << std::endl;
+    std::cout << "-file=\t\tProvide an input file with commands as shown in examples" << std::endl;
     std::cout << "-runtime=\tSet runtime seconds" << std::endl;
     std::cout << "-filesize=\tSet file size (For example 2M for 2MiB file)" << std::endl;
     std::cout << "-copysize=\tSet copy size for memcpy (For example 4K for 4KiB)" << std::endl;
-    std::cout << "-dir=\t\tPath to file (/dev/null or /dev/zero for MAP_ANONYMOUS)" << std::endl;
+    std::cout << "-dir=\t\tPath to directory to use (/dev/null or /dev/zero for MAP_ANONYMOUS, current if none specified)" << std::endl;
     std::cout << "-mode=\t\tPossible modes are: read write randread randwrite (Default read)" << std::endl;
     std::cout << "-engine=\tPossible engines are mmap and pmem (Default mmap)" << std::endl;
     exit(0);
@@ -228,6 +228,35 @@ void Parser::set_engine(char *token, Arguments &args)
     {
         errno = EINVAL;
         perror("Invalid engine");
+        exit(1);
+    }
+}
+
+// Checking args that all engines have in common
+void Parser::check_args(Arguments args)
+{
+    if (args.buflen == 0 || args.fsize == 0)
+    {
+        errno = EINVAL;
+        perror("Missing file or copy size");
+        exit(1);
+    }
+    if (args.runtime < 1)
+    {
+        errno = EINVAL;
+        perror("Runtime should be greater than 1sec");
+        exit(1);
+    }
+    if (args.buflen > args.fsize)
+    {
+        errno = EINVAL;
+        perror("Copy size can't be larger than file size");
+        exit(1);
+    }
+    if (args.fsize % args.buflen != 0)
+    {
+        errno = EINVAL;
+        perror("Not aligned file size and copy size");
         exit(1);
     }
 }
