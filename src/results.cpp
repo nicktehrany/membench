@@ -34,20 +34,20 @@ void dump_results(Results results, Arguments args)
         outfile << "MAP_ANONYMOUS\t\t\tNo\n";
         break;
     }
-    if (args.fsize > (1024 * 1024 * 1024))
+    if (args.fsize >= (1024 * 1024 * 1024))
         outfile << "File Size\t\t\t\t" << args.fsize / (1024 * 1024 * 1024) << " GiB\n";
-    else if (args.fsize > (1024 * 1024))
+    else if (args.fsize >= (1024 * 1024))
         outfile << "File Size\t\t\t\t" << args.fsize / (1024 * 1024) << " MiB\n";
-    else if (args.fsize > 1024)
+    else if (args.fsize >= 1024)
         outfile << "File Size\t\t\t\t" << args.fsize / 1024 << " KiB\n";
     else
         outfile << "File Size\t\t\t\t" << args.fsize << " Bytes\n";
 
-    if (args.buflen > (1024 * 1024 * 1024))
+    if (args.buflen >= (1024 * 1024 * 1024))
         outfile << "Block Size\t\t\t\t" << args.buflen / ((1024 * 1024 * 1024)) << " GiB\n";
-    else if (args.buflen > (1024 * 1024))
+    else if (args.buflen >= (1024 * 1024))
         outfile << "Block Size\t\t\t\t" << args.buflen / ((1024 * 1024)) << " MiB\n";
-    else if (args.buflen > 1024)
+    else if (args.buflen >= 1024)
         outfile << "Block Size\t\t\t\t" << args.buflen / 1024 << " KiB\n";
     else
         outfile << "Block Size\t\t\t\t" << args.buflen << " Bytes\n";
@@ -55,25 +55,25 @@ void dump_results(Results results, Arguments args)
     switch (args.mode)
     {
     case 0:
-        if (results.bandwidth > 1024)
+        if (results.bandwidth >= 1024)
             outfile << "Sequential Read\t\t\t" << results.bandwidth / 1024 << " GiB/s\n";
         else
             outfile << "Sequential Read\t\t\t" << results.bandwidth << " MiB/s\n";
         break;
     case 1:
-        if (results.bandwidth > 1024)
+        if (results.bandwidth >= 1024)
             outfile << "Sequential Write\t\t\t" << results.bandwidth / 1024 << " GiB/s\n";
         else
             outfile << "Sequential Write\t\t\t" << results.bandwidth << " MiB/s\n";
         break;
     case 2:
-        if (results.bandwidth > 1024)
+        if (results.bandwidth >= 1024)
             outfile << "Random Read\t\t\t" << results.bandwidth / 1024 << " GiB/s\n";
         else
             outfile << "Random Read\t\t\t" << results.bandwidth << " MiB/s\n";
         break;
     case 3:
-        if (results.bandwidth > 1024)
+        if (results.bandwidth >= 1024)
             outfile << "Random Write\t\t\t" << results.bandwidth / 1024 << " GiB/s\n";
         else
             outfile << "Random Write\t\t\t" << results.bandwidth << " MiB/s\n";

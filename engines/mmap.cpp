@@ -24,8 +24,8 @@ void Eng_mmap::mmap_engine(Mapping &mapping, Arguments args, Results &results)
 
 void Eng_mmap::seq_read(Mapping mapping, Results &results, int runtime)
 {
-    long counter = 0;
-    int block_index = 0;
+    uint64_t counter = 0;
+    uint64_t block_index = 0;
     auto end = std::chrono::high_resolution_clock::now();
     unsigned char *dest = new unsigned char[mapping.buflen]; // Heap memory to handle large arrays
 
@@ -42,22 +42,22 @@ void Eng_mmap::seq_read(Mapping mapping, Results &results, int runtime)
         block_index++;
         counter++;
     }
-
+    std::cout << (int *)mapping.addr;
     get_bandwidth(counter, runtime, mapping.buflen, results);
     delete[] dest;
 }
 
 void Eng_mmap::rand_read(Mapping mapping, Results &results, int runtime)
 {
-    long counter = 0;
-    int index_counter = 0;
+    uint64_t counter = 0;
+    uint64_t index_counter = 0;
     auto end = std::chrono::high_resolution_clock::now();
     unsigned char *dest = new unsigned char[mapping.buflen];
-    int max_ind = mapping.fsize / mapping.buflen;
+    uint64_t max_ind = mapping.fsize / mapping.buflen;
     int *block_index = new int[max_ind];
 
     srand(time(NULL));
-    for (int i = 0; i < max_ind; i++)
+    for (uint64_t i = 0; i < max_ind; i++)
         block_index[i] = rand() % max_ind;
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -81,13 +81,13 @@ void Eng_mmap::rand_read(Mapping mapping, Results &results, int runtime)
 
 void Eng_mmap::seq_write(Mapping mapping, Results &results, int runtime)
 {
-    long counter = 0;
-    int block_index = 0;
+    uint64_t counter = 0;
+    uint64_t block_index = 0;
     unsigned char *src = new unsigned char[mapping.buflen];
     auto end = std::chrono::high_resolution_clock::now();
 
     srand(time(NULL));
-    for (int i = 0; i < mapping.buflen; i++)
+    for (uint64_t i = 0; i < mapping.buflen; i++)
         src[i] = rand() % 256;
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -108,18 +108,18 @@ void Eng_mmap::seq_write(Mapping mapping, Results &results, int runtime)
 
 void Eng_mmap::rand_write(Mapping mapping, Results &results, int runtime)
 {
-    long counter = 0;
-    int index_counter = 0;
+    uint64_t counter = 0;
+    uint64_t index_counter = 0;
     unsigned char *src = new unsigned char[mapping.buflen];
     std::chrono::high_resolution_clock::time_point end;
-    int max_ind = mapping.fsize / mapping.buflen;
+    uint64_t max_ind = mapping.fsize / mapping.buflen;
     int *block_index = new int[max_ind];
 
     srand(time(NULL));
-    for (int i = 0; i < mapping.buflen; i++)
+    for (uint64_t i = 0; i < mapping.buflen; i++)
         src[i] = rand() % 256;
 
-    for (int i = 0; i < max_ind; i++)
+    for (uint64_t i = 0; i < max_ind; i++)
         block_index[i] = rand() % max_ind;
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -151,16 +151,7 @@ void Eng_mmap::prepare_mapping(Mapping &mapping, Arguments args)
             exit(1);
         }
 
-        // truncate file to size to avoid mmap on empty file (BUS_ERROR on mem access)
-        if (ftruncate(fd, args.fsize) != 0)
-        {
-            perror("truncate");
-            close(fd);
-            remove(args.path);
-            exit(1);
-        }
-
-        // Init file in case fle is on DAX-fs, where truncate init with 0s isn't enough
+        // Init file manually in case fle is on DAX-fs, where truncate init isn't enough
         init_file(fd, args.fsize, args.buflen);
 
         if ((mapping.addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0)) == MAP_FAILED)

@@ -48,7 +48,7 @@ void Eng_pmem::run_benchmark(Mapping mapping, Arguments args, Results &results)
 
 void Eng_pmem::seq_read(Mapping mapping, Results &results, int runtime)
 {
-    long counter = 0;
+    uint64_t counter = 0;
     int block_index = 0;
     auto end = std::chrono::high_resolution_clock::now();
     unsigned char *dest = new unsigned char[mapping.buflen]; // Heap memory to handle large arrays
@@ -74,7 +74,7 @@ void Eng_pmem::seq_read(Mapping mapping, Results &results, int runtime)
 
 void Eng_pmem::rand_read(Mapping mapping, Results &results, int runtime)
 {
-    long counter = 0;
+    uint64_t counter = 0;
     int index_counter = 0;
     auto end = std::chrono::high_resolution_clock::now();
     unsigned char *dest = new unsigned char[mapping.buflen];
@@ -106,13 +106,13 @@ void Eng_pmem::rand_read(Mapping mapping, Results &results, int runtime)
 
 void Eng_pmem::seq_write(Mapping mapping, Results &results, int runtime)
 {
-    long counter = 0;
+    uint64_t counter = 0;
     int block_index = 0;
     unsigned char *src = new unsigned char[mapping.buflen];
     auto end = std::chrono::high_resolution_clock::now();
 
     srand(time(NULL));
-    for (int i = 0; i < mapping.buflen; i++)
+    for (uint64_t i = 0; i < mapping.buflen; i++)
         src[i] = rand() % 256;
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -135,7 +135,7 @@ void Eng_pmem::seq_write(Mapping mapping, Results &results, int runtime)
 
 void Eng_pmem::rand_write(Mapping mapping, Results &results, int runtime)
 {
-    long counter = 0;
+    uint64_t counter = 0;
     int index_counter = 0;
     unsigned char *src = new unsigned char[mapping.buflen];
     std::chrono::high_resolution_clock::time_point end;
@@ -143,7 +143,7 @@ void Eng_pmem::rand_write(Mapping mapping, Results &results, int runtime)
     int *block_index = new int[max_ind];
 
     srand(time(NULL));
-    for (int i = 0; i < mapping.buflen; i++)
+    for (uint64_t i = 0; i < mapping.buflen; i++)
         src[i] = rand() % 256;
 
     for (int i = 0; i < max_ind; i++)

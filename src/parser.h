@@ -1,13 +1,14 @@
 #ifndef PARSER_H
 #define PARSER_H
+#include <stdint.h>
 
 // Default values
 struct Arguments
 {
     int runtime = 0;
     const char *path = "";
-    long fsize = 0;
-    long buflen = 0;
+    uint64_t fsize = 0;
+    uint64_t buflen = 0;
     int mode = 0;     //0=read 1=write 2=randread 3=randwrite
     int map_anon = 0; // Mapping without backing of file on file system
     int engine = 0;   // Default mmap engine
