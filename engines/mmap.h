@@ -10,6 +10,7 @@ public:
 
 private:
     void check_args(Arguments &);
+    void init_file(int fd, int fsize);
     void seq_read(Mapping, Results &, int);
     void rand_read(Mapping, Results &, int);
     void seq_write(Mapping, Results &, int);

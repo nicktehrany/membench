@@ -42,7 +42,6 @@ void Eng_mmap::seq_read(Mapping mapping, Results &results, int runtime)
         counter++;
     }
 
-    //Calculating per second memcpy * size of memcpy and convert to MiB
     get_bandwidth(counter, runtime, mapping.buflen, results);
     delete[] dest;
 }
@@ -151,7 +150,7 @@ void Eng_mmap::prepare_mapping(Mapping &mapping, Arguments args)
             exit(1);
         }
 
-        // truncate file to size and init with 0s to avoid mmap on empty file (BUS_ERROR on mem access)
+        // truncate file to size to avoid mmap on empty file (BUS_ERROR on mem access)
         if (ftruncate(fd, args.fsize) != 0)
         {
             perror("truncate");
@@ -159,6 +158,9 @@ void Eng_mmap::prepare_mapping(Mapping &mapping, Arguments args)
             remove(args.path);
             exit(1);
         }
+
+        // Init file in case fle is on DAX-fs, where truncate init with 0s isn't enough
+        init_file(fd, args.fsize);
 
         if ((mapping.addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0)) == MAP_FAILED)
         {
@@ -175,6 +177,23 @@ void Eng_mmap::prepare_mapping(Mapping &mapping, Arguments args)
         mapping.fsize = args.fsize;
         mapping.fpath = args.path;
     }
+}
+
+void Eng_mmap::init_file(int fd, int fsize)
+{
+    // TODO BETTER INITIALIZING INEFFICIENT to create huge buf
+    unsigned char *buf = new unsigned char[fsize]; // Handle large sizes
+
+    srand(time(NULL));
+    for (int i = 0; i < fsize; i++)
+        buf[i] = rand() % 256;
+
+    if (write(fd, buf, fsize) < 0)
+    {
+        perror("File Error");
+        exit(1);
+    }
+    delete[] buf;
 }
 
 // Mapping is anonymous
@@ -197,8 +216,11 @@ void Eng_mmap::cleanup_mapping(Mapping mapping)
 {
     munmap(mapping.addr, mapping.fsize);
 
-    if (remove(mapping.fpath) != 0)
+    if (!mapping.map_anon && (mapping.fpath) != 0)
+    {
+        errno = EINVAL;
         perror("Error deleting file");
+    }
 
     mapping.addr = 0;
     mapping.buflen = 0;

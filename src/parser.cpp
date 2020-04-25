@@ -186,9 +186,10 @@ void Parser::set_path(char *token, Arguments &args)
     strcpy(dir, temp.c_str());
     if (strcmp(dir, "/dev/null") == 0 || strcmp(dir, "/dev/zero") == 0)
         args.map_anon = 1;
-    else
+    else if (temp.back() == '/')
         dir = strcat(dir, "file");
-    exit(1);
+    else
+        dir = strcat(dir, "/file");
     args.path = dir;
 }
 
