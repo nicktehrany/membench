@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <chrono>
+#include <sys/sendfile.h>
 
 /*
  *
@@ -160,7 +161,7 @@ void Eng_mmap::prepare_mapping(Mapping &mapping, Arguments args)
         }
 
         // Init file in case fle is on DAX-fs, where truncate init with 0s isn't enough
-        init_file(fd, args.fsize);
+        init_file(fd, args.fsize, args.buflen);
 
         if ((mapping.addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0)) == MAP_FAILED)
         {
@@ -177,23 +178,6 @@ void Eng_mmap::prepare_mapping(Mapping &mapping, Arguments args)
         mapping.fsize = args.fsize;
         mapping.fpath = args.path;
     }
-}
-
-void Eng_mmap::init_file(int fd, int fsize)
-{
-    // TODO BETTER INITIALIZING INEFFICIENT to create huge buf
-    unsigned char *buf = new unsigned char[fsize]; // Handle large sizes
-
-    srand(time(NULL));
-    for (int i = 0; i < fsize; i++)
-        buf[i] = rand() % 256;
-
-    if (write(fd, buf, fsize) < 0)
-    {
-        perror("File Error");
-        exit(1);
-    }
-    delete[] buf;
 }
 
 // Mapping is anonymous
@@ -266,4 +250,24 @@ void Eng_mmap::check_args(Arguments &args)
     {
         args.path = "file";
     }
+}
+
+void Eng_mmap::init_file(int fd, int fsize, int buflen)
+{
+    // Since file size has to be multiple of buflen
+    unsigned char *buf = new unsigned char[buflen];
+    int iter = fsize / buflen;
+
+    srand(time(NULL));
+    for (int i = 0; i < iter; i++)
+    {
+        for (int j = 0; j < buflen; j++)
+            buf[j] = rand() % 256;
+        if (write(fd, buf, buflen) < 0)
+        {
+            perror("File Error");
+            exit(1);
+        }
+    }
+    delete[] buf;
 }
