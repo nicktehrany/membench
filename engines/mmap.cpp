@@ -216,7 +216,7 @@ void Eng_mmap::cleanup_mapping(Mapping mapping)
 {
     munmap(mapping.addr, mapping.fsize);
 
-    if (!mapping.map_anon && (mapping.fpath) != 0)
+    if (!mapping.map_anon && remove(mapping.fpath) != 0)
     {
         errno = EINVAL;
         perror("Error deleting file");
