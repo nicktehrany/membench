@@ -1,7 +1,6 @@
 #include "results.h"
 #include "functions.h"
 #include "../engines/mmap.h"
-// #include "../engines/pmem.h"
 #include "parser.h"
 
 int main(int argc, char *argv[])
@@ -13,11 +12,6 @@ int main(int argc, char *argv[])
     parse(&args, argc, argv);
     if (args.engine == 0)
         mmap_engine(&mapping, &args, &results);
-    // else if (args.engine == 1)
-    // {
-    //     Eng_pmem engine;
-    //     engine.pmem_engine(mapping, args, results);
-    // }
 
     return 0;
 }
