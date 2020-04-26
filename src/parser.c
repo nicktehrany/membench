@@ -63,7 +63,7 @@ int parse_file(char *token, char *tokens[])
         exit(1);
     }
 
-    char *line;
+    char *line = "";
     int counter = 0;
     size_t len = 0;
     while (getline(&line, &len, fp) != -1)
@@ -73,7 +73,7 @@ int parse_file(char *token, char *tokens[])
             perror("Too many commands");
             exit(1);
         }
-        char *x = malloc(strlen(line));
+        char *x = calloc(strlen(line), 1);
         size_t len = strlen(line) - 1;
         memcpy(x, line, len);
         tokens[counter] = x;
