@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 void parse(Arguments *args, int argc, char **argv)
 {
@@ -10,6 +11,7 @@ void parse(Arguments *args, int argc, char **argv)
 
     if (argc > 100)
     {
+        errno = EINVAL;
         perror("Too many commands");
         exit(1);
     }
@@ -59,6 +61,7 @@ int parse_file(char *token, char *tokens[])
 
     if (fp == NULL)
     {
+        errno = EINVAL;
         perror("Invalid file");
         exit(1);
     }
@@ -70,6 +73,7 @@ int parse_file(char *token, char *tokens[])
     {
         if (counter > 100)
         {
+            errno = EINVAL;
             perror("Too many commands");
             exit(1);
         }
@@ -100,6 +104,12 @@ void set_runtime(char *token, Arguments *args)
 {
     char *temp = (char *)token;
     args->runtime = atoi(temp + 9);
+    if (args->runtime <= 0)
+    {
+        errno = EINVAL;
+        perror("Invalid runtime");
+        exit(1);
+    }
 }
 
 void set_filesize(char *token, Arguments *args)
@@ -119,6 +129,12 @@ void set_filesize(char *token, Arguments *args)
 
     char *ptr;
     args->fsize = strtoul(temp + 7, &ptr, 10) * multiplier;
+    if (args->fsize <= 0)
+    {
+        errno = EINVAL;
+        perror("Invalid File size");
+        exit(1);
+    }
 }
 
 void set_buflen(char *token, Arguments *args)
@@ -139,6 +155,12 @@ void set_buflen(char *token, Arguments *args)
 
     char *ptr;
     args->buflen = strtoul(temp + 10, &ptr, 10) * multiplier;
+    if (args->buflen <= 0)
+    {
+        errno = EINVAL;
+        perror("Invalid copy size");
+        exit(1);
+    }
 }
 
 void set_path(char *token, Arguments *args)
@@ -159,6 +181,7 @@ void set_path(char *token, Arguments *args)
     }
     if (!(args->path = malloc(strlen(dir) + 1)))
     {
+        errno = EINVAL;
         perror("Invalid Directory.");
     }
     strcpy(args->path, dir);
@@ -180,6 +203,7 @@ void set_mode(char *token, Arguments *args)
         args->mode = 3;
     else
     {
+        errno = EINVAL;
         perror("Invalid mode");
         exit(1);
     }
@@ -191,35 +215,38 @@ void set_engine(char *token, Arguments *args)
     char *mode = temp + 8;
     if (strncmp(mode, "mmap", 4) == 0)
         args->engine = 0;
-    else if (strncmp(mode, "pmem", 4) == 0)
-        args->engine = 1;
     else
     {
+        errno = EINVAL;
         perror("Invalid engine");
         exit(1);
     }
 }
 
-// // Checking args that all engines have in common
+// Checking args that all engines have in common
 void check_args(Arguments *args)
 {
     if (args->buflen <= 0 || args->fsize <= 0)
     {
+        errno = EINVAL;
         perror("Invalid or missing file or copy size");
         exit(1);
     }
     if (args->runtime < 1)
     {
+        errno = EINVAL;
         perror("Runtime should be greater than 1sec");
         exit(1);
     }
     if (args->buflen > args->fsize)
     {
+        errno = EINVAL;
         perror("Copy size can't be larger than file size");
         exit(1);
     }
     if (args->fsize % args->buflen != 0)
     {
+        errno = EINVAL;
         perror("Not aligned file size and copy size");
         exit(1);
     }

@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/sendfile.h>
 #include <stdio.h>
 #include <time.h>
+#include <errno.h>
 
 /*
  *
@@ -209,6 +209,7 @@ void mmap_cleanup_mapping(Mapping *mapping)
 
     if (!mapping->map_anon && remove(mapping->fpath) != 0)
     {
+        errno = EINVAL;
         perror("Error deleting file");
     }
 
@@ -238,6 +239,7 @@ void mmap_run_benchmark(Mapping *mapping, Arguments args, Results *results)
         mmap_rand_write(mapping, results, args.runtime);
         break;
     default:
+        errno = EINVAL;
         perror("Invalid Mode");
         exit(1);
     }
