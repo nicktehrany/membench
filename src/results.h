@@ -2,11 +2,11 @@
 #define RESULTS_H
 #include "parser.h"
 
-struct Results
+typedef struct Results
 {
     double bandwidth;
     double io_data;
-};
+} Results;
 
 void dump_results(Results, Arguments);
 
