@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "../engines/mmap.h"
 #include "parser.h"
-#include <stdlib.h>
 
 int main(int argc, char *argv[])
 {
@@ -13,6 +12,6 @@ int main(int argc, char *argv[])
     parse(&args, argc, argv);
     if (args.engine == 0)
         mmap_engine(&mapping, &args, &results);
-    free(args.path);
+
     return 0;
 }

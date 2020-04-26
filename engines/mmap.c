@@ -12,18 +12,20 @@
  *
  * Engine that uses mmap to map files into memory and then measures throughput by 
  * reading/writing from and to it using memcpy. Possible file options are a usual
- * file from any file system, no file (mmap will be called with MAP_ANONYMOUS),
+ * file from any file system, no file (mmap will be called with MAP_ANONYMOUS)
+ * Will create and delete files of specified sizes (which can take longer for large 
+ * files)
 */
 void mmap_engine(Mapping *mapping, Arguments *args, Results *results)
 {
     mmap_check_args(args);
     mmap_prepare_mapping(mapping, *args);
-    mmap_run_benchmark(mapping, *args, results);
+    mmap_run_benchmark(mapping, args, results);
     mmap_cleanup_mapping(mapping);
     dump_results(*results, *args);
 }
 
-void mmap_seq_read(Mapping *mapping, Results *results, uint64_t runtime)
+void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
 {
     uint64_t counter = 0;
     uint64_t block_index = 0;
@@ -33,25 +35,29 @@ void mmap_seq_read(Mapping *mapping, Results *results, uint64_t runtime)
     clock_t start = clock();
     clock_t end = clock();
 
-    while (elapsed < runtime)
+    while (elapsed < args->runtime)
     {
         // Read all blocks from mapped area, start over
         if (block_index * mapping->buflen >= mapping->fsize)
+        {
+            end = clock();
+            elapsed = (end - start) / CLOCKS_PER_SEC;
             block_index = 0;
+        }
 
         memcpy(dest, mapping->addr + (mapping->buflen * block_index), mapping->buflen);
-        end = clock();
-        elapsed = (end - start) / CLOCKS_PER_SEC;
         block_index++;
         counter++;
     }
 
-    get_bandwidth(counter, runtime, mapping->buflen, results);
+    get_bandwidth(counter, elapsed, mapping->buflen, results);
+    // In case runtime deviated from desired runtime (unlikely but possible one larger files)
+    args->runtime = elapsed;
     free(dest);
     dest = NULL;
 }
 
-void mmap_rand_read(Mapping *mapping, Results *results, uint64_t runtime)
+void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
 {
     uint64_t counter = 0;
     uint64_t index_counter = 0;
@@ -67,27 +73,29 @@ void mmap_rand_read(Mapping *mapping, Results *results, uint64_t runtime)
     clock_t start = clock();
     clock_t end = clock();
 
-    while (elapsed < runtime)
+    while (elapsed < args->runtime)
     {
-        // Read all blocks from mapped area, start over
         if (index_counter == max_ind)
+        {
             index_counter = 0;
+            end = clock();
+            elapsed = (end - start) / CLOCKS_PER_SEC;
+        }
 
         memcpy(dest, mapping->addr + (mapping->buflen * block_index[index_counter]), mapping->buflen);
-        end = clock();
-        elapsed = (end - start) / CLOCKS_PER_SEC;
         index_counter++;
         counter++;
     }
 
-    get_bandwidth(counter, runtime, mapping->buflen, results);
+    get_bandwidth(counter, elapsed, mapping->buflen, results);
+    args->runtime = elapsed;
     free(dest);
     dest = NULL;
     free(block_index);
     block_index = NULL;
 }
 
-void mmap_seq_write(Mapping *mapping, Results *results, uint64_t runtime)
+void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
 {
     uint64_t counter = 0;
     uint64_t block_index = 0;
@@ -101,23 +109,27 @@ void mmap_seq_write(Mapping *mapping, Results *results, uint64_t runtime)
     clock_t start = clock();
     clock_t end = clock();
 
-    while (elapsed < runtime)
+    while (elapsed < args->runtime)
     {
         if (block_index * mapping->buflen >= mapping->fsize)
+        {
             block_index = 0;
+            end = clock();
+            elapsed = (end - start) / CLOCKS_PER_SEC;
+        }
+
         memcpy(mapping->addr + (block_index * mapping->buflen), src, mapping->buflen);
-        end = clock();
-        elapsed = (end - start) / CLOCKS_PER_SEC;
         block_index++;
         counter++;
     }
 
-    get_bandwidth(counter, runtime, mapping->buflen, results);
+    get_bandwidth(counter, elapsed, mapping->buflen, results);
+    args->runtime = elapsed;
     free(src);
     src = NULL;
 }
 
-void mmap_rand_write(Mapping *mapping, Results *results, uint64_t runtime)
+void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
 {
     uint64_t counter = 0;
     uint64_t index_counter = 0;
@@ -136,18 +148,22 @@ void mmap_rand_write(Mapping *mapping, Results *results, uint64_t runtime)
     clock_t start = clock();
     clock_t end = clock();
 
-    while (elapsed < runtime)
+    while (elapsed < args->runtime)
     {
         if (index_counter == max_ind)
+        {
             index_counter = 0;
+            end = clock();
+            elapsed = (end - start) / CLOCKS_PER_SEC;
+        }
+
         memcpy(mapping->addr + (block_index[index_counter] * mapping->buflen), src, mapping->buflen);
-        end = clock();
-        elapsed = (end - start) / CLOCKS_PER_SEC;
         index_counter++;
         counter++;
     }
 
-    get_bandwidth(counter, runtime, mapping->buflen, results);
+    get_bandwidth(counter, elapsed, mapping->buflen, results);
+    args->runtime = elapsed;
     free(src);
     src = NULL;
     free(block_index);
@@ -221,22 +237,22 @@ void mmap_cleanup_mapping(Mapping *mapping)
     mapping->map_anon = 0;
 }
 
-void mmap_run_benchmark(Mapping *mapping, Arguments args, Results *results)
+void mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
 {
-    mapping->buflen = args.buflen;
-    switch (args.mode)
+    mapping->buflen = args->buflen;
+    switch (args->mode)
     {
     case 0:
-        mmap_seq_read(mapping, results, args.runtime);
+        mmap_seq_read(mapping, results, args);
         break;
     case 1:
-        mmap_seq_write(mapping, results, args.runtime);
+        mmap_seq_write(mapping, results, args);
         break;
     case 2:
-        mmap_rand_read(mapping, results, args.runtime);
+        mmap_rand_read(mapping, results, args);
         break;
     case 3:
-        mmap_rand_write(mapping, results, args.runtime);
+        mmap_rand_write(mapping, results, args);
         break;
     default:
         errno = EINVAL;
@@ -259,18 +275,27 @@ void mmap_check_args(Arguments *args)
     }
 }
 
+/*
+*  For performance reasons, don't want to write to file in single bytes at a time (which
+*  will take very long for large files), write in 4KiB amounts at a time or buflen 
+*  (copy size) amounts if it's larger
+*/
 void mmap_init_file(int fd, int fsize, int buflen)
 {
+    int factor = 4096;
+    if (buflen > factor)
+        factor = buflen;
+
     // Since file size has to be multiple of buflen
-    unsigned char *buf = (unsigned char *)malloc(buflen * sizeof(char));
-    int iter = fsize / buflen;
+    unsigned char *buf = (unsigned char *)malloc(factor * sizeof(char));
+    int iter = fsize / factor;
 
     srand(time(NULL));
     for (int i = 0; i < iter; i++)
     {
-        for (int j = 0; j < buflen; j++)
+        for (int j = 0; j < factor; j++)
             buf[j] = rand() % 256;
-        if (write(fd, buf, buflen) < 0)
+        if (write(fd, buf, factor) < 0)
         {
             perror("File Error");
             exit(1);
