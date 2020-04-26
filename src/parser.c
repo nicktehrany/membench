@@ -215,7 +215,6 @@ void check_args(Arguments *args)
     }
     if (args->buflen > args->fsize)
     {
-        printf("%ld %ld ", args->buflen, args->fsize);
         perror("Copy size can't be larger than file size");
         exit(1);
     }
