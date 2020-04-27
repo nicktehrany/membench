@@ -282,7 +282,7 @@ void mmap_check_args(Arguments *args)
 */
 void mmap_init_file(int fd, int fsize, int buflen)
 {
-    int factor = 4096;
+    int factor = 32768;
     if (buflen > factor)
         factor = buflen;
 

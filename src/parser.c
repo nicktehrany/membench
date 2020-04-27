@@ -129,10 +129,10 @@ void set_filesize(char *token, Arguments *args)
 
     char *ptr;
     args->fsize = strtoul(temp + 7, &ptr, 10) * multiplier;
-    if (args->fsize <= 0)
+    if (args->fsize < 4096)
     {
         errno = EINVAL;
-        perror("Invalid File size");
+        perror("Invalid File size. Needs to be at least 32KiB");
         exit(1);
     }
 }
