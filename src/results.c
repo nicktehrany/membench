@@ -54,28 +54,16 @@ void dump_results(Results results, Arguments args)
     switch (args.mode)
     {
     case 0:
-        if (results.bandwidth >= 1024)
-            fprintf(fd, "Sequential Read\t\t\t%f GiB/s\n", results.bandwidth / 1024);
-        else
-            fprintf(fd, "Sequential Read\t\t\t%f MiB/s\n", results.bandwidth);
+        fprintf(fd, "Sequential Read\t\t\t%f GiB/s\n", results.bandwidth / 1024);
         break;
     case 1:
-        if (results.bandwidth >= 1024)
-            fprintf(fd, "Sequential Write\t\t\t%f GiB/s\n", results.bandwidth / 1024);
-        else
-            fprintf(fd, "Sequential Write\t\t\t%f MiB/s\n", results.bandwidth);
+        fprintf(fd, "Sequential Write\t\t\t%f GiB/s\n", results.bandwidth / 1024);
         break;
     case 2:
-        if (results.bandwidth >= 1024)
-            fprintf(fd, "Random Read\t\t\t%f GiB/s\n", results.bandwidth / 1024);
-        else
-            fprintf(fd, "Random Read\t\t\t%f MiB/s\n", results.bandwidth);
+        fprintf(fd, "Random Read\t\t\t%f GiB/s\n", results.bandwidth / 1024);
         break;
     case 3:
-        if (results.bandwidth >= 1024)
-            fprintf(fd, "Random Write\t\t\t%f GiB/s\n", results.bandwidth / 1024);
-        else
-            fprintf(fd, "Random Write\t\t\t%f MiB/s\n", results.bandwidth);
+        fprintf(fd, "Random Write\t\t\t%f GiB/s\n", results.bandwidth / 1024);
         break;
     }
 
