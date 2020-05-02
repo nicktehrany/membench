@@ -7,6 +7,11 @@
 void dump_results(Results results, Arguments args)
 {
     FILE *fd = fopen("results.out", "w+");
+    if (fd == NULL)
+    {
+        perror("Failed opening results.out file. Delete it or run as sudo!");
+        exit(1);
+    }
     fprintf(fd, "\t\t==== SUMMARY ====\n");
     fprintf(fd, "Runtime\t\t\t\t\t%ld sec\n", args.runtime);
     if (strcmp(args.path, "file") == 0)

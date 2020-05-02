@@ -219,7 +219,7 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
 }
 
 // // Mapping is anonymous
-void mmap_prepare_map_anon(Mapping *mapping, int fsize)
+void mmap_prepare_map_anon(Mapping *mapping, uint64_t fsize)
 {
     // MAP_ANONYMOUS not backed by file on file system
     if ((mapping->addr = (char *)mmap(0, fsize, PROT_WRITE | PROT_READ, MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE, -1, 0)) == MAP_FAILED)
