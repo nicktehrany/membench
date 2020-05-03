@@ -50,7 +50,7 @@ void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
             index_counter = 0;
         }
 
-        memcpy(dest, block_index[index_counter], mapping->buflen);
+        memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
         index_counter++;
         counter++;
     }
@@ -90,7 +90,7 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
             index_counter = 0;
         }
 
-        memcpy(dest, block_index[index_counter], mapping->buflen);
+        memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
         index_counter++;
         counter++;
     }
@@ -131,7 +131,7 @@ void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
             index_counter = 0;
         }
 
-        memcpy(block_index[index_counter], src, mapping->buflen);
+        memcpy(block_index[index_counter], src, mapping->buflen * sizeof(char));
         index_counter++;
         counter++;
     }
@@ -172,7 +172,7 @@ void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
             elapsed = (end - start) / CLOCKS_PER_SEC;
         }
 
-        memcpy(block_index[index_counter], src, mapping->buflen);
+        memcpy(block_index[index_counter], src, mapping->buflen * sizeof(char));
         index_counter++;
         counter++;
     }
@@ -201,7 +201,7 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
         // Init file manually in case fle is on DAX-fs, where truncate init isn't enough
         mmap_init_file(fd, args.fsize, args.buflen);
 
-        if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0)) == MAP_FAILED)
+        if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0)) == MAP_FAILED)
         {
             perror("mmap");
             close(fd);
@@ -222,7 +222,7 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
 void mmap_prepare_map_anon(Mapping *mapping, uint64_t fsize)
 {
     // MAP_ANONYMOUS not backed by file on file system
-    if ((mapping->addr = (char *)mmap(0, fsize, PROT_WRITE | PROT_READ, MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE, -1, 0)) == MAP_FAILED)
+    if ((mapping->addr = (char *)mmap(0, fsize, PROT_WRITE | PROT_READ, MAP_ANONYMOUS | MAP_SHARED | MAP_POPULATE, -1, 0)) == MAP_FAILED)
     {
         perror("mmap");
         exit(1);
