@@ -1,5 +1,5 @@
-#ifndef H
-#define H
+#ifndef MMAP_H
+#define MMAP_H
 #include "../src/results.h"
 #include "../src/functions.h"
 

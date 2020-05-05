@@ -10,3 +10,5 @@ input.txt
 *.png
 
 plot.py
+
+*.dat
