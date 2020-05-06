@@ -213,7 +213,9 @@ void set_engine(char *token, Arguments *args)
 {
     char *temp = token;
     char *mode = temp + 8;
-    if (strncmp(mode, "mmap", 4) == 0)
+    if (strncmp(mode, "mmap_lat", 8) == 0)
+        args->engine = 1;
+    else if (strncmp(mode, "mmap", 4) == 0)
         args->engine = 0;
     else
     {
