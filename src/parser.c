@@ -45,6 +45,8 @@ void parse_cmd_line(Arguments *args, char *tokens[], int size)
             set_mode(tokens[i], args);
         else if (strncmp(tokens[i], "-engine=", 8) == 0)
             set_engine(tokens[i], args);
+        else if (strncmp(tokens[i], "-iter=", 6) == 0)
+            set_iter(tokens[i], args);
         else
         {
             printf("Unknow command %s\n", tokens[i]);
@@ -96,6 +98,7 @@ void display_help()
     printf("-dir=\t\tPath to directory to use (/dev/null or /dev/zero for MAP_ANONYMOUS, current if none specified)\n");
     printf("-mode=\t\tPossible modes are: read write randread randwrite (Default read)\n");
     printf("-engine=\tPossible engines are mmap and pmem (Default mmap)\n");
+    printf("For engine specific commands consult the documentation\n");
     exit(0);
 }
 
@@ -220,6 +223,31 @@ void set_engine(char *token, Arguments *args)
     {
         errno = EINVAL;
         perror("Invalid engine");
+        exit(1);
+    }
+}
+
+void set_iter(char *token, Arguments *args)
+{
+    char *temp = token;
+
+    char *unit = temp + strlen(temp) - 1;
+    int multiplier = 1;
+    char K = 'K', M = 'M', G = 'G';
+    if (*unit == K)
+        multiplier = 1000;
+    else if (*unit == M)
+        multiplier = 1000 * 1000;
+
+    else if (*unit == G)
+        multiplier = 1000 * 1000 * 1000;
+
+    char *ptr;
+    args->iterations = strtoul(temp + 6, &ptr, 10) * multiplier;
+    if (args->iterations < 1)
+    {
+        errno = EINVAL;
+        perror("Invalid Iterations. Needs to be at least 1");
         exit(1);
     }
 }

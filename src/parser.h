@@ -25,4 +25,5 @@ void set_buflen(char *, Arguments *);
 void set_path(char *, Arguments *);
 void set_mode(char *, Arguments *);
 void set_engine(char *, Arguments *);
+void set_iter(char *token, Arguments *args);
 #endif

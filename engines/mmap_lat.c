@@ -12,14 +12,14 @@ void mmap_lat_engine(Mapping *mapping, Arguments *args, Results *results)
 {
     uint64_t acc_usec = 0;
     int fd = 0;
-    double value = 0.0;
+    uint64_t value = 0;
 
     mmap_lat_check_args(args);
     fd = mmap_lat_prep_file(*args);
     mapping->fpath = args->path;
     mapping->fsize = args->fsize;
 
-    for (int i = 0; i < 10000; i++)
+    for (uint64_t i = 0; i < args->iterations; i++)
     {
         value = mmap_lat_do_mmap(mapping, *args, fd);
         if (value > results->max_lat)
@@ -27,11 +27,12 @@ void mmap_lat_engine(Mapping *mapping, Arguments *args, Results *results)
         if (value < results->min_lat || results->min_lat == 0)
             results->min_lat = value;
         acc_usec += value;
+        printf("%ld ", value);
         mmap_lat_do_unmap(mapping);
     }
     if (!mapping->map_anon)
         mmap_lat_cleanup_file(mapping, fd);
-    results->avg_lat = acc_usec / 10000.0;
+    results->avg_lat = (double)acc_usec / (double)args->iterations;
     dump_results(*results, *args);
 }
 
@@ -60,7 +61,7 @@ int mmap_lat_prep_file(Arguments args)
     return fd;
 }
 
-double mmap_lat_do_mmap(Mapping *mapping, Arguments args, int fd)
+uint64_t mmap_lat_do_mmap(Mapping *mapping, Arguments args, int fd)
 {
     double elapsed = 0.0;
     if (args.map_anon)
@@ -82,7 +83,7 @@ double mmap_lat_do_mmap(Mapping *mapping, Arguments args, int fd)
 }
 
 // Mapping is anonymous
-double mmap_lat_do_mmap_anon(Mapping *mapping, uint64_t fsize, int fd)
+uint64_t mmap_lat_do_mmap_anon(Mapping *mapping, uint64_t fsize, int fd)
 {
     clock_t start = clock();
     // MAP_ANONYMOUS not backed by file on file system
@@ -103,6 +104,7 @@ void mmap_lat_do_unmap(Mapping *mapping)
 
 void mmap_lat_cleanup_file(Mapping *mapping, int fd)
 {
+    close(fd);
     if (!mapping->map_anon && remove(mapping->fpath) != 0)
     {
         errno = EINVAL;
@@ -113,4 +115,14 @@ void mmap_lat_cleanup_file(Mapping *mapping, int fd)
 // Check if all args are valid for engine to start
 void mmap_lat_check_args(Arguments *args)
 {
+    if (args->fsize <= 0)
+    {
+        errno = EINVAL;
+        perror("Invalid or missing file or copy size");
+        exit(1);
+    }
+    if (strcmp(args->path, "") == 0)
+    {
+        args->path = "file";
+    }
 }

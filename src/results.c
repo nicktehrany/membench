@@ -87,7 +87,7 @@ void results_mmap_eng(Arguments args, FILE *fd, Results results)
 void results_mmap_lat_eng(Arguments args, FILE *fd, Results results)
 {
     fprintf(fd, "Iterations\t\t\t\t%ld\n", args.iterations);
-    fprintf(fd, "Minimum latency\t\t\t\t%f usec\n", results.min_lat);
-    fprintf(fd, "Maximum latency\t\t\t\t%f usec\n", results.max_lat);
-    fprintf(fd, "Average latency\t\t\t\t%f usec\n", results.avg_lat);
+    fprintf(fd, "Minimum latency\t\t\t%f usec\n", results.min_lat);
+    fprintf(fd, "Maximum latency\t\t\t%f usec\n", results.max_lat);
+    fprintf(fd, "Average latency\t\t\t%f usec\n", results.avg_lat);
 }
