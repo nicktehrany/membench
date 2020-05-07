@@ -27,7 +27,6 @@ void parse(Arguments *args, int argc, char **argv)
         tokens[i] = argv[i + 1];
     }
     parse_cmd_line(args, tokens, argc - 1);
-    check_args(args);
 }
 
 void parse_cmd_line(Arguments *args, char *tokens[], int size)
@@ -221,35 +220,6 @@ void set_engine(char *token, Arguments *args)
     {
         errno = EINVAL;
         perror("Invalid engine");
-        exit(1);
-    }
-}
-
-// Checking args that all engines have in common
-void check_args(Arguments *args)
-{
-    if (args->buflen <= 0 || args->fsize <= 0)
-    {
-        errno = EINVAL;
-        perror("Invalid or missing file or copy size");
-        exit(1);
-    }
-    if (args->runtime < 1)
-    {
-        errno = EINVAL;
-        perror("Runtime should be greater than 1sec");
-        exit(1);
-    }
-    if (args->buflen > args->fsize)
-    {
-        errno = EINVAL;
-        perror("Copy size can't be larger than file size");
-        exit(1);
-    }
-    if (args->fsize % args->buflen != 0)
-    {
-        errno = EINVAL;
-        perror("Not aligned file size and copy size");
         exit(1);
     }
 }

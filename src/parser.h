@@ -16,7 +16,6 @@ typedef struct Arguments
 } Arguments;
 
 void parse(Arguments *, int, char **);
-void check_args(Arguments *);
 void display_help();
 void parse_cmd_line(Arguments *, char *[], int);
 int parse_file(char *, char *[]);

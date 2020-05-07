@@ -282,11 +282,36 @@ void mmap_init_mem(Mapping *mapping)
     memset(mapping->addr, rand(), mapping->fsize);
 }
 
+// Check if all args are valid for engine to start
 void mmap_check_args(Arguments *args)
 {
     if (strcmp(args->path, "") == 0)
     {
         args->path = "file";
+    }
+    if (args->buflen <= 0 || args->fsize <= 0)
+    {
+        errno = EINVAL;
+        perror("Invalid or missing file or copy size");
+        exit(1);
+    }
+    if (args->runtime < 1)
+    {
+        errno = EINVAL;
+        perror("Runtime should be greater than 1sec");
+        exit(1);
+    }
+    if (args->buflen > args->fsize)
+    {
+        errno = EINVAL;
+        perror("Copy size can't be larger than file size");
+        exit(1);
+    }
+    if (args->fsize % args->buflen != 0)
+    {
+        errno = EINVAL;
+        perror("Not aligned file size and copy size");
+        exit(1);
     }
 }
 

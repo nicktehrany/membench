@@ -11,7 +11,7 @@
 void mmap_lat_engine(Mapping *mapping, Arguments *args, Results *results)
 {
     //sleep(6);
-    //mmap_check_args(args);
+    mmap_lat_check_args(args);
     mmap_lat_prepare_mapping(mapping, *args);
     mmap_lat_cleanup_mapping(mapping);
     dump_results(*results, *args);
@@ -86,4 +86,9 @@ void mmap_lat_cleanup_mapping(Mapping *mapping)
     mapping->fsize = 0;
     mapping->is_pmem = 0;
     mapping->map_anon = 0;
+}
+
+// Check if all args are valid for engine to start
+void mmap_lat_check_args(Arguments *args)
+{
 }
