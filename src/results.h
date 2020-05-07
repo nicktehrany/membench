@@ -9,7 +9,7 @@ typedef struct Results
     double io_data;
     double min_lat;
     double max_lat;
-    double acc_lat;
+    double avg_lat;
 } Results;
 
 void dump_results(Results, Arguments);

@@ -12,7 +12,6 @@ void dump_results(Results results, Arguments args)
         exit(1);
     }
     fprintf(fd, "\t\t==== SUMMARY ====\n");
-    fprintf(fd, "Runtime\t\t\t\t\t%ld sec\n", args.runtime);
     if (strcmp(args.path, "file") == 0)
         fprintf(fd, "Directory\t\t\t\tCurrent Directory\n");
     else
@@ -24,7 +23,7 @@ void dump_results(Results results, Arguments args)
         fprintf(fd, "Engine\t\t\t\t\tmmap\n");
         break;
     case 1:
-        fprintf(fd, "Engine\t\t\t\t\tpmem\n");
+        fprintf(fd, "Engine\t\t\t\t\tmmap_lat\n");
         break;
     }
 
@@ -47,6 +46,7 @@ void dump_results(Results results, Arguments args)
 
 void results_mmap_eng(Arguments args, FILE *fd, Results results)
 {
+    fprintf(fd, "Runtime\t\t\t\t\t%ld sec\n", args.runtime);
     if (args.fsize >= (1024 * 1024 * 1024))
         fprintf(fd, "File Size\t\t\t\t%ld GiB\n", args.fsize / (1024 * 1024 * 1024));
     else if (args.fsize >= (1024 * 1024))
@@ -86,6 +86,8 @@ void results_mmap_eng(Arguments args, FILE *fd, Results results)
 
 void results_mmap_lat_eng(Arguments args, FILE *fd, Results results)
 {
-
+    fprintf(fd, "Iterations\t\t\t\t%ld\n", args.iterations);
+    fprintf(fd, "Minimum latency\t\t\t\t%f usec\n", results.min_lat);
     fprintf(fd, "Maximum latency\t\t\t\t%f usec\n", results.max_lat);
+    fprintf(fd, "Average latency\t\t\t\t%f usec\n", results.avg_lat);
 }

@@ -218,7 +218,7 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
     }
 }
 
-// // Mapping is anonymous
+// Mapping is anonymous
 void mmap_prepare_map_anon(Mapping *mapping, uint64_t fsize)
 {
     // MAP_ANONYMOUS not backed by file on file system

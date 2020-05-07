@@ -5,8 +5,11 @@
 
 void mmap_lat_engine(Mapping *, Arguments *, Results *);
 void mmap_lat_check_args(Arguments *);
-void mmap_lat_prepare_mapping(Mapping *, Arguments);
-void mmap_lat_cleanup_mapping(Mapping *);
-void mmap_lat_prepare_map_anon(Mapping *mapping, uint64_t fsize);
+int mmap_lat_prep_file(Arguments args);
+
+double mmap_lat_do_mmap(Mapping *, Arguments, int);
+void mmap_lat_do_unmap(Mapping *);
+double mmap_lat_do_mmap_anon(Mapping *mapping, uint64_t fsize, int fd);
+void mmap_lat_cleanup_file(Mapping *mapping, int fd);
 
 #endif
