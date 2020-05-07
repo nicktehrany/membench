@@ -1,0 +1,5 @@
+-dir=/mnt/mem
+-fsize=256M
+-engine=mmap_lat
+-iter=10K
+-map_pop=0

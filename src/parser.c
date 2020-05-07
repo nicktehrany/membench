@@ -95,12 +95,15 @@ void display_help()
     printf("Possible commands are:\n");
     printf("-file=\t\tProvide an input file with commands as shown in examples\n");
     printf("-runtime=\tSet runtime seconds\n");
-    printf("-fsize=\tSet file size (For example 2M for 2MiB file)\n");
+    printf("-fsize=\t\tSet file size (For example 2M for 2MiB file)\n");
     printf("-copysize=\tSet copy size for memcpy (For example 4K for 4KiB)\n");
     printf("-dir=\t\tPath to directory to use (/dev/null or /dev/zero for MAP_ANONYMOUS, current if none specified)\n");
     printf("-mode=\t\tPossible modes are: read write randread randwrite (Default read)\n");
-    printf("-engine=\tPossible engines are mmap and pmem (Default mmap)\n");
-    printf("For engine specific commands consult the documentation\n");
+    printf("-engine=\tPossible engines are mmap and mmap_lat (Default mmap)\n");
+    printf("-iter=\t\tNumber of iterations to mmap for mmap_lat engine\n");
+    printf("-map_pop=\t0|1 to pass MAP_POPULATE to mmap for mmap_lat engine\n");
+    printf("\nFor usage of engine specific commands consult the documentation\n");
+    printf("Commands invalid for engine will be disregarded\n");
     exit(0);
 }
 
