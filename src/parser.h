@@ -12,6 +12,7 @@ typedef struct Arguments
     int mode;     //0=read 1=write 2=randread 3=randwrite
     int map_anon; // Mapping without backing of file on file system
     int engine;   // Default mmap engine
+    uint64_t iterations;
 } Arguments;
 
 void parse(Arguments *, int, char **);

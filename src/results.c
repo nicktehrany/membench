@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "results.h"
@@ -38,6 +37,16 @@ void dump_results(Results results, Arguments args)
         fprintf(fd, "MAP_ANONYMOUS\t\t\tNo\n");
         break;
     }
+
+    if (args.engine == 0)
+        results_mmap_eng(args, fd, results);
+    else if (args.engine == 1)
+        results_mmap_lat_eng(args, fd, results);
+    fclose(fd);
+}
+
+void results_mmap_eng(Arguments args, FILE *fd, Results results)
+{
     if (args.fsize >= (1024 * 1024 * 1024))
         fprintf(fd, "File Size\t\t\t\t%ld GiB\n", args.fsize / (1024 * 1024 * 1024));
     else if (args.fsize >= (1024 * 1024))
@@ -73,5 +82,10 @@ void dump_results(Results results, Arguments args)
     }
 
     fprintf(fd, "I/O Data\t\t\t\t%f GiB\n", results.io_data);
-    fclose(fd);
+}
+
+void results_mmap_lat_eng(Arguments args, FILE *fd, Results results)
+{
+
+    fprintf(fd, "Maximum latency\t\t\t\t%f usec\n", results.max_lat);
 }

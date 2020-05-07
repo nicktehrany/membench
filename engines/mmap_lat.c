@@ -10,11 +10,11 @@
 
 void mmap_lat_engine(Mapping *mapping, Arguments *args, Results *results)
 {
-    sleep(6);
+    //sleep(6);
     //mmap_check_args(args);
     mmap_lat_prepare_mapping(mapping, *args);
     mmap_lat_cleanup_mapping(mapping);
-    //dump_results(*results, *args);
+    dump_results(*results, *args);
 }
 
 void mmap_lat_prepare_mapping(Mapping *mapping, Arguments args)
