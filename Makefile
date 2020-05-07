@@ -15,4 +15,4 @@ $(BM): $(BM_DEPS)
 	$(CC) $(CFLAGS) $^ -o $(BM_Target)
 
 clean:
-	$(RM) -r $(OBJ)* $(BM_Target) *.out
+	$(RM) -r $(OBJ)* $(BM_Target) *.out *.dat
