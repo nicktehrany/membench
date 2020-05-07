@@ -15,5 +15,6 @@ typedef struct Results
 void dump_results(Results, Arguments);
 void results_mmap_eng(Arguments args, FILE *fd, Results results);
 void results_mmap_lat_eng(Arguments args, FILE *fd, Results results);
+void display_results(FILE *);
 
 #endif

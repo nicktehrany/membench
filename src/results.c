@@ -5,7 +5,7 @@
 // Summarize all Arguments and Results in a file
 void dump_results(Results results, Arguments args)
 {
-    FILE *fd = fopen("results.out", "w+");
+    FILE *fd = fopen("results.out", "rw");
     if (fd == NULL)
     {
         perror("Failed opening results.out file. Delete it or run as sudo!");
@@ -41,7 +41,17 @@ void dump_results(Results results, Arguments args)
         results_mmap_eng(args, fd, results);
     else if (args.engine == 1)
         results_mmap_lat_eng(args, fd, results);
+    display_results(fd);
     fclose(fd);
+}
+
+void display_results(FILE *fp)
+{
+    char buff[255];
+    while (fgets(buff, 255, (FILE *)fp))
+    {
+        printf("%s", buff);
+    }
 }
 
 void results_mmap_eng(Arguments args, FILE *fd, Results results)
