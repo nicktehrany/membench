@@ -13,6 +13,7 @@ typedef struct Arguments
     int map_anon; // Mapping without backing of file on file system
     int engine;   // Default mmap engine
     uint64_t iterations;
+    int map_pop;
 } Arguments;
 
 void parse(Arguments *, int, char **);
@@ -26,4 +27,5 @@ void set_path(char *, Arguments *);
 void set_mode(char *, Arguments *);
 void set_engine(char *, Arguments *);
 void set_iter(char *token, Arguments *args);
+void set_map_pop(char *token, Arguments *args);
 #endif

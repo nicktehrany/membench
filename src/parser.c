@@ -47,6 +47,8 @@ void parse_cmd_line(Arguments *args, char *tokens[], int size)
             set_engine(tokens[i], args);
         else if (strncmp(tokens[i], "-iter=", 6) == 0)
             set_iter(tokens[i], args);
+        else if (strncmp(tokens[i], "-map_pop=", 9) == 0)
+            set_map_pop(tokens[i], args);
         else
         {
             printf("Unknow command %s\n", tokens[i]);
@@ -248,6 +250,19 @@ void set_iter(char *token, Arguments *args)
     {
         errno = EINVAL;
         perror("Invalid Iterations. Needs to be at least 1");
+        exit(1);
+    }
+}
+
+void set_map_pop(char *token, Arguments *args)
+{
+    char *temp = token;
+    char *ptr;
+    args->map_pop = strtoul(temp + 9, &ptr, 10);
+    if (args->map_pop > 1 || args->map_pop < 0)
+    {
+        errno = EINVAL;
+        perror("Invalid value for map_pop. Needs to be 0|1");
         exit(1);
     }
 }

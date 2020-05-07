@@ -18,6 +18,7 @@ void mmap_lat_engine(Mapping *mapping, Arguments *args, Results *results)
     fd = mmap_lat_prep_file(*args);
     mapping->fpath = args->path;
     mapping->fsize = args->fsize;
+    mapping->map_anon = args->map_anon;
 
     for (uint64_t i = 0; i < args->iterations; i++)
     {
@@ -27,11 +28,10 @@ void mmap_lat_engine(Mapping *mapping, Arguments *args, Results *results)
         if (value < results->min_lat || results->min_lat == 0)
             results->min_lat = value;
         acc_usec += value;
-        printf("%ld ", value);
         mmap_lat_do_unmap(mapping);
     }
-    if (!mapping->map_anon)
-        mmap_lat_cleanup_file(mapping, fd);
+
+    mmap_lat_cleanup_file(mapping, fd);
     results->avg_lat = (double)acc_usec / (double)args->iterations;
     dump_results(*results, *args);
 }
@@ -65,11 +65,16 @@ uint64_t mmap_lat_do_mmap(Mapping *mapping, Arguments args, int fd)
 {
     double elapsed = 0.0;
     if (args.map_anon)
-        elapsed = mmap_lat_do_mmap_anon(mapping, args.fsize, fd);
+        elapsed = mmap_lat_do_mmap_anon(mapping, args, fd);
     else
     {
+        int flags;
+        if (args.map_pop)
+            flags = MAP_SHARED | MAP_POPULATE;
+        else
+            flags = MAP_SHARED;
         clock_t start = clock();
-        if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, MAP_SHARED, fd, 0)) == MAP_FAILED)
+        if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
         {
             perror("mmap");
             close(fd);
@@ -83,11 +88,16 @@ uint64_t mmap_lat_do_mmap(Mapping *mapping, Arguments args, int fd)
 }
 
 // Mapping is anonymous
-uint64_t mmap_lat_do_mmap_anon(Mapping *mapping, uint64_t fsize, int fd)
+uint64_t mmap_lat_do_mmap_anon(Mapping *mapping, Arguments args, int fd)
 {
+    int flags;
+    if (args.map_pop)
+        flags = MAP_ANONYMOUS | MAP_SHARED | MAP_POPULATE;
+    else
+        flags = MAP_ANONYMOUS | MAP_SHARED;
     clock_t start = clock();
     // MAP_ANONYMOUS not backed by file on file system
-    if ((mapping->addr = (char *)mmap(0, fsize, PROT_WRITE | PROT_READ, MAP_ANONYMOUS | MAP_SHARED, fd, 0)) == MAP_FAILED)
+    if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
     {
         perror("mmap");
         exit(1);
