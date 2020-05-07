@@ -8,6 +8,14 @@
 #include <time.h>
 #include <errno.h>
 
+/*
+ *
+ * Engine that will continuously, for the given number of iterations mmap
+ * and unmap a file, of given size, and measure the latency of the mmap
+ * call. Possible options are regular file on any mounted file system and
+ * MAP_ANONYMOUS, for no file backing. Each one can be run with or without
+ * MAP_POPULATE, to pre populate pages
+ */
 void mmap_lat_engine(Mapping *mapping, Arguments *args, Results *results)
 {
     uint64_t acc_usec = 0;
