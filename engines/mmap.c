@@ -196,7 +196,7 @@ void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
 void mmap_prepare_mapping(Mapping *mapping, Arguments args)
 {
     if (args.map_anon)
-        mmap_prepare_map_anon(mapping, args.fsize);
+        mmap_prepare_map_anon(mapping, args);
     else
     {
         int fd;
@@ -209,7 +209,12 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
         // Init file manually in case fle is on DAX-fs, where truncate init isn't enough
         mmap_init_file(fd, args.fsize, args.buflen);
 
-        if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0)) == MAP_FAILED)
+        int flags;
+        if (args.map_pop)
+            flags = MAP_SHARED | MAP_POPULATE;
+        else
+            flags = MAP_SHARED;
+        if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
         {
             perror("mmap");
             close(fd);
@@ -227,10 +232,16 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
 }
 
 // Mapping is anonymous
-void mmap_prepare_map_anon(Mapping *mapping, uint64_t fsize)
+void mmap_prepare_map_anon(Mapping *mapping, Arguments args)
 {
+    int flags;
+    if (args.map_pop)
+        flags = MAP_ANONYMOUS | MAP_SHARED | MAP_POPULATE;
+    else
+        flags = MAP_ANONYMOUS | MAP_SHARED;
+
     // MAP_ANONYMOUS not backed by file on file system
-    if ((mapping->addr = (char *)mmap(0, fsize, PROT_WRITE | PROT_READ, MAP_ANONYMOUS | MAP_SHARED | MAP_POPULATE, -1, 0)) == MAP_FAILED)
+    if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, flags, -1, 0)) == MAP_FAILED)
     {
         perror("mmap");
         exit(1);
@@ -238,7 +249,7 @@ void mmap_prepare_map_anon(Mapping *mapping, uint64_t fsize)
 
     mapping->is_pmem = 0;
     mapping->map_anon = 1;
-    mapping->fsize = fsize;
+    mapping->fsize = args.fsize;
     mmap_init_mem(mapping);
 }
 
