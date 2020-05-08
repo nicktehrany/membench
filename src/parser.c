@@ -238,14 +238,11 @@ void set_iter(char *token, Arguments *args)
 
     char *unit = temp + strlen(temp) - 1;
     int multiplier = 1;
-    char K = 'K', M = 'M', G = 'G';
+    char K = 'K', M = 'M';
     if (*unit == K)
         multiplier = 1000;
     else if (*unit == M)
         multiplier = 1000 * 1000;
-
-    else if (*unit == G)
-        multiplier = 1000 * 1000 * 1000;
 
     char *ptr;
     args->iterations = strtoul(temp + 6, &ptr, 10) * multiplier;

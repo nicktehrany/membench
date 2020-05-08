@@ -5,7 +5,7 @@
 // Summarize all Arguments and Results in a file
 void dump_results(Results results, Arguments args)
 {
-    FILE *fd = fopen("results.out", "rw");
+    FILE *fd = fopen("results.out", "w+");
     if (fd == NULL)
     {
         perror("Failed opening results.out file. Delete it or run as sudo!");
@@ -41,7 +41,7 @@ void dump_results(Results results, Arguments args)
         results_mmap_eng(args, fd, results);
     else if (args.engine == 1)
         results_mmap_lat_eng(args, fd, results);
-    display_results(fd);
+    // display_results(fd); TODO IMPLEMENT FULLY
     fclose(fd);
 }
 
@@ -96,6 +96,15 @@ void results_mmap_eng(Arguments args, FILE *fd, Results results)
 
 void results_mmap_lat_eng(Arguments args, FILE *fd, Results results)
 {
+    switch (args.map_pop)
+    {
+    case 1:
+        fprintf(fd, "MAP_POPULATE\t\t\tYes\n");
+        break;
+    default:
+        fprintf(fd, "MAP_POPULATE\t\t\tNo\n");
+        break;
+    }
     fprintf(fd, "Iterations\t\t\t\t%ld\n", args.iterations);
     fprintf(fd, "Minimum latency\t\t\t%f usec\n", results.min_lat);
     fprintf(fd, "Maximum latency\t\t\t%f usec\n", results.max_lat);
