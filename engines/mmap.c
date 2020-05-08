@@ -43,11 +43,13 @@ void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
     while (elapsed < args->runtime)
     {
         // Read all blocks from mapped area, start over
-        if (index_counter == max_ind)
+        if (index_counter == max_ind || args->iterations == counter)
         {
             end = clock();
             elapsed = (end - start) / CLOCKS_PER_SEC;
             index_counter = 0;
+            if (args->iterations == counter)
+                break;
         }
 
         memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
@@ -83,11 +85,13 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
 
     while (elapsed < args->runtime)
     {
-        if (index_counter == max_ind)
+        if (index_counter == max_ind || args->iterations == counter)
         {
             end = clock();
             elapsed = (end - start) / CLOCKS_PER_SEC;
             index_counter = 0;
+            if (args->iterations == counter)
+                break;
         }
 
         memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
@@ -124,11 +128,13 @@ void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
 
     while (elapsed < args->runtime)
     {
-        if (index_counter == max_ind)
+        if (index_counter == max_ind || args->iterations == counter)
         {
             end = clock();
             elapsed = (end - start) / CLOCKS_PER_SEC;
             index_counter = 0;
+            if (args->iterations == counter)
+                break;
         }
 
         memcpy(block_index[index_counter], src, mapping->buflen * sizeof(char));
@@ -165,11 +171,13 @@ void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
 
     while (elapsed < args->runtime)
     {
-        if (index_counter == max_ind)
+        if (index_counter == max_ind || args->iterations == counter)
         {
             index_counter = 0;
             end = clock();
             elapsed = (end - start) / CLOCKS_PER_SEC;
+            if (args->iterations == counter)
+                break;
         }
 
         memcpy(block_index[index_counter], src, mapping->buflen * sizeof(char));
