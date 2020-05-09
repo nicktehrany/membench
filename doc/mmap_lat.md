@@ -6,7 +6,7 @@ This Engine is meant to measure the latencies of mmap calls. It achieves this by
 
 ## Usage
 
-The engine takes several commands, which can be provided via cmd line or a file. Specify to run this engine as shown in the possible flags below. It's possible to run mmap on any mount location, as well as using MAP_ANONYMOUS. It's also possible to measure the latency of mmap with MAP_POPULATE as a flag. Usage of these flags is shown below.
+The engine takes several commands, which can be provided via cmd line or a file. Specify to run this engine as shown in the possible flags below. It's possible to run mmap on any mount location, as well as using MAP_ANONYMOUS. It's also possible to measure the latency of mmap with MAP_POPULATE as a flag. Usage of these flags is shown below. If no directory is specified in the flag, the current directory will be used.
 
 ## Possible Flags
 
