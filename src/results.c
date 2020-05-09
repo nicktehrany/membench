@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "results.h"
@@ -13,7 +12,6 @@ void dump_results(Results results, Arguments args)
         exit(1);
     }
     fprintf(fd, "\t\t==== SUMMARY ====\n");
-    fprintf(fd, "Runtime\t\t\t\t\t%ld sec\n", args.runtime);
     if (strcmp(args.path, "file") == 0)
         fprintf(fd, "Directory\t\t\t\tCurrent Directory\n");
     else
@@ -25,7 +23,7 @@ void dump_results(Results results, Arguments args)
         fprintf(fd, "Engine\t\t\t\t\tmmap\n");
         break;
     case 1:
-        fprintf(fd, "Engine\t\t\t\t\tpmem\n");
+        fprintf(fd, "Engine\t\t\t\t\tmmap_lat\n");
         break;
     }
 
@@ -38,6 +36,27 @@ void dump_results(Results results, Arguments args)
         fprintf(fd, "MAP_ANONYMOUS\t\t\tNo\n");
         break;
     }
+
+    if (args.engine == 0)
+        results_mmap_eng(args, fd, results);
+    else if (args.engine == 1)
+        results_mmap_lat_eng(args, fd, results);
+    // display_results(fd); TODO IMPLEMENT FULLY
+    fclose(fd);
+}
+
+void display_results(FILE *fp)
+{
+    char buff[255];
+    while (fgets(buff, 255, (FILE *)fp))
+    {
+        printf("%s", buff);
+    }
+}
+
+void results_mmap_eng(Arguments args, FILE *fd, Results results)
+{
+    fprintf(fd, "Runtime\t\t\t\t\t%ld sec\n", args.runtime);
     if (args.fsize >= (1024 * 1024 * 1024))
         fprintf(fd, "File Size\t\t\t\t%ld GiB\n", args.fsize / (1024 * 1024 * 1024));
     else if (args.fsize >= (1024 * 1024))
@@ -73,5 +92,21 @@ void dump_results(Results results, Arguments args)
     }
 
     fprintf(fd, "I/O Data\t\t\t\t%f GiB\n", results.io_data);
-    fclose(fd);
+}
+
+void results_mmap_lat_eng(Arguments args, FILE *fd, Results results)
+{
+    switch (args.map_pop)
+    {
+    case 1:
+        fprintf(fd, "MAP_POPULATE\t\t\tYes\n");
+        break;
+    default:
+        fprintf(fd, "MAP_POPULATE\t\t\tNo\n");
+        break;
+    }
+    fprintf(fd, "Iterations\t\t\t\t%ld\n", args.iterations);
+    fprintf(fd, "Minimum latency\t\t\t%f usec\n", results.min_lat);
+    fprintf(fd, "Maximum latency\t\t\t%f usec\n", results.max_lat);
+    fprintf(fd, "Average latency\t\t\t%f usec\n", results.avg_lat);
 }

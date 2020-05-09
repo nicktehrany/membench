@@ -27,7 +27,6 @@ void parse(Arguments *args, int argc, char **argv)
         tokens[i] = argv[i + 1];
     }
     parse_cmd_line(args, tokens, argc - 1);
-    check_args(args);
 }
 
 void parse_cmd_line(Arguments *args, char *tokens[], int size)
@@ -46,6 +45,10 @@ void parse_cmd_line(Arguments *args, char *tokens[], int size)
             set_mode(tokens[i], args);
         else if (strncmp(tokens[i], "-engine=", 8) == 0)
             set_engine(tokens[i], args);
+        else if (strncmp(tokens[i], "-iter=", 6) == 0)
+            set_iter(tokens[i], args);
+        else if (strncmp(tokens[i], "-map_pop=", 9) == 0)
+            set_map_pop(tokens[i], args);
         else
         {
             printf("Unknow command %s\n", tokens[i]);
@@ -92,11 +95,15 @@ void display_help()
     printf("Possible commands are:\n");
     printf("-file=\t\tProvide an input file with commands as shown in examples\n");
     printf("-runtime=\tSet runtime seconds\n");
-    printf("-fsize=\tSet file size (For example 2M for 2MiB file)\n");
+    printf("-fsize=\t\tSet file size (For example 2M for 2MiB file)\n");
     printf("-copysize=\tSet copy size for memcpy (For example 4K for 4KiB)\n");
     printf("-dir=\t\tPath to directory to use (/dev/null or /dev/zero for MAP_ANONYMOUS, current if none specified)\n");
     printf("-mode=\t\tPossible modes are: read write randread randwrite (Default read)\n");
-    printf("-engine=\tPossible engines are mmap and pmem (Default mmap)\n");
+    printf("-engine=\tPossible engines are mmap and mmap_lat (Default mmap)\n");
+    printf("-iter=\t\tNumber of iterations to mmap for mmap_lat engine\n");
+    printf("-map_pop=\t0|1 to pass MAP_POPULATE to mmap for mmap_lat engine\n");
+    printf("\nFor usage of engine specific commands consult the documentation\n");
+    printf("Commands invalid for engine will be disregarded\n");
     exit(0);
 }
 
@@ -225,31 +232,37 @@ void set_engine(char *token, Arguments *args)
     }
 }
 
-// Checking args that all engines have in common
-void check_args(Arguments *args)
+void set_iter(char *token, Arguments *args)
 {
-    if (args->buflen <= 0 || args->fsize <= 0)
+    char *temp = token;
+
+    char *unit = temp + strlen(temp) - 1;
+    int multiplier = 1;
+    char K = 'K', M = 'M';
+    if (*unit == K)
+        multiplier = 1000;
+    else if (*unit == M)
+        multiplier = 1000 * 1000;
+
+    char *ptr;
+    args->iterations = strtoul(temp + 6, &ptr, 10) * multiplier;
+    if (args->iterations < 1)
     {
         errno = EINVAL;
-        perror("Invalid or missing file or copy size");
+        perror("Invalid Iterations. Needs to be at least 1");
         exit(1);
     }
-    if (args->runtime < 1)
+}
+
+void set_map_pop(char *token, Arguments *args)
+{
+    char *temp = token;
+    char *ptr;
+    args->map_pop = strtoul(temp + 9, &ptr, 10);
+    if (args->map_pop > 1 || args->map_pop < 0)
     {
         errno = EINVAL;
-        perror("Runtime should be greater than 1sec");
-        exit(1);
-    }
-    if (args->buflen > args->fsize)
-    {
-        errno = EINVAL;
-        perror("Copy size can't be larger than file size");
-        exit(1);
-    }
-    if (args->fsize % args->buflen != 0)
-    {
-        errno = EINVAL;
-        perror("Not aligned file size and copy size");
+        perror("Invalid value for map_pop. Needs to be 0|1");
         exit(1);
     }
 }

@@ -12,10 +12,11 @@ typedef struct Arguments
     int mode;     //0=read 1=write 2=randread 3=randwrite
     int map_anon; // Mapping without backing of file on file system
     int engine;   // Default mmap engine
+    uint64_t iterations;
+    int map_pop;
 } Arguments;
 
 void parse(Arguments *, int, char **);
-void check_args(Arguments *);
 void display_help();
 void parse_cmd_line(Arguments *, char *[], int);
 int parse_file(char *, char *[]);
@@ -25,4 +26,6 @@ void set_buflen(char *, Arguments *);
 void set_path(char *, Arguments *);
 void set_mode(char *, Arguments *);
 void set_engine(char *, Arguments *);
+void set_iter(char *token, Arguments *args);
+void set_map_pop(char *token, Arguments *args);
 #endif
