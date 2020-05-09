@@ -48,7 +48,7 @@ void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
             end = clock();
             elapsed = (end - start) / CLOCKS_PER_SEC;
             index_counter = 0;
-            if (args->iterations == counter)
+            if (args->iterations != 0 && args->iterations == counter)
                 break;
         }
 
@@ -90,7 +90,7 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
             end = clock();
             elapsed = (end - start) / CLOCKS_PER_SEC;
             index_counter = 0;
-            if (args->iterations == counter)
+            if (args->iterations != 0 && args->iterations == counter)
                 break;
         }
 
@@ -133,7 +133,7 @@ void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
             end = clock();
             elapsed = (end - start) / CLOCKS_PER_SEC;
             index_counter = 0;
-            if (args->iterations == counter)
+            if (args->iterations != 0 && args->iterations == counter)
                 break;
         }
 
@@ -176,7 +176,7 @@ void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
             index_counter = 0;
             end = clock();
             elapsed = (end - start) / CLOCKS_PER_SEC;
-            if (args->iterations == counter)
+            if (args->iterations != 0 && args->iterations == counter)
                 break;
         }
 
