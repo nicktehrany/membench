@@ -13,8 +13,8 @@
  * Engine that uses mmap to map files into memory and then measures throughput by 
  * reading/writing from and to it using memcpy. Possible file options are a usual
  * file from any mounted file system, MAP_ANONYMOUS for no file backing.
- * Engine will create and delete files of specified sizes (which can take longer for 
- * large files)
+ * Engine will create and delete a file of the specified sizes (which can take longer 
+ * for large files)
 */
 void mmap_engine(Mapping *mapping, Arguments *args, Results *results)
 {
@@ -250,7 +250,9 @@ void mmap_prepare_map_anon(Mapping *mapping, Arguments args)
     mapping->is_pmem = 0;
     mapping->map_anon = 1;
     mapping->fsize = args.fsize;
-    mmap_init_mem(mapping);
+
+    if (args.init_mem)
+        mmap_init_mem(mapping);
 }
 
 void mmap_cleanup_mapping(Mapping *mapping)
