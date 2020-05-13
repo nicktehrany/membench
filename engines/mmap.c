@@ -28,39 +28,42 @@ void mmap_engine(Mapping *mapping, Arguments *args, Results *results)
 void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
 {
     uint64_t counter = 0;
-    uint64_t elapsed = 0;
     uint64_t index_counter = 0;
     uint64_t max_ind = mapping->fsize / mapping->buflen;
+    long double secs_elapsed = 0;
     unsigned char *dest = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
     char **block_index = (char **)malloc(max_ind * sizeof(char *));
 
     for (uint64_t i = 0; i < max_ind; i++)
         block_index[i] = (char *)(mapping->addr + (mapping->buflen * i));
 
-    clock_t start = clock();
-    clock_t end = clock();
+    struct timespec tstart = {0, 0}, tend = {0, 0};
 
-    while (elapsed < args->runtime)
+    while (secs_elapsed < args->runtime)
     {
         // Read all blocks from mapped area, start over
         if (index_counter == max_ind || args->iterations == counter)
         {
-            end = clock();
-            elapsed = (end - start) / CLOCKS_PER_SEC;
             index_counter = 0;
             if (args->iterations != 0 && args->iterations == counter)
                 break;
         }
 
+        clock_gettime(CLOCK_MONOTONIC, &tstart);
         memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
+        clock_gettime(CLOCK_MONOTONIC, &tend);
+
+        secs_elapsed += ((double)tend.tv_sec + 1.0e-9 * tend.tv_nsec) -
+                        ((double)tstart.tv_sec + 1.0e-9 * tstart.tv_nsec);
+
         index_counter++;
         counter++;
     }
 
-    get_bandwidth(counter, elapsed, mapping->buflen, results);
+    get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
 
-    // In case runtime deviated from desired runtime (unlikely but possible one larger files)
-    args->runtime = elapsed;
+    // In case runtime deviated from desired runtime (unlikely but possible on very large memcpy)
+    args->runtime = secs_elapsed;
     free(dest);
     dest = NULL;
     free(block_index);
@@ -346,6 +349,8 @@ void mmap_init_file(int fd, int fsize, int buflen)
     int factor = 32768;
     if (buflen > factor)
         factor = buflen;
+    if (fsize < factor)
+        factor = fsize;
 
     // Since file size has to be multiple of buflen
     unsigned char *buf = (unsigned char *)malloc(factor * sizeof(char));
@@ -362,6 +367,8 @@ void mmap_init_file(int fd, int fsize, int buflen)
             exit(1);
         }
     }
+    // Make sure data is written back to fs
+    fsync(fd);
     free(buf);
     buf = NULL;
 }
