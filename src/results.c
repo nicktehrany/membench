@@ -106,7 +106,16 @@ void results_mmap_lat_eng(Arguments args, FILE *fd, Results results)
         break;
     }
     fprintf(fd, "Iterations\t\t\t\t%ld\n", args.iterations);
-    fprintf(fd, "Minimum latency\t\t\t%f usec\n", results.min_lat);
-    fprintf(fd, "Maximum latency\t\t\t%f usec\n", results.max_lat);
-    fprintf(fd, "Average latency\t\t\t%f usec\n", results.avg_lat);
+    if (results.min_lat < 1000)
+        fprintf(fd, "Minimum latency\t\t\t%f nsec\n", results.min_lat);
+    else
+        fprintf(fd, "Minimum latency\t\t\t%f usec\n", results.min_lat / 1000.0);
+    if (results.max_lat < 1000)
+        fprintf(fd, "Maximum latency\t\t\t%f nsec\n", results.max_lat);
+    else
+        fprintf(fd, "Maximum latency\t\t\t%f usec\n", results.max_lat / 1000.0);
+    if (results.avg_lat < 1000)
+        fprintf(fd, "Average latency\t\t\t%f nsec\n", results.avg_lat);
+    else
+        fprintf(fd, "Average latency\t\t\t%f usec\n", results.avg_lat / 1000.0);
 }

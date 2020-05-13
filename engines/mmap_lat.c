@@ -71,9 +71,10 @@ int mmap_lat_prep_file(Arguments args)
 
 uint64_t mmap_lat_do_mmap(Mapping *mapping, Arguments args, int fd)
 {
-    double elapsed = 0.0;
+    uint64_t nsecs_elapsed = 0;
+    struct timespec tstart = {0, 0}, tend = {0, 0};
     if (args.map_anon)
-        elapsed = mmap_lat_do_mmap_anon(mapping, args, fd);
+        nsecs_elapsed = mmap_lat_do_mmap_anon(mapping, args, fd);
     else
     {
         int flags;
@@ -81,7 +82,7 @@ uint64_t mmap_lat_do_mmap(Mapping *mapping, Arguments args, int fd)
             flags = MAP_SHARED | MAP_POPULATE;
         else
             flags = MAP_SHARED;
-        clock_t start = clock();
+        clock_gettime(CLOCK_MONOTONIC, &tstart);
         if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
         {
             perror("mmap");
@@ -89,30 +90,36 @@ uint64_t mmap_lat_do_mmap(Mapping *mapping, Arguments args, int fd)
             remove(args.path);
             exit(1);
         }
-        clock_t end = clock();
-        elapsed = (double)end - (double)start;
+        clock_gettime(CLOCK_MONOTONIC, &tend);
+        nsecs_elapsed = tend.tv_nsec - tstart.tv_nsec;
     }
-    return elapsed;
+    return nsecs_elapsed;
 }
 
 // Mapping is anonymous
 uint64_t mmap_lat_do_mmap_anon(Mapping *mapping, Arguments args, int fd)
 {
     int flags;
+    uint64_t nsecs_elapsed = 0;
+    struct timespec tstart = {0, 0}, tend = {0, 0};
+
     if (args.map_pop)
         flags = MAP_ANONYMOUS | MAP_SHARED | MAP_POPULATE;
     else
         flags = MAP_ANONYMOUS | MAP_SHARED;
-    clock_t start = clock();
+
+    clock_gettime(CLOCK_MONOTONIC, &tstart);
+
     // MAP_ANONYMOUS not backed by file on file system
     if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
     {
         perror("mmap");
         exit(1);
     }
-    clock_t end = clock();
+    clock_gettime(CLOCK_MONOTONIC, &tend);
+    nsecs_elapsed = tend.tv_nsec - tstart.tv_nsec;
 
-    return ((double)end - (double)start);
+    return nsecs_elapsed;
 }
 
 void mmap_lat_do_unmap(Mapping *mapping)
