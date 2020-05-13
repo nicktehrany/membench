@@ -12,5 +12,5 @@ typedef struct Mapping
     const char *fpath;
 } Mapping;
 
-void get_bandwidth(uint64_t, int, uint64_t, Results *);
+void get_bandwidth(uint64_t, long double, uint64_t, Results *);
 #endif

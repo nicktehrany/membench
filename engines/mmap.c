@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <errno.h>
+#define NANS_CONV 1.0e-9
 
 /*
  *
@@ -53,9 +54,8 @@ void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
         memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
         clock_gettime(CLOCK_MONOTONIC, &tend);
 
-        secs_elapsed += ((double)tend.tv_sec + 1.0e-9 * tend.tv_nsec) -
-                        ((double)tstart.tv_sec + 1.0e-9 * tstart.tv_nsec);
-
+        secs_elapsed += ((double)tend.tv_sec + NANS_CONV * tend.tv_nsec) -
+                        ((double)tstart.tv_sec + NANS_CONV * tstart.tv_nsec);
         index_counter++;
         counter++;
     }
@@ -74,7 +74,7 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
 {
     uint64_t counter = 0;
     uint64_t index_counter = 0;
-    uint64_t elapsed = 0;
+    long double secs_elapsed = 0;
     unsigned char *dest = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
     uint64_t max_ind = mapping->fsize / mapping->buflen;
     char **block_index = (char **)malloc(max_ind * sizeof(char *));
@@ -83,27 +83,29 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
     for (uint64_t i = 0; i < max_ind; i++)
         block_index[i] = (char *)(mapping->addr + (mapping->buflen * (rand() % max_ind)));
 
-    clock_t start = clock();
-    clock_t end = clock();
+    struct timespec tstart = {0, 0}, tend = {0, 0};
 
-    while (elapsed < args->runtime)
+    while (secs_elapsed < args->runtime)
     {
         if (index_counter == max_ind || args->iterations == counter)
         {
-            end = clock();
-            elapsed = (end - start) / CLOCKS_PER_SEC;
             index_counter = 0;
             if (args->iterations != 0 && args->iterations == counter)
                 break;
         }
 
+        clock_gettime(CLOCK_MONOTONIC, &tstart);
         memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
+        clock_gettime(CLOCK_MONOTONIC, &tend);
+
+        secs_elapsed += ((double)tend.tv_sec + NANS_CONV * tend.tv_nsec) -
+                        ((double)tstart.tv_sec + NANS_CONV * tstart.tv_nsec);
         index_counter++;
         counter++;
     }
 
-    get_bandwidth(counter, elapsed, mapping->buflen, results);
-    args->runtime = elapsed;
+    get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
+    args->runtime = secs_elapsed;
     free(dest);
     dest = NULL;
     free(block_index);
@@ -113,7 +115,7 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
 void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
 {
     uint64_t counter = 0;
-    uint64_t elapsed = 0;
+    long double secs_elapsed = 0;
     unsigned char *src = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
     uint64_t index_counter = 0;
     uint64_t max_ind = mapping->fsize / mapping->buflen;
@@ -126,27 +128,29 @@ void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
     for (uint64_t i = 0; i < mapping->buflen; i++)
         src[i] = rand() % 256;
 
-    clock_t start = clock();
-    clock_t end = clock();
+    struct timespec tstart = {0, 0}, tend = {0, 0};
 
-    while (elapsed < args->runtime)
+    while (secs_elapsed < args->runtime)
     {
         if (index_counter == max_ind || args->iterations == counter)
         {
-            end = clock();
-            elapsed = (end - start) / CLOCKS_PER_SEC;
             index_counter = 0;
             if (args->iterations != 0 && args->iterations == counter)
                 break;
         }
 
+        clock_gettime(CLOCK_MONOTONIC, &tstart);
         memcpy(block_index[index_counter], src, mapping->buflen * sizeof(char));
+        clock_gettime(CLOCK_MONOTONIC, &tend);
+
+        secs_elapsed += ((double)tend.tv_sec + NANS_CONV * tend.tv_nsec) -
+                        ((double)tstart.tv_sec + NANS_CONV * tstart.tv_nsec);
         index_counter++;
         counter++;
     }
 
-    get_bandwidth(counter, elapsed, mapping->buflen, results);
-    args->runtime = elapsed;
+    get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
+    args->runtime = secs_elapsed;
     free(src);
     src = NULL;
     free(block_index);
@@ -157,7 +161,7 @@ void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
 {
     uint64_t counter = 0;
     uint64_t index_counter = 0;
-    uint64_t elapsed = 0;
+    long double secs_elapsed = 0;
     unsigned char *src = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
     uint64_t max_ind = mapping->fsize / mapping->buflen;
     char **block_index = (char **)malloc(max_ind * sizeof(char *));
@@ -169,27 +173,29 @@ void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
     for (uint64_t i = 0; i < mapping->buflen; i++)
         src[i] = rand() % 256;
 
-    clock_t start = clock();
-    clock_t end = clock();
+    struct timespec tstart = {0, 0}, tend = {0, 0};
 
-    while (elapsed < args->runtime)
+    while (secs_elapsed < args->runtime)
     {
         if (index_counter == max_ind || args->iterations == counter)
         {
             index_counter = 0;
-            end = clock();
-            elapsed = (end - start) / CLOCKS_PER_SEC;
             if (args->iterations != 0 && args->iterations == counter)
                 break;
         }
 
+        clock_gettime(CLOCK_MONOTONIC, &tstart);
         memcpy(block_index[index_counter], src, mapping->buflen * sizeof(char));
+        clock_gettime(CLOCK_MONOTONIC, &tend);
+
+        secs_elapsed += ((double)tend.tv_sec + NANS_CONV * tend.tv_nsec) -
+                        ((double)tstart.tv_sec + NANS_CONV * tstart.tv_nsec);
         index_counter++;
         counter++;
     }
 
-    get_bandwidth(counter, elapsed, mapping->buflen, results);
-    args->runtime = elapsed;
+    get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
+    args->runtime = secs_elapsed;
     free(src);
     src = NULL;
     free(block_index);
@@ -346,6 +352,7 @@ void mmap_check_args(Arguments *args)
 */
 void mmap_init_file(int fd, int fsize, int buflen)
 {
+    // TODO Some smarter way of init for very large files
     int factor = 32768;
     if (buflen > factor)
         factor = buflen;
