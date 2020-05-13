@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <time.h>
 #include <errno.h>
+#define NANS_TO_SECS 1.0e-9
+#define SECS_TO_NANS 1.0e9
 
 /*
  *
@@ -18,9 +20,9 @@
  */
 void mmap_lat_engine(Mapping *mapping, Arguments *args, Results *results)
 {
-    uint64_t acc_usec = 0;
+    uint64_t acc_nsecs = 0;
     int fd = 0;
-    uint64_t value = 0;
+    uint64_t latency = 0;
 
     mmap_lat_check_args(args);
     fd = mmap_lat_prep_file(*args);
@@ -30,17 +32,14 @@ void mmap_lat_engine(Mapping *mapping, Arguments *args, Results *results)
 
     for (uint64_t i = 0; i < args->iterations; i++)
     {
-        value = mmap_lat_do_mmap(mapping, *args, fd);
-        if (value > results->max_lat)
-            results->max_lat = value;
-        if (value < results->min_lat || results->min_lat == 0)
-            results->min_lat = value;
-        acc_usec += value;
+        latency = mmap_lat_do_mmap(mapping, *args, fd);
+        add_latency(latency, results);
+        acc_nsecs += latency;
         mmap_lat_do_unmap(mapping);
     }
 
     mmap_lat_cleanup_file(mapping, fd);
-    results->avg_lat = (double)acc_usec / (double)args->iterations;
+    results->avg_lat = (double)acc_nsecs / (double)args->iterations;
     dump_results(*results, *args);
 }
 
@@ -91,7 +90,7 @@ uint64_t mmap_lat_do_mmap(Mapping *mapping, Arguments args, int fd)
             exit(1);
         }
         clock_gettime(CLOCK_MONOTONIC, &tend);
-        nsecs_elapsed = tend.tv_nsec - tstart.tv_nsec;
+        nsecs_elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
     }
     return nsecs_elapsed;
 }
@@ -117,7 +116,7 @@ uint64_t mmap_lat_do_mmap_anon(Mapping *mapping, Arguments args, int fd)
         exit(1);
     }
     clock_gettime(CLOCK_MONOTONIC, &tend);
-    nsecs_elapsed = tend.tv_nsec - tstart.tv_nsec;
+    nsecs_elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
 
     return nsecs_elapsed;
 }

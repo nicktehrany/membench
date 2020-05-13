@@ -81,7 +81,7 @@ void results_mmap_eng(Arguments args, FILE *fd, Results results)
         fprintf(fd, "Sequential Read\t\t\t%f GiB/s\n", results.bandwidth / 1024);
         break;
     case 1:
-        fprintf(fd, "Sequential Write\t\t\t%f GiB/s\n", results.bandwidth / 1024);
+        fprintf(fd, "Sequential Write\t\t%f GiB/s\n", results.bandwidth / 1024);
         break;
     case 2:
         fprintf(fd, "Random Read\t\t\t%f GiB/s\n", results.bandwidth / 1024);
@@ -92,6 +92,18 @@ void results_mmap_eng(Arguments args, FILE *fd, Results results)
     }
 
     fprintf(fd, "I/O Data\t\t\t\t%f GiB\n", results.io_data);
+    if (results.min_lat < 1000.0)
+        fprintf(fd, "Minimum latency\t\t\t%.0f nsec\n", results.min_lat);
+    else
+        fprintf(fd, "Minimum latency\t\t\t%f usec\n", results.min_lat / 1000.0);
+    if (results.max_lat < 1000.0)
+        fprintf(fd, "Maximum latency\t\t\t%.0f nsec\n", results.max_lat);
+    else
+        fprintf(fd, "Maximum latency\t\t\t%f usec\n", results.max_lat / 1000.0);
+    if (results.avg_lat < 1000.0)
+        fprintf(fd, "Average latency\t\t\t%.0f nsec\n", results.avg_lat);
+    else
+        fprintf(fd, "Average latency\t\t\t%f usec\n", results.avg_lat / 1000.0);
 }
 
 void results_mmap_lat_eng(Arguments args, FILE *fd, Results results)
@@ -106,16 +118,16 @@ void results_mmap_lat_eng(Arguments args, FILE *fd, Results results)
         break;
     }
     fprintf(fd, "Iterations\t\t\t\t%ld\n", args.iterations);
-    if (results.min_lat < 1000)
-        fprintf(fd, "Minimum latency\t\t\t%f nsec\n", results.min_lat);
+    if (results.min_lat < 1000.0)
+        fprintf(fd, "Minimum latency\t\t\t%.0f nsec\n", results.min_lat);
     else
         fprintf(fd, "Minimum latency\t\t\t%f usec\n", results.min_lat / 1000.0);
-    if (results.max_lat < 1000)
-        fprintf(fd, "Maximum latency\t\t\t%f nsec\n", results.max_lat);
+    if (results.max_lat < 1000.0)
+        fprintf(fd, "Maximum latency\t\t\t%.0f nsec\n", results.max_lat);
     else
         fprintf(fd, "Maximum latency\t\t\t%f usec\n", results.max_lat / 1000.0);
-    if (results.avg_lat < 1000)
-        fprintf(fd, "Average latency\t\t\t%f nsec\n", results.avg_lat);
+    if (results.avg_lat < 1000.0)
+        fprintf(fd, "Average latency\t\t\t%.0f nsec\n", results.avg_lat);
     else
         fprintf(fd, "Average latency\t\t\t%f usec\n", results.avg_lat / 1000.0);
 }

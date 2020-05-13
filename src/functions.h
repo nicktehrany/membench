@@ -13,4 +13,6 @@ typedef struct Mapping
 } Mapping;
 
 void get_bandwidth(uint64_t, long double, uint64_t, Results *);
+void add_latency(uint64_t latency, Results *results);
+
 #endif

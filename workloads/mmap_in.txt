@@ -1,0 +1,7 @@
+-runtime=2
+-dir=/mnt/mem
+-fsize=256M
+-copysize=4K
+-mode=write
+-engine=mmap
+-init_mem=0

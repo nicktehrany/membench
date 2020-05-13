@@ -7,7 +7,8 @@
 #include <stdio.h>
 #include <time.h>
 #include <errno.h>
-#define NANS_CONV 1.0e-9
+#define NANS_TO_SECS 1.0e-9
+#define SECS_TO_NANS 1.0e9
 
 /*
  *
@@ -28,8 +29,7 @@ void mmap_engine(Mapping *mapping, Arguments *args, Results *results)
 
 void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
 {
-    uint64_t counter = 0;
-    uint64_t index_counter = 0;
+    uint64_t counter = 0, index_counter = 0, elapsed = 0;
     uint64_t max_ind = mapping->fsize / mapping->buflen;
     long double secs_elapsed = 0;
     unsigned char *dest = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
@@ -53,14 +53,16 @@ void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
         clock_gettime(CLOCK_MONOTONIC, &tstart);
         memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
         clock_gettime(CLOCK_MONOTONIC, &tend);
+        elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
+        add_latency(elapsed, results);
 
-        secs_elapsed += ((double)tend.tv_sec + NANS_CONV * tend.tv_nsec) -
-                        ((double)tstart.tv_sec + NANS_CONV * tstart.tv_nsec);
+        secs_elapsed += ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
+                        ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec);
         index_counter++;
         counter++;
     }
-
     get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
+    results->avg_lat = (secs_elapsed * SECS_TO_NANS) / counter;
 
     // In case runtime deviated from desired runtime (unlikely but possible on very large memcpy)
     args->runtime = secs_elapsed;
@@ -72,8 +74,7 @@ void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
 
 void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
 {
-    uint64_t counter = 0;
-    uint64_t index_counter = 0;
+    uint64_t counter = 0, index_counter = 0, elapsed = 0;
     long double secs_elapsed = 0;
     unsigned char *dest = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
     uint64_t max_ind = mapping->fsize / mapping->buflen;
@@ -97,15 +98,19 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
         clock_gettime(CLOCK_MONOTONIC, &tstart);
         memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
         clock_gettime(CLOCK_MONOTONIC, &tend);
+        elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
+        add_latency(elapsed, results);
 
-        secs_elapsed += ((double)tend.tv_sec + NANS_CONV * tend.tv_nsec) -
-                        ((double)tstart.tv_sec + NANS_CONV * tstart.tv_nsec);
+        secs_elapsed += ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
+                        ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec);
         index_counter++;
         counter++;
     }
 
     get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
+    results->avg_lat = (secs_elapsed * SECS_TO_NANS) / counter;
     args->runtime = secs_elapsed;
+
     free(dest);
     dest = NULL;
     free(block_index);
@@ -114,7 +119,7 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
 
 void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
 {
-    uint64_t counter = 0;
+    uint64_t counter = 0, elapsed = 0;
     long double secs_elapsed = 0;
     unsigned char *src = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
     uint64_t index_counter = 0;
@@ -142,15 +147,19 @@ void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
         clock_gettime(CLOCK_MONOTONIC, &tstart);
         memcpy(block_index[index_counter], src, mapping->buflen * sizeof(char));
         clock_gettime(CLOCK_MONOTONIC, &tend);
+        elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
+        add_latency(elapsed, results);
 
-        secs_elapsed += ((double)tend.tv_sec + NANS_CONV * tend.tv_nsec) -
-                        ((double)tstart.tv_sec + NANS_CONV * tstart.tv_nsec);
+        secs_elapsed += ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
+                        ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec);
         index_counter++;
         counter++;
     }
 
     get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
+    results->avg_lat = (secs_elapsed * SECS_TO_NANS) / (double)counter;
     args->runtime = secs_elapsed;
+
     free(src);
     src = NULL;
     free(block_index);
@@ -159,8 +168,7 @@ void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
 
 void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
 {
-    uint64_t counter = 0;
-    uint64_t index_counter = 0;
+    uint64_t counter = 0, index_counter = 0, elapsed = 0;
     long double secs_elapsed = 0;
     unsigned char *src = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
     uint64_t max_ind = mapping->fsize / mapping->buflen;
@@ -187,15 +195,19 @@ void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
         clock_gettime(CLOCK_MONOTONIC, &tstart);
         memcpy(block_index[index_counter], src, mapping->buflen * sizeof(char));
         clock_gettime(CLOCK_MONOTONIC, &tend);
+        elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
+        add_latency(elapsed, results);
 
-        secs_elapsed += ((double)tend.tv_sec + NANS_CONV * tend.tv_nsec) -
-                        ((double)tstart.tv_sec + NANS_CONV * tstart.tv_nsec);
+        secs_elapsed += ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
+                        ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec);
         index_counter++;
         counter++;
     }
 
     get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
+    results->avg_lat = (secs_elapsed * SECS_TO_NANS) / counter;
     args->runtime = secs_elapsed;
+
     free(src);
     src = NULL;
     free(block_index);
