@@ -27,33 +27,35 @@ void dump_results(Results results, Arguments args)
         break;
     }
 
+    fprintf(fd, "Flags\t\t\t\t\t");
     switch (args.map_anon)
     {
     case 1:
-        fprintf(fd, "MAP_ANONYMOUS\t\t\tYes\n");
+        fprintf(fd, "MAP_ANONYMOUS ");
         break;
     default:
-        fprintf(fd, "MAP_ANONYMOUS\t\t\tNo\n");
+        fprintf(fd, "MAP_ANONYMOUS ");
         break;
     }
     switch (args.map_pop)
     {
     case 1:
-        fprintf(fd, "MAP_POPULATE\t\t\tYes\n");
+        fprintf(fd, "MAP_POPULATE ");
         break;
     default:
-        fprintf(fd, "MAP_POPULATE\t\t\tNo\n");
+        fprintf(fd, "MAP_POPULATE ");
         break;
     }
     switch (args.map_shared)
     {
     case 1:
-        fprintf(fd, "MAP_SHARED\t\t\t\tYes\n");
+        fprintf(fd, "MAP_SHARED ");
         break;
     default:
-        fprintf(fd, "MAP_PRIVATE\t\t\t\tYES\n");
+        fprintf(fd, "MAP_PRIVATE ");
         break;
     }
+    fprintf(fd, "\n");
 
     if (args.engine == 0)
         results_mmap_eng(args, fd, results);
