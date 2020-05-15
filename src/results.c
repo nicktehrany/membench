@@ -36,6 +36,24 @@ void dump_results(Results results, Arguments args)
         fprintf(fd, "MAP_ANONYMOUS\t\t\tNo\n");
         break;
     }
+    switch (args.map_pop)
+    {
+    case 1:
+        fprintf(fd, "MAP_POPULATE\t\t\tYes\n");
+        break;
+    default:
+        fprintf(fd, "MAP_POPULATE\t\t\tNo\n");
+        break;
+    }
+    switch (args.map_shared)
+    {
+    case 1:
+        fprintf(fd, "MAP_SHARED\t\t\t\tYes\n");
+        break;
+    default:
+        fprintf(fd, "MAP_PRIVATE\t\t\t\tYES\n");
+        break;
+    }
 
     if (args.engine == 0)
         results_mmap_eng(args, fd, results);
@@ -67,13 +85,13 @@ void results_mmap_eng(Arguments args, FILE *fd, Results results)
         fprintf(fd, "File Size\t\t\t\t%ld Bytes\n", args.fsize);
 
     if (args.buflen >= (1024 * 1024 * 1024))
-        fprintf(fd, "Block Size\t\t\t\t%ld GiB\n", args.buflen / ((1024 * 1024 * 1024)));
+        fprintf(fd, "Copy Size\t\t\t\t%ld GiB\n", args.buflen / ((1024 * 1024 * 1024)));
     else if (args.buflen >= (1024 * 1024))
-        fprintf(fd, "Block Size\t\t\t\t%ld MiB\n", args.buflen / ((1024 * 1024)));
+        fprintf(fd, "Copy Size\t\t\t\t%ld MiB\n", args.buflen / ((1024 * 1024)));
     else if (args.buflen >= 1024)
-        fprintf(fd, "Block Size\t\t\t\t%ld KiB\n", args.buflen / 1024);
+        fprintf(fd, "Copy Size\t\t\t\t%ld KiB\n", args.buflen / 1024);
     else
-        fprintf(fd, "Block Size\t\t\t\t%ld Bytes\n", args.buflen);
+        fprintf(fd, "Copy Size\t\t\t\t%ld Bytes\n", args.buflen);
 
     switch (args.mode)
     {
@@ -92,31 +110,22 @@ void results_mmap_eng(Arguments args, FILE *fd, Results results)
     }
 
     fprintf(fd, "I/O Data\t\t\t\t%f GiB\n", results.io_data);
-    if (results.min_lat < 1000.0)
-        fprintf(fd, "Minimum latency\t\t\t%.0f nsec\n", results.min_lat);
-    else
-        fprintf(fd, "Minimum latency\t\t\t%f usec\n", results.min_lat / 1000.0);
-    if (results.max_lat < 1000.0)
-        fprintf(fd, "Maximum latency\t\t\t%.0f nsec\n", results.max_lat);
-    else
-        fprintf(fd, "Maximum latency\t\t\t%f usec\n", results.max_lat / 1000.0);
-    if (results.avg_lat < 1000.0)
-        fprintf(fd, "Average latency\t\t\t%.0f nsec\n", results.avg_lat);
-    else
-        fprintf(fd, "Average latency\t\t\t%f usec\n", results.avg_lat / 1000.0);
+    //if (results.min_lat < 1000.0)
+    fprintf(fd, "Minimum latency\t\t\t%.0f nsec\n", results.min_lat);
+    // else
+    //     fprintf(fd, "Minimum latency\t\t\t%f usec\n", results.min_lat / 1000.0);
+    // if (results.max_lat < 1000.0)
+    fprintf(fd, "Maximum latency\t\t\t%.0f nsec\n", results.max_lat);
+    // else
+    //     fprintf(fd, "Maximum latency\t\t\t%f usec\n", results.max_lat / 1000.0);
+    // if (results.avg_lat < 1000.0)
+    fprintf(fd, "Average latency\t\t\t%.0f nsec\n", results.avg_lat);
+    // else
+    //     fprintf(fd, "Average latency\t\t\t%f usec\n", results.avg_lat / 1000.0);
 }
 
 void results_mmap_lat_eng(Arguments args, FILE *fd, Results results)
 {
-    switch (args.map_pop)
-    {
-    case 1:
-        fprintf(fd, "MAP_POPULATE\t\t\tYes\n");
-        break;
-    default:
-        fprintf(fd, "MAP_POPULATE\t\t\tNo\n");
-        break;
-    }
     fprintf(fd, "Iterations\t\t\t\t%ld\n", args.iterations);
     if (results.min_lat < 1000.0)
         fprintf(fd, "Minimum latency\t\t\t%.0f nsec\n", results.min_lat);

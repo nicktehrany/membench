@@ -3,3 +3,4 @@
 -fsize=1G
 -map_pop=0
 -iter=10000
+-map_shared=0

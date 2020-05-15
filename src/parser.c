@@ -51,6 +51,8 @@ void parse_cmd_line(Arguments *args, char *tokens[], int size)
             set_map_pop(tokens[i], args);
         else if (strncmp(tokens[i], "-init_mem=", 10) == 0)
             set_init_mem(tokens[i], args);
+        else if (strncmp(tokens[i], "-map_shared=", 12) == 0)
+            set_map_shared(tokens[i], args);
         else
         {
             printf("Unknow command %s\n", tokens[i]);
@@ -279,6 +281,19 @@ void set_init_mem(char *token, Arguments *args)
     {
         errno = EINVAL;
         perror("Invalid value for init_mem. Needs to be 0|1");
+        exit(1);
+    }
+}
+
+void set_map_shared(char *token, Arguments *args)
+{
+    char *temp = token;
+    char *ptr;
+    args->map_shared = strtoul(temp + 12, &ptr, 10);
+    if (args->map_shared > 1 || args->map_shared < 0)
+    {
+        errno = EINVAL;
+        perror("Invalid value for map_pop. Needs to be 0|1");
         exit(1);
     }
 }

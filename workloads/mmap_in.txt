@@ -1,7 +1,8 @@
--runtime=2
+-runtime=5
 -dir=/mnt/mem
 -fsize=256M
 -copysize=4K
--mode=write
+-mode=read
 -engine=mmap
--init_mem=0
+-map_pop=0
+-iter=10

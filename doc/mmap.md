@@ -6,7 +6,7 @@ This Engine is meant to measure the throughput to memory via reading and writing
 
 ## Usage
 
-The engine takes several commands, which can be provided via cmd line or a file. Specify to run this engine as shown in the possible flags below. It's possible to run mmap on any mount location, as well as using MAP_ANONYMOUS. It's also possible to measure the latency of mmap with MAP_POPULATE as a flag. Usage of these flags is shown below. It's possible to only run a certain number of memcpy calls, which can be specified via the -iter flag (Still have to specify a time). mmap pages can pre populates by setting the -map_pop flag to 1. If no directory is specified in the flag, the current directory will be used. The -init_mem flag will initialize the memory with random bytes for anonymous mappings (otherwise memory will be initialized with all 0s), this will also cause all pages to be mapped, therefore not recommended when measuring latencies of page faults.
+The engine takes several commands, which can be provided via cmd line or a file. Specify to run this engine as shown in the possible flags below. It's possible to run mmap on any mount location, as well as using MAP_ANONYMOUS. It's also possible to measure the latency of mmap with MAP_POPULATE as a flag. Usage of these flags is shown below. It's possible to only run a certain number of memcpy calls, which can be specified via the -iter flag (Still have to specify a time), and runtime only includes memcpy calls. mmap pages can pre populates by setting the -map_pop flag to 1. If no directory is specified in the flag, the current directory will be used. The -init_mem flag will initialize the memory with random bytes for anonymous mappings (otherwise memory will be initialized with all 0s), this will also cause all pages to be mapped, therefore not recommended when measuring latencies of page faults.
 
 ## Possible Flags
 
@@ -20,4 +20,5 @@ The engine takes several commands, which can be provided via cmd line or a file.
 -tier= *specify number of times to call memcpy*
 -map_pop= *0|1 to pass MAP_POPULATE to mmap*
 -init_mem= *0|1 to initialize memory with random bytes instead of all 0s (Only for MAP_ANONYMOUS)*
+-map_shared= *0|1 to specify to pass MAP_SHARED or MAP_PRIVATE to mmap*
 ```

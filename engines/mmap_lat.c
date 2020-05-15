@@ -76,11 +76,8 @@ uint64_t mmap_lat_do_mmap(Mapping *mapping, Arguments args, int fd)
         nsecs_elapsed = mmap_lat_do_mmap_anon(mapping, args, fd);
     else
     {
-        int flags;
-        if (args.map_pop)
-            flags = MAP_SHARED | MAP_POPULATE;
-        else
-            flags = MAP_SHARED;
+        int flags = set_flags(args);
+
         clock_gettime(CLOCK_MONOTONIC, &tstart);
         if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
         {
@@ -98,14 +95,9 @@ uint64_t mmap_lat_do_mmap(Mapping *mapping, Arguments args, int fd)
 // Mapping is anonymous
 uint64_t mmap_lat_do_mmap_anon(Mapping *mapping, Arguments args, int fd)
 {
-    int flags;
     uint64_t nsecs_elapsed = 0;
     struct timespec tstart = {0, 0}, tend = {0, 0};
-
-    if (args.map_pop)
-        flags = MAP_ANONYMOUS | MAP_SHARED | MAP_POPULATE;
-    else
-        flags = MAP_ANONYMOUS | MAP_SHARED;
+    int flags = set_flags(args);
 
     clock_gettime(CLOCK_MONOTONIC, &tstart);
 

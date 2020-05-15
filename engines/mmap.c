@@ -16,7 +16,9 @@
  * reading/writing from and to it using memcpy. Possible file options are a usual
  * file from any mounted file system, MAP_ANONYMOUS for no file backing.
  * Engine will create and delete a file of the specified sizes (which can take longer 
- * for large files)
+ * for large files). Will memcpy entire file at least once, unless iterations are 
+ * specified, can therefore take longer than runtime if file is large and copy size
+ * is small
 */
 void mmap_engine(Mapping *mapping, Arguments *args, Results *results)
 {
@@ -40,24 +42,25 @@ void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
 
     struct timespec tstart = {0, 0}, tend = {0, 0};
 
+    clock_gettime(CLOCK_MONOTONIC, &tstart);
     while (secs_elapsed < args->runtime)
     {
         // Read all blocks from mapped area, start over
+        // Don't want to gettime after every copy, only once entire file is copied
         if (index_counter == max_ind || args->iterations == counter)
         {
             index_counter = 0;
+            clock_gettime(CLOCK_MONOTONIC, &tend);
+            elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
+            add_latency(elapsed / (args->fsize / args->buflen), results);
+            secs_elapsed += ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
+                            ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec);
+            clock_gettime(CLOCK_MONOTONIC, &tstart);
             if (args->iterations != 0 && args->iterations == counter)
                 break;
         }
 
-        clock_gettime(CLOCK_MONOTONIC, &tstart);
         memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
-        clock_gettime(CLOCK_MONOTONIC, &tend);
-        elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
-        add_latency(elapsed, results);
-
-        secs_elapsed += ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
-                        ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec);
         index_counter++;
         counter++;
     }
@@ -86,23 +89,23 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
 
     struct timespec tstart = {0, 0}, tend = {0, 0};
 
+    clock_gettime(CLOCK_MONOTONIC, &tstart);
     while (secs_elapsed < args->runtime)
     {
         if (index_counter == max_ind || args->iterations == counter)
         {
             index_counter = 0;
+            clock_gettime(CLOCK_MONOTONIC, &tend);
+            elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
+            add_latency(elapsed / (args->fsize / args->buflen), results);
+            secs_elapsed += ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
+                            ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec);
+            clock_gettime(CLOCK_MONOTONIC, &tstart);
             if (args->iterations != 0 && args->iterations == counter)
                 break;
         }
 
-        clock_gettime(CLOCK_MONOTONIC, &tstart);
         memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
-        clock_gettime(CLOCK_MONOTONIC, &tend);
-        elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
-        add_latency(elapsed, results);
-
-        secs_elapsed += ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
-                        ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec);
         index_counter++;
         counter++;
     }
@@ -135,23 +138,23 @@ void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
 
     struct timespec tstart = {0, 0}, tend = {0, 0};
 
+    clock_gettime(CLOCK_MONOTONIC, &tstart);
     while (secs_elapsed < args->runtime)
     {
         if (index_counter == max_ind || args->iterations == counter)
         {
             index_counter = 0;
+            clock_gettime(CLOCK_MONOTONIC, &tend);
+            elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
+            add_latency(elapsed / (args->fsize / args->buflen), results);
+            secs_elapsed += ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
+                            ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec);
+            clock_gettime(CLOCK_MONOTONIC, &tstart);
             if (args->iterations != 0 && args->iterations == counter)
                 break;
         }
 
-        clock_gettime(CLOCK_MONOTONIC, &tstart);
         memcpy(block_index[index_counter], src, mapping->buflen * sizeof(char));
-        clock_gettime(CLOCK_MONOTONIC, &tend);
-        elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
-        add_latency(elapsed, results);
-
-        secs_elapsed += ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
-                        ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec);
         index_counter++;
         counter++;
     }
@@ -183,23 +186,23 @@ void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
 
     struct timespec tstart = {0, 0}, tend = {0, 0};
 
+    clock_gettime(CLOCK_MONOTONIC, &tstart);
     while (secs_elapsed < args->runtime)
     {
         if (index_counter == max_ind || args->iterations == counter)
         {
             index_counter = 0;
+            clock_gettime(CLOCK_MONOTONIC, &tend);
+            elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
+            add_latency(elapsed / (args->fsize / args->buflen), results);
+            secs_elapsed += ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
+                            ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec);
+            clock_gettime(CLOCK_MONOTONIC, &tstart);
             if (args->iterations != 0 && args->iterations == counter)
                 break;
         }
 
-        clock_gettime(CLOCK_MONOTONIC, &tstart);
         memcpy(block_index[index_counter], src, mapping->buflen * sizeof(char));
-        clock_gettime(CLOCK_MONOTONIC, &tend);
-        elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
-        add_latency(elapsed, results);
-
-        secs_elapsed += ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
-                        ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec);
         index_counter++;
         counter++;
     }
@@ -230,11 +233,7 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
         // Init file manually in case fle is on DAX-fs, where truncate init isn't enough
         mmap_init_file(fd, args.fsize, args.buflen);
 
-        int flags;
-        if (args.map_pop)
-            flags = MAP_SHARED | MAP_POPULATE;
-        else
-            flags = MAP_SHARED;
+        int flags = set_flags(args);
         if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
         {
             perror("mmap");
@@ -255,11 +254,7 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
 // Mapping is anonymous
 void mmap_prepare_map_anon(Mapping *mapping, Arguments args)
 {
-    int flags;
-    if (args.map_pop)
-        flags = MAP_ANONYMOUS | MAP_SHARED | MAP_POPULATE;
-    else
-        flags = MAP_ANONYMOUS | MAP_SHARED;
+    int flags = set_flags(args);
 
     // MAP_ANONYMOUS not backed by file on file system
     if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, flags, -1, 0)) == MAP_FAILED)
