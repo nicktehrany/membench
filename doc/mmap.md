@@ -20,5 +20,5 @@ The engine takes several commands, which can be provided via cmd line or a file.
 -tier= *specify number of times to call memcpy*
 -map_pop= *0|1 to pass MAP_POPULATE to mmap*
 -init_mem= *0|1 to initialize memory with random bytes instead of all 0s (Only for MAP_ANONYMOUS)*
--map_shared= *0|1 to specify to pass MAP_SHARED or MAP_PRIVATE to mmap*
+-map_shared= *0|1 to specify to pass MAP_SHARED or MAP_PRIVATE to mmap (Default 0)*
 ```

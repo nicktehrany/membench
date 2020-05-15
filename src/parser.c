@@ -107,6 +107,7 @@ void display_help()
     printf("-iter=\t\tNumber of iterations to mmap for mmap_lat engine\n");
     printf("-map_pop=\t0|1 to pass MAP_POPULATE to mmap for mmap_lat engine\n");
     printf("-init_mem=\t0|1 to initialize memory with random bytes instead of all 0s (Only for MAP_ANONYMOUS)\n");
+    printf("-map_shared=\t0|1 to specify to pass MAP_SHARED or MAP_PRIVATE to mmap(Default 0)\n");
     printf("\nFor usage of engine specific commands consult the documentation\n");
     printf("Commands invalid for engine will be disregarded\n");
     exit(0);

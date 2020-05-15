@@ -16,5 +16,5 @@ The engine takes several commands, which can be provided via cmd line or a file.
 -fsize= *specify the size of file to mmap given in B/M/G*
 -map_pop= *0|1 to pass MAP_POPULATE to mmap call (Default 0)*
 -iter= *Number of iterations to run mmap for*
--map_shared= *0|1 to specify to pass MAP_SHARED or MAP_PRIVATE to mmap*
+-map_shared= *0|1 to specify to pass MAP_SHARED or MAP_PRIVATE to mmap (Default 0)*
 ```
