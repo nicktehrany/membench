@@ -34,7 +34,6 @@ void dump_results(Results results, Arguments args)
         fprintf(fd, "MAP_ANONYMOUS ");
         break;
     default:
-        fprintf(fd, "MAP_ANONYMOUS ");
         break;
     }
     switch (args.map_pop)
@@ -43,7 +42,6 @@ void dump_results(Results results, Arguments args)
         fprintf(fd, "MAP_POPULATE ");
         break;
     default:
-        fprintf(fd, "MAP_POPULATE ");
         break;
     }
     switch (args.map_shared)
@@ -56,6 +54,7 @@ void dump_results(Results results, Arguments args)
         break;
     }
     fprintf(fd, "\n");
+    fprintf(fd, "Total Runtime\t\t\t%ld sec\n", args.runtime);
 
     if (args.engine == 0)
         results_mmap_eng(args, fd, results);
@@ -76,7 +75,7 @@ void display_results(FILE *fp)
 
 void results_mmap_eng(Arguments args, FILE *fd, Results results)
 {
-    fprintf(fd, "Runtime\t\t\t\t\t%ld sec\n", args.runtime);
+    fprintf(fd, "Memcpy Runtime\t\t\t%f sec\n", results.cpytime);
     if (args.fsize >= (1024 * 1024 * 1024))
         fprintf(fd, "File Size\t\t\t\t%ld GiB\n", args.fsize / (1024 * 1024 * 1024));
     else if (args.fsize >= (1024 * 1024))
@@ -104,7 +103,7 @@ void results_mmap_eng(Arguments args, FILE *fd, Results results)
         fprintf(fd, "Sequential Write\t\t%f GiB/s\n", results.bandwidth / 1024);
         break;
     case 2:
-        fprintf(fd, "Random Read\t\t\t%f GiB/s\n", results.bandwidth / 1024);
+        fprintf(fd, "Random Read\t\t\t\t%f GiB/s\n", results.bandwidth / 1024);
         break;
     case 3:
         fprintf(fd, "Random Write\t\t\t%f GiB/s\n", results.bandwidth / 1024);

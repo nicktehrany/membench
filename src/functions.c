@@ -18,18 +18,16 @@ void add_latency(uint64_t latency, Results *results)
 
 int set_flags(Arguments args)
 {
-    int flags;
+    int flags = 0;
+
     if (args.map_pop)
-    {
-        if (args.map_shared)
-            flags = MAP_SHARED | MAP_POPULATE;
-        else
-            flags = MAP_PRIVATE | MAP_POPULATE;
-    }
-    else if (args.map_shared)
-        flags = MAP_SHARED;
+        flags |= MAP_POPULATE;
+    if (args.map_anon)
+        flags |= MAP_ANONYMOUS;
+    if (args.map_shared)
+        flags |= MAP_SHARED;
     else
-        flags = MAP_PRIVATE;
+        flags |= MAP_PRIVATE;
 
     return flags;
 }

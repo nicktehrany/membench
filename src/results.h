@@ -6,6 +6,7 @@
 typedef struct Results
 {
     double bandwidth;
+    double cpytime;
     double io_data;
     double min_lat;
     double max_lat;
