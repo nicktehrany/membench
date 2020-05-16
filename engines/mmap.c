@@ -240,7 +240,7 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
         int fd;
 
         // Open/Create file and truncate it to given size
-        if (((fd = open(args.path, O_CREAT | O_RDWR, 0666)) < 0) || (truncate(args.path, args.fsize) != 0))
+        if (((fd = open(args.path, O_CREAT | O_RDWR, 0666)) < 0) || (ftruncate(fd, args.fsize) != 0))
         {
             perror("File Error");
             exit(1);
