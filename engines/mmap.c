@@ -69,6 +69,7 @@ void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
     }
     get_bandwidth(counter, cpy_elapsed, mapping->buflen, results);
     results->avg_lat = (cpy_elapsed * SECS_TO_NANS) / counter;
+    args->iterations = counter;
 
     // Save the total time that was used for only memcpy calls
     results->cpytime = cpy_elapsed;
@@ -93,6 +94,7 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
     struct timespec tstart = {0, 0}, tend = {0, 0}, total = {0, 0};
     clock_gettime(CLOCK_MONOTONIC, &total);
 
+    clock_t dummy = clock(); // DUMMY COMMAND TO IDENTIFY CORRECT PAGE FAULT
     while (secs_elapsed < args->runtime)
     {
         if (index_counter == max_ind || args->iterations == counter)
@@ -114,10 +116,11 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
         index_counter++;
         counter++;
     }
-
+    results->io_data = dummy; // DUMMY COMMAND TO IDENTIFY CORRECT PAGE FAULT
     get_bandwidth(counter, cpy_elapsed, mapping->buflen, results);
     results->avg_lat = (cpy_elapsed * SECS_TO_NANS) / counter;
     results->cpytime = cpy_elapsed;
+    args->iterations = counter;
 
     free(dest);
     dest = NULL;
@@ -169,6 +172,7 @@ void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
     get_bandwidth(counter, cpy_elapsed, mapping->buflen, results);
     results->avg_lat = (cpy_elapsed * SECS_TO_NANS) / (double)counter;
     results->cpytime = cpy_elapsed;
+    args->iterations = counter;
 
     free(src);
     src = NULL;
@@ -219,6 +223,7 @@ void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
     get_bandwidth(counter, cpy_elapsed, mapping->buflen, results);
     results->avg_lat = (cpy_elapsed * SECS_TO_NANS) / counter;
     results->cpytime = cpy_elapsed;
+    args->iterations = counter;
 
     free(src);
     src = NULL;
@@ -233,14 +238,13 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
     else
     {
         int fd;
-        if ((fd = open(args.path, O_CREAT | O_RDWR, 0666)) < 0)
+
+        // Open/Create file and truncate it to given size
+        if (((fd = open(args.path, O_CREAT | O_RDWR, 0666)) < 0) || (truncate(args.path, args.fsize) != 0))
         {
-            perror("File Open");
+            perror("File Error");
             exit(1);
         }
-
-        // Init file manually in case fle is on DAX-fs, where truncate init isn't enough
-        mmap_init_file(fd, args.fsize, args.buflen);
 
         int flags = set_flags(args);
         if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
@@ -359,39 +363,4 @@ void mmap_check_args(Arguments *args)
         perror("Not aligned file size and copy size");
         exit(1);
     }
-}
-
-/*
-*  For performance reasons, don't want to write to file in single bytes at a time (which
-*  will take very long for large files), write in 4KiB amounts at a time or buflen 
-*  (copy size) amounts if it's larger
-*/
-void mmap_init_file(int fd, int fsize, int buflen)
-{
-    // TODO Some smarter way of init for very large files
-    int factor = 32768;
-    if (buflen > factor)
-        factor = buflen;
-    if (fsize < factor)
-        factor = fsize;
-
-    // Since file size has to be multiple of buflen
-    unsigned char *buf = (unsigned char *)malloc(factor * sizeof(char));
-    int iter = fsize / factor;
-
-    srand(time(NULL));
-    for (int i = 0; i < iter; i++)
-    {
-        for (int j = 0; j < factor; j++)
-            buf[j] = rand() % 256;
-        if (write(fd, buf, factor) < 0)
-        {
-            perror("File Error");
-            exit(1);
-        }
-    }
-    // Make sure data is written back to fs
-    fsync(fd);
-    free(buf);
-    buf = NULL;
 }

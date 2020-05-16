@@ -1,8 +1,9 @@
--runtime=5
--dir=/mnt/mem
--fsize=256M
+-runtime=4
+-dir=/dev/zero
+-fsize=1G
 -copysize=4K
--mode=read
+-mode=randread
 -engine=mmap
 -map_pop=0
+-map_shared=0
 -iter=10

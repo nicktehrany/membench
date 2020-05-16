@@ -55,11 +55,12 @@ void dump_results(Results results, Arguments args)
     }
     fprintf(fd, "\n");
     fprintf(fd, "Total Runtime\t\t\t%ld sec\n", args.runtime);
+    fprintf(fd, "Iterations\t\t\t\t%ld\n", args.iterations);
 
     if (args.engine == 0)
         results_mmap_eng(args, fd, results);
     else if (args.engine == 1)
-        results_mmap_lat_eng(args, fd, results);
+        results_mmap_lat_eng(fd, results);
     // display_results(fd); TODO IMPLEMENT FULLY
     fclose(fd);
 }
@@ -125,9 +126,8 @@ void results_mmap_eng(Arguments args, FILE *fd, Results results)
     //     fprintf(fd, "Average latency\t\t\t%f usec\n", results.avg_lat / 1000.0);
 }
 
-void results_mmap_lat_eng(Arguments args, FILE *fd, Results results)
+void results_mmap_lat_eng(FILE *fd, Results results)
 {
-    fprintf(fd, "Iterations\t\t\t\t%ld\n", args.iterations);
     if (results.min_lat < 1000.0)
         fprintf(fd, "Minimum latency\t\t\t%.0f nsec\n", results.min_lat);
     else

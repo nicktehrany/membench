@@ -142,12 +142,6 @@ void set_filesize(char *token, Arguments *args)
 
     char *ptr;
     args->fsize = strtoul(temp + 7, &ptr, 10) * multiplier;
-    if (args->fsize < 4096)
-    {
-        errno = EINVAL;
-        perror("Invalid File size. Needs to be at least 32KiB");
-        exit(1);
-    }
 }
 
 void set_buflen(char *token, Arguments *args)
