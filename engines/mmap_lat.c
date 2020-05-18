@@ -7,8 +7,6 @@
 #include <stdio.h>
 #include <time.h>
 #include <errno.h>
-#define NANS_TO_SECS 1.0e-9
-#define SECS_TO_NANS 1.0e9
 
 /*
  *
@@ -87,7 +85,7 @@ uint64_t mmap_lat_do_mmap(Mapping *mapping, Arguments args, int fd)
             exit(1);
         }
         clock_gettime(CLOCK_MONOTONIC, &tend);
-        nsecs_elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
+        nsecs_elapsed = NANS_ELAPSED(tend, tstart);
     }
     return nsecs_elapsed;
 }
@@ -108,7 +106,7 @@ uint64_t mmap_lat_do_mmap_anon(Mapping *mapping, Arguments args, int fd)
         exit(1);
     }
     clock_gettime(CLOCK_MONOTONIC, &tend);
-    nsecs_elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
+    nsecs_elapsed = NANS_ELAPSED(tend, tstart);
 
     return nsecs_elapsed;
 }

@@ -7,11 +7,6 @@
 #include <stdio.h>
 #include <time.h>
 #include <errno.h>
-#define NANS_TO_SECS 1.0e-9
-#define SECS_TO_NANS 1.0e9
-#define SECS_ELAPSED(tend, tstart) (((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) - \
-                                    ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec))
-#define NANS_ELAPSED(tend, tstart) (((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec))
 
 /*
  *
