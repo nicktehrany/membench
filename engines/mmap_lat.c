@@ -1,12 +1,4 @@
 #include "mmap_lat.h"
-#include <string.h>
-#include <sys/mman.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <time.h>
-#include <errno.h>
 
 /*
  *

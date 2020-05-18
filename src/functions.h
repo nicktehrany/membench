@@ -1,5 +1,14 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
+#include <string.h>
+#include <sys/mman.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <time.h>
+#include <errno.h>
+
 #define NANS_TO_SECS 1.0e-9
 #define SECS_TO_NANS 1.0e9
 #define SECS_ELAPSED(tend, tstart) (((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) - \
