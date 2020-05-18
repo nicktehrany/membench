@@ -9,6 +9,9 @@
 #include <errno.h>
 #define NANS_TO_SECS 1.0e-9
 #define SECS_TO_NANS 1.0e9
+#define SECS_ELAPSED(tend, tstart) (((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) - \
+                                    ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec))
+#define NANS_ELAPSED(tend, tstart) (((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec))
 
 /*
  *
@@ -54,16 +57,14 @@ void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
         clock_gettime(CLOCK_MONOTONIC, &tstart);
         memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
         clock_gettime(CLOCK_MONOTONIC, &tend);
-        elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
+        elapsed = NANS_ELAPSED(tend, tstart);
         add_latency(elapsed, results);
 
         // Used to keep track of runtime
-        secs_elapsed = ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
-                       ((double)total.tv_sec + NANS_TO_SECS * total.tv_nsec);
+        secs_elapsed = SECS_ELAPSED(tend, total);
 
         // Keeping track of total memcpy time to correctly calculate bandwidth
-        cpy_elapsed += ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
-                       ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec);
+        cpy_elapsed += SECS_ELAPSED(tend, tstart);
         index_counter++;
         counter++;
     }
@@ -107,12 +108,10 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
         clock_gettime(CLOCK_MONOTONIC, &tstart);
         memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
         clock_gettime(CLOCK_MONOTONIC, &tend);
-        elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
+        elapsed = NANS_ELAPSED(tend, tstart);
         add_latency(elapsed, results);
-        secs_elapsed = ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
-                       ((double)total.tv_sec + NANS_TO_SECS * total.tv_nsec);
-        cpy_elapsed += ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
-                       ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec);
+        secs_elapsed = SECS_ELAPSED(tend, total);
+        cpy_elapsed += SECS_ELAPSED(tend, tstart);
         index_counter++;
         counter++;
     }
@@ -159,12 +158,10 @@ void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
         clock_gettime(CLOCK_MONOTONIC, &tstart);
         memcpy(block_index[index_counter], src, mapping->buflen * sizeof(char));
         clock_gettime(CLOCK_MONOTONIC, &tend);
-        elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
+        elapsed = NANS_ELAPSED(tend, tstart);
         add_latency(elapsed, results);
-        secs_elapsed = ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
-                       ((double)total.tv_sec + NANS_TO_SECS * total.tv_nsec);
-        cpy_elapsed += ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
-                       ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec);
+        secs_elapsed = SECS_ELAPSED(tend, total);
+        cpy_elapsed += SECS_ELAPSED(tend, tstart);
         index_counter++;
         counter++;
     }
@@ -210,12 +207,10 @@ void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
         clock_gettime(CLOCK_MONOTONIC, &tstart);
         memcpy(block_index[index_counter], src, mapping->buflen * sizeof(char));
         clock_gettime(CLOCK_MONOTONIC, &tend);
-        elapsed = ((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec);
+        elapsed = NANS_ELAPSED(tend, tstart);
         add_latency(elapsed, results);
-        secs_elapsed = ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
-                       ((double)total.tv_sec + NANS_TO_SECS * total.tv_nsec);
-        cpy_elapsed += ((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) -
-                       ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec);
+        secs_elapsed = SECS_ELAPSED(tend, total);
+        cpy_elapsed += SECS_ELAPSED(tend, tstart);
         index_counter++;
         counter++;
     }
