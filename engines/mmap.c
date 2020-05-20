@@ -1,4 +1,5 @@
 #include "mmap.h"
+#define PAGESIZE sysconf(_SC_PAGE_SIZE)
 
 /*
  *
@@ -19,48 +20,46 @@ void mmap_engine(Mapping *mapping, Arguments *args, Results *results)
 
 void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
 {
-    uint64_t counter = 0, index_counter = 0, elapsed = 0;
-    uint64_t max_ind = mapping->fsize / mapping->buflen;
-    long double secs_elapsed = 0, cpy_elapsed = 0;
+    uint64_t counter = 0, index_counter = 0, elapsed = 0, multiplier;
+    uint64_t max_ind = mapping->fsize / PAGESIZE;
+    long double secs_elapsed = 0;
     unsigned char *dest = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
     char **block_index = (char **)malloc(max_ind * sizeof(char *));
+    multiplier = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
 
     for (uint64_t i = 0; i < max_ind; i++)
-        block_index[i] = (char *)(mapping->addr + (mapping->buflen * i));
+        block_index[i] = (char *)(mapping->addr + (i * multiplier));
 
-    struct timespec tstart = {0, 0}, tend = {0, 0}, total = {0, 0};
-    clock_gettime(CLOCK_MONOTONIC, &total);
+    struct timespec tstart = {0, 0}, tend = {0, 0};
 
     while (secs_elapsed < args->runtime)
     {
-        // Read all blocks from mapped area, start over
-        if (index_counter == max_ind || args->iterations == counter)
+        clock_gettime(CLOCK_MONOTONIC, &tstart);
+
+        // Reading from every 4KiB chunk of file at least once
+        for (uint64_t i = 0; i < max_ind; i++)
         {
-            index_counter = 0;
-            if (args->iterations != 0 && args->iterations == counter)
-                break;
+            memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
+            index_counter++;
         }
 
-        clock_gettime(CLOCK_MONOTONIC, &tstart);
-        memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
         clock_gettime(CLOCK_MONOTONIC, &tend);
+        counter += max_ind;
         elapsed = NANS_ELAPSED(tend, tstart);
-        add_latency(elapsed, results);
+        add_latency(elapsed / index_counter, results); // Adding the average latency for the run to be stored
+        index_counter = 0;
 
         // Used to keep track of runtime
-        secs_elapsed = SECS_ELAPSED(tend, total);
+        secs_elapsed += SECS_ELAPSED(tend, tstart);
 
-        // Keeping track of total memcpy time to correctly calculate bandwidth
-        cpy_elapsed += SECS_ELAPSED(tend, tstart);
-        index_counter++;
-        counter++;
+        if (args->iterations != 0 && args->iterations == counter)
+            break;
     }
-    get_bandwidth(counter, cpy_elapsed, mapping->buflen, results);
-    results->avg_lat = (cpy_elapsed * SECS_TO_NANS) / counter;
+
+    get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
+    results->avg_lat = (secs_elapsed * SECS_TO_NANS) / counter;
     args->iterations = counter;
 
-    // Save the total time that was used for only memcpy calls
-    results->cpytime = cpy_elapsed;
     free(dest);
     dest = NULL;
     free(block_index);
