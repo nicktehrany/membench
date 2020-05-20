@@ -5,7 +5,7 @@
 // Default values
 typedef struct Arguments
 {
-    uint64_t runtime;
+    double runtime;
     char *path;
     uint64_t fsize;
     uint64_t buflen;

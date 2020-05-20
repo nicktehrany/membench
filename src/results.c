@@ -55,7 +55,7 @@ void dump_results(Results results, Arguments args)
     }
     fprintf(fd, "\n");
     fprintf(fd, "Memcpy Iterations\t\t%ld\n", args.iterations);
-    fprintf(fd, "Total Runtime\t\t\t%ld sec\n", args.runtime);
+    fprintf(fd, "Total Runtime\t\t\t%.6f sec\n", args.runtime);
 
     if (args.engine == 0)
         results_mmap_eng(args, fd, results);
@@ -76,7 +76,6 @@ void display_results(FILE *fp)
 
 void results_mmap_eng(Arguments args, FILE *fd, Results results)
 {
-    fprintf(fd, "Memcpy Runtime\t\t\t%f sec\n", results.cpytime);
     if (args.fsize >= (1024 * 1024 * 1024))
         fprintf(fd, "File Size\t\t\t\t%ld GiB\n", args.fsize / (1024 * 1024 * 1024));
     else if (args.fsize >= (1024 * 1024))
