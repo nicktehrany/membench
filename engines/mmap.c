@@ -20,10 +20,10 @@ void mmap_engine(Mapping *mapping, Arguments *args, Results *results)
 
 void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
 {
-    uint64_t counter = 0, index_counter = 0, elapsed = 0, chunk_size;
+    uint64_t counter = 0, index_counter = 0, elapsed = 0;
 
-    // If copy size > PAGE_SIZE, divide file into copy size chunks else PAGE_SIZE chunks
-    chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
+    // If buflen > PAGE_SIZE, divide file into buflen size chunks else PAGE_SIZE chunks
+    uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
     uint64_t max_ind = mapping->fsize / chunk_size;
     long double secs_elapsed = 0;
     unsigned char *dest = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
@@ -73,43 +73,44 @@ void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
 void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
 {
     uint64_t counter = 0, index_counter = 0, elapsed = 0;
-    long double secs_elapsed = 0, cpy_elapsed = 0;
+    uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
+    uint64_t max_ind = mapping->fsize / chunk_size;
+    long double secs_elapsed = 0;
     unsigned char *dest = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
-    uint64_t max_ind = mapping->fsize / mapping->buflen;
     char **block_index = (char **)malloc(max_ind * sizeof(char *));
 
+    // Storing pointers to beginning of buflen/PAGE_SIZE sized chunks from file in random order
     srand(time(NULL));
     for (uint64_t i = 0; i < max_ind; i++)
-        block_index[i] = (char *)(mapping->addr + (mapping->buflen * (rand() % max_ind)));
+        block_index[i] = (char *)(mapping->addr + ((rand() % max_ind) * chunk_size));
 
-    struct timespec tstart = {0, 0}, tend = {0, 0}, total = {0, 0};
-    clock_gettime(CLOCK_MONOTONIC, &total);
+    struct timespec tstart = {0, 0}, tend = {0, 0};
 
-    clock_t dummy = clock(); // DUMMY COMMAND TO IDENTIFY CORRECT PAGE FAULT
     while (secs_elapsed < args->runtime)
     {
-        if (index_counter == max_ind || args->iterations == counter)
+        clock_gettime(CLOCK_MONOTONIC, &tstart);
+
+        for (uint64_t i = 0; i < max_ind; i++)
         {
-            index_counter = 0;
-            if (args->iterations != 0 && args->iterations == counter)
-                break;
+            memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
+            index_counter++;
         }
 
-        clock_gettime(CLOCK_MONOTONIC, &tstart);
-        memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
         clock_gettime(CLOCK_MONOTONIC, &tend);
+        counter += max_ind;
         elapsed = NANS_ELAPSED(tend, tstart);
-        add_latency(elapsed, results);
-        secs_elapsed = SECS_ELAPSED(tend, total);
-        cpy_elapsed += SECS_ELAPSED(tend, tstart);
-        index_counter++;
-        counter++;
+        add_latency(elapsed / index_counter, results);
+        index_counter = 0;
+        secs_elapsed += SECS_ELAPSED(tend, tstart);
+
+        if (args->iterations != 0 && args->iterations <= counter)
+            break;
     }
-    results->io_data = dummy; // DUMMY COMMAND TO IDENTIFY CORRECT PAGE FAULT
-    get_bandwidth(counter, cpy_elapsed, mapping->buflen, results);
-    results->avg_lat = (cpy_elapsed * SECS_TO_NANS) / counter;
-    results->cpytime = cpy_elapsed;
+
+    get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
+    results->avg_lat = (secs_elapsed * SECS_TO_NANS) / counter;
     args->iterations = counter;
+    args->runtime = secs_elapsed;
 
     free(dest);
     dest = NULL;
@@ -119,8 +120,8 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
 
 void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
 {
-    uint64_t counter = 0, index_counter = 0, elapsed = 0, chunk_size;
-    chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
+    uint64_t counter = 0, index_counter = 0, elapsed = 0;
+    uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
     uint64_t max_ind = mapping->fsize / chunk_size;
     long double secs_elapsed = 0;
     unsigned char *src = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);

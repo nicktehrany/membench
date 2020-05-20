@@ -54,7 +54,7 @@ void dump_results(Results results, Arguments args)
         break;
     }
     fprintf(fd, "\n");
-    fprintf(fd, "Iterations\t\t\t\t%ld\n", args.iterations);
+    fprintf(fd, "Memcpy Iterations\t\t%ld\n", args.iterations);
     fprintf(fd, "Total Runtime\t\t\t%ld sec\n", args.runtime);
 
     if (args.engine == 0)
