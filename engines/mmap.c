@@ -20,7 +20,7 @@ void mmap_engine(Mapping *mapping, Arguments *args, Results *results)
 
 void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
 {
-    uint64_t counter = 0, index_counter = 0, elapsed = 0;
+    uint64_t counter = 0, elapsed = 0;
 
     // If buflen > PAGE_SIZE, divide file into buflen size chunks else PAGE_SIZE chunks
     uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
@@ -42,16 +42,12 @@ void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
 
         // Reading from every consecutive chunk_size part of file at least once
         for (uint64_t i = 0; i < loop_iters; i++)
-        {
-            memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
-            index_counter++;
-        }
+            memcpy(dest, block_index[i], mapping->buflen * sizeof(char));
 
         clock_gettime(CLOCK_MONOTONIC, &tend);
         counter += loop_iters;
         elapsed = NANS_ELAPSED(tend, tstart);
-        add_latency(elapsed / index_counter, results); // Adding the average latency for the run to be stored
-        index_counter = 0;
+        add_latency(elapsed / loop_iters, results); // Adding the average latency for the run to be stored
 
         // Used to keep track of runtime
         secs_elapsed += SECS_ELAPSED(tend, tstart);
@@ -73,7 +69,7 @@ void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
 
 void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
 {
-    uint64_t counter = 0, index_counter = 0, elapsed = 0;
+    uint64_t counter = 0, elapsed = 0;
     uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
     uint64_t max_ind = mapping->fsize / chunk_size;
     uint64_t loop_iters = (max_ind > args->iterations) ? args->iterations : max_ind;
@@ -93,18 +89,14 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
         clock_gettime(CLOCK_MONOTONIC, &tstart);
 
         for (uint64_t i = 0; i < loop_iters; i++)
-        {
-            memcpy(dest, block_index[index_counter], mapping->buflen * sizeof(char));
-            index_counter++;
-        }
+            memcpy(dest, block_index[i], mapping->buflen * sizeof(char));
 
         clock_gettime(CLOCK_MONOTONIC, &tend);
         counter += loop_iters;
         elapsed = NANS_ELAPSED(tend, tstart);
-        add_latency(elapsed / index_counter, results);
-        index_counter = 0;
+        add_latency(elapsed / loop_iters, results);
         secs_elapsed += SECS_ELAPSED(tend, tstart);
-
+        msync(mapping->addr, mapping->fsize, MS_INVALIDATE);
         if (args->iterations != 0 && args->iterations <= counter)
             break;
     }
@@ -122,7 +114,7 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
 
 void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
 {
-    uint64_t counter = 0, index_counter = 0, elapsed = 0;
+    uint64_t counter = 0, elapsed = 0;
     uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
     uint64_t max_ind = mapping->fsize / chunk_size;
     uint64_t loop_iters = (max_ind > args->iterations) ? args->iterations : max_ind;
@@ -145,16 +137,12 @@ void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
         clock_gettime(CLOCK_MONOTONIC, &tstart);
 
         for (uint64_t i = 0; i < loop_iters; i++)
-        {
-            memcpy(block_index[index_counter], src, mapping->buflen * sizeof(char));
-            index_counter++;
-        }
+            memcpy(block_index[i], src, mapping->buflen * sizeof(char));
 
         clock_gettime(CLOCK_MONOTONIC, &tend);
         counter += loop_iters;
         elapsed = NANS_ELAPSED(tend, tstart);
-        add_latency(elapsed / index_counter, results);
-        index_counter = 0;
+        add_latency(elapsed / loop_iters, results);
         secs_elapsed += SECS_ELAPSED(tend, tstart);
 
         if (args->iterations != 0 && args->iterations <= counter)
@@ -174,7 +162,7 @@ void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
 
 void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
 {
-    uint64_t counter = 0, index_counter = 0, elapsed = 0;
+    uint64_t counter = 0, elapsed = 0;
     uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
     uint64_t max_ind = mapping->fsize / chunk_size;
     uint64_t loop_iters = (max_ind > args->iterations) ? args->iterations : max_ind;
@@ -185,7 +173,6 @@ void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
     for (uint64_t i = 0; i < max_ind; i++)
         block_index[i] = (char *)(mapping->addr + ((rand() % max_ind) * chunk_size));
 
-    // Filling src with rand bytes to memcpy to dest
     srand(time(NULL));
     for (uint64_t i = 0; i < mapping->buflen; i++)
         src[i] = rand() % 256;
@@ -197,16 +184,12 @@ void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
         clock_gettime(CLOCK_MONOTONIC, &tstart);
 
         for (uint64_t i = 0; i < loop_iters; i++)
-        {
-            memcpy(block_index[index_counter], src, mapping->buflen * sizeof(char));
-            index_counter++;
-        }
+            memcpy(block_index[i], src, mapping->buflen * sizeof(char));
 
         clock_gettime(CLOCK_MONOTONIC, &tend);
         counter += loop_iters;
         elapsed = NANS_ELAPSED(tend, tstart);
-        add_latency(elapsed / index_counter, results);
-        index_counter = 0;
+        add_latency(elapsed / loop_iters, results);
         secs_elapsed += SECS_ELAPSED(tend, tstart);
 
         if (args->iterations != 0 && args->iterations <= counter)
