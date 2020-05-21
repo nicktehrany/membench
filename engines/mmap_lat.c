@@ -28,6 +28,7 @@ void mmap_lat_engine(Mapping *mapping, Arguments *args, Results *results)
         mmap_lat_do_unmap(mapping);
     }
 
+    args->runtime = acc_nsecs * NANS_TO_SECS;
     mmap_lat_cleanup_file(mapping, fd);
     results->avg_lat = (double)acc_nsecs / (double)args->iterations;
     dump_results(*results, *args);

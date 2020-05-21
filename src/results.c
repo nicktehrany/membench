@@ -56,6 +56,14 @@ void dump_results(Results results, Arguments args)
     fprintf(fd, "\n");
     fprintf(fd, "Memcpy Iterations\t\t%ld\n", args.iterations);
     fprintf(fd, "Total Runtime\t\t\t%.6f sec\n", args.runtime);
+    if (args.fsize >= (1024 * 1024 * 1024))
+        fprintf(fd, "File Size\t\t\t\t%ld GiB\n", args.fsize / (1024 * 1024 * 1024));
+    else if (args.fsize >= (1024 * 1024))
+        fprintf(fd, "File Size\t\t\t\t%ld MiB\n", args.fsize / (1024 * 1024));
+    else if (args.fsize >= 1024)
+        fprintf(fd, "File Size\t\t\t\t%ld KiB\n", args.fsize / 1024);
+    else
+        fprintf(fd, "File Size\t\t\t\t%ld Bytes\n", args.fsize);
 
     if (args.engine == 0)
         results_mmap_eng(args, fd, results);
@@ -76,15 +84,6 @@ void display_results(FILE *fp)
 
 void results_mmap_eng(Arguments args, FILE *fd, Results results)
 {
-    if (args.fsize >= (1024 * 1024 * 1024))
-        fprintf(fd, "File Size\t\t\t\t%ld GiB\n", args.fsize / (1024 * 1024 * 1024));
-    else if (args.fsize >= (1024 * 1024))
-        fprintf(fd, "File Size\t\t\t\t%ld MiB\n", args.fsize / (1024 * 1024));
-    else if (args.fsize >= 1024)
-        fprintf(fd, "File Size\t\t\t\t%ld KiB\n", args.fsize / 1024);
-    else
-        fprintf(fd, "File Size\t\t\t\t%ld Bytes\n", args.fsize);
-
     if (args.buflen >= (1024 * 1024 * 1024))
         fprintf(fd, "Copy Size\t\t\t\t%ld GiB\n", args.buflen / ((1024 * 1024 * 1024)));
     else if (args.buflen >= (1024 * 1024))
@@ -111,32 +110,14 @@ void results_mmap_eng(Arguments args, FILE *fd, Results results)
     }
 
     fprintf(fd, "I/O Data\t\t\t\t%f GiB\n", results.io_data);
-    //if (results.min_lat < 1000.0)
     fprintf(fd, "Minimum latency\t\t\t%.0f nsec\n", results.min_lat);
-    // else
-    //     fprintf(fd, "Minimum latency\t\t\t%f usec\n", results.min_lat / 1000.0);
-    // if (results.max_lat < 1000.0)
     fprintf(fd, "Maximum latency\t\t\t%.0f nsec\n", results.max_lat);
-    // else
-    //     fprintf(fd, "Maximum latency\t\t\t%f usec\n", results.max_lat / 1000.0);
-    // if (results.avg_lat < 1000.0)
     fprintf(fd, "Average latency\t\t\t%.0f nsec\n", results.avg_lat);
-    // else
-    //     fprintf(fd, "Average latency\t\t\t%f usec\n", results.avg_lat / 1000.0);
 }
 
 void results_mmap_lat_eng(FILE *fd, Results results)
 {
-    if (results.min_lat < 1000.0)
-        fprintf(fd, "Minimum latency\t\t\t%.0f nsec\n", results.min_lat);
-    else
-        fprintf(fd, "Minimum latency\t\t\t%f usec\n", results.min_lat / 1000.0);
-    if (results.max_lat < 1000.0)
-        fprintf(fd, "Maximum latency\t\t\t%.0f nsec\n", results.max_lat);
-    else
-        fprintf(fd, "Maximum latency\t\t\t%f usec\n", results.max_lat / 1000.0);
-    if (results.avg_lat < 1000.0)
-        fprintf(fd, "Average latency\t\t\t%.0f nsec\n", results.avg_lat);
-    else
-        fprintf(fd, "Average latency\t\t\t%f usec\n", results.avg_lat / 1000.0);
+    fprintf(fd, "Minimum latency\t\t\t%.0f nsec\n", results.min_lat);
+    fprintf(fd, "Maximum latency\t\t\t%.0f nsec\n", results.max_lat);
+    fprintf(fd, "Average latency\t\t\t%.0f nsec\n", results.avg_lat);
 }
