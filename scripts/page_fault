@@ -28,7 +28,7 @@ run_cmd() {
     for i in {1..5}
     do
         sudo ./Benchmark -file=$1 &>/dev/null
-        awk '{if(/Average latency\t*/) print $3}' < results.out >> $dest
+        echo | awk '{if(/Average latency\t*/) printf("%s ",$3)}' < results.out >> $dest
     done
     echo "" >> $dest
 }
@@ -41,7 +41,7 @@ echo "Creating and Mounting ext4 on $ram"
 sudo mkfs.ext4 -F $ram &> /dev/null 
 mount_fs $ram $mnt
 echo "Running ext4 bench"
-echo "ext4: " >> $dest
+echo -n "ext4: " >> $dest
 run_cmd $workload
 echo "Finished ext4 bench"
 echo "Unmounting ext4"
@@ -51,7 +51,7 @@ echo "Creating and Mounting xfs on $ram"
 sudo mkfs.xfs $ram -f &> /dev/null
 mount_fs $ram $mnt
 echo "Running xfs bench"
-echo "xfs: " >> $dest
+echo -n "xfs: " >> $dest
 run_cmd $workload
 echo "Finished xfs bench"
 echo "Unmounting xfs"
@@ -61,7 +61,7 @@ echo "Creating and Mounting ext4-dax on $pmem"
 sudo mkfs.ext4 $pmem -f &> /dev/null
 mount_fs $pmem $mnt
 echo "Running ext4-dax bench"
-echo "ext4-dax: " >> $dest
+echo -n "ext4-dax: " >> $dest
 run_cmd $workload
 echo "Finished ext4-dax bench"
 echo "Unmounting ext4-dax"
@@ -71,14 +71,14 @@ echo "Creating and Mounting xfs-dax on $pmem"
 sudo mkfs.xfs -m reflink=0 $pmem -f &> /dev/null
 mount_fs $pmem $mnt
 echo "Running xfs-dax bench"
-echo "xfs-dax: " >> $dest
+echo -n "xfs-dax: " >> $dest
 run_cmd $workload
 echo "Finished xfs-dax bench"
 echo "Unmounting xfs-dax"
 sudo umount $pmem &> /dev/null
 
 echo "Running MAP_ANONYMOUS"
-echo "map_anon: " >> $dest
+echo -n "map_anon: " >> $dest
 run_cmd $workload_anon
 echo "Finished MAP_ANONYMOUS bench"
 
