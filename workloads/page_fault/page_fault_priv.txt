@@ -1,6 +1,6 @@
 -runtime=5
 -dir=/mnt/mem
--fsize=1G
+-fsize=3G
 -copysize=4
 -mode=randread
 -engine=mmap
