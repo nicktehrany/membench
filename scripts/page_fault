@@ -9,7 +9,10 @@ workload="workloads/page_fault/page_fault_reg.txt"
 workload_anon="workloads/page_fault/page_fault_anon.txt"
 iters=10
 
-cd ..
+if [[ "$PWD" == *"scripts"* ]]; then
+    cd ..
+fi
+
 mkdir -p results/page_fault
 touch $dest
 
