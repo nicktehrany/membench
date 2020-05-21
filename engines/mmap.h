@@ -13,5 +13,4 @@ void mmap_prepare_mapping(Mapping *, Arguments);
 void mmap_cleanup_mapping(Mapping *);
 void mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results);
 void mmap_prepare_map_anon(Mapping *mapping, Arguments args);
-void mmap_init_mem(Mapping *);
 #endif

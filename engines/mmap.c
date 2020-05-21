@@ -259,9 +259,6 @@ void mmap_prepare_map_anon(Mapping *mapping, Arguments args)
     mapping->is_pmem = 0;
     mapping->map_anon = 1;
     mapping->fsize = args.fsize;
-
-    if (args.init_mem)
-        mmap_init_mem(mapping);
 }
 
 void mmap_cleanup_mapping(Mapping *mapping)
@@ -304,12 +301,6 @@ void mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
         perror("Invalid Mode");
         exit(1);
     }
-}
-
-void mmap_init_mem(Mapping *mapping)
-{
-    srand(time(NULL));
-    memset(mapping->addr, rand(), mapping->fsize);
 }
 
 // Check if all args are valid for engine to start

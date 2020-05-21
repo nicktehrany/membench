@@ -14,7 +14,6 @@ typedef struct Arguments
     int engine;   // Default mmap engine
     uint64_t iterations;
     int map_pop;
-    int init_mem;
     int map_shared;
 } Arguments;
 
@@ -30,7 +29,6 @@ void set_mode(char *, Arguments *);
 void set_engine(char *, Arguments *);
 void set_iter(char *token, Arguments *args);
 void set_map_pop(char *token, Arguments *args);
-void set_init_mem(char *token, Arguments *args);
 void set_map_shared(char *token, Arguments *args);
 
 #endif

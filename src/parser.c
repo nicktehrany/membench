@@ -49,8 +49,6 @@ void parse_cmd_line(Arguments *args, char *tokens[], int size)
             set_iter(tokens[i], args);
         else if (strncmp(tokens[i], "-map_pop=", 9) == 0)
             set_map_pop(tokens[i], args);
-        else if (strncmp(tokens[i], "-init_mem=", 10) == 0)
-            set_init_mem(tokens[i], args);
         else if (strncmp(tokens[i], "-map_shared=", 12) == 0)
             set_map_shared(tokens[i], args);
         else
@@ -106,7 +104,6 @@ void display_help()
     printf("-engine=\tPossible engines are mmap and mmap_lat (Default mmap)\n");
     printf("-iter=\t\tNumber of iterations to mmap for mmap_lat engine\n");
     printf("-map_pop=\t0|1 to pass MAP_POPULATE to mmap for mmap_lat engine\n");
-    printf("-init_mem=\t0|1 to initialize memory with random bytes instead of all 0s (Only for MAP_ANONYMOUS)\n");
     printf("-map_shared=\t0|1 to specify to pass MAP_SHARED or MAP_PRIVATE to mmap(Default 0)\n");
     printf("\nFor usage of engine specific commands consult the documentation\n");
     printf("Commands invalid for engine will be disregarded\n");
@@ -263,19 +260,6 @@ void set_map_pop(char *token, Arguments *args)
     {
         errno = EINVAL;
         perror("Invalid value for map_pop. Needs to be 0|1");
-        exit(1);
-    }
-}
-
-void set_init_mem(char *token, Arguments *args)
-{
-    char *temp = token;
-    char *ptr;
-    args->init_mem = strtoul(temp + 10, &ptr, 10);
-    if (args->init_mem > 1 || args->init_mem < 0)
-    {
-        errno = EINVAL;
-        perror("Invalid value for init_mem. Needs to be 0|1");
         exit(1);
     }
 }
