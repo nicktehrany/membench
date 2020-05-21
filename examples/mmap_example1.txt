@@ -1,6 +1,0 @@
--runtime=20
--fsize=1G
--dir=/dev/null
--copysize=64K
--mode=randwrite
--engine=mmap

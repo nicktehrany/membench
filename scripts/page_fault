@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
 
-dest="results/page_faults/page_fault_costs"
+dest="results/page_fault/page_fault_costs"
 res="results.out"
 ram="/dev/ram0"
 pmem="/dev/pmem0"
 mnt="/mnt/mem"
-workload_priv="workloads/page_fault/page_fault_priv.txt"
-workload_priv_anon="workloads/page_fault/page_fault_anon_priv.txt"
-workload_shar="workloads/page_fault/page_fault_shar.txt"
-workload_shar_anon="workloads/page_fault/page_fault_anon_shar.txt"
+workload="workloads/page_fault/page_fault_reg.txt"
+workload_anon="workloads/page_fault/page_fault_anon.txt"
 
-mkdir -p results
-mkdir -p results/page_faults
+cd ..
+mkdir -p results/page_fault
 touch $dest
 
 mount_fs() {
@@ -43,10 +41,8 @@ echo "Creating and Mounting ext4 on $ram"
 sudo mkfs.ext4 -F $ram &> /dev/null 
 mount_fs $ram $mnt
 echo "Running ext4 bench"
-echo "Private ext4: " >> $dest
-run_cmd $workload_priv
-echo "Shared ext4: " >> $dest
-run_cmd $workload_shar
+echo "ext4: " >> $dest
+run_cmd $workload
 echo "Finished ext4 bench"
 echo "Unmounting ext4"
 sudo umount $ram &> /dev/null
@@ -55,10 +51,8 @@ echo "Creating and Mounting xfs on $ram"
 sudo mkfs.xfs $ram -f &> /dev/null
 mount_fs $ram $mnt
 echo "Running xfs bench"
-echo "Private xfs: " >> $dest
-run_cmd $workload_priv
-echo "Shared xfs: " >> $dest
-run_cmd $workload_shar
+echo "xfs: " >> $dest
+run_cmd $workload
 echo "Finished xfs bench"
 echo "Unmounting xfs"
 umount_fs $ram
@@ -67,10 +61,8 @@ echo "Creating and Mounting ext4-dax on $pmem"
 sudo mkfs.ext4 $pmem -f &> /dev/null
 mount_fs $pmem $mnt
 echo "Running ext4-dax bench"
-echo "Private ext4-dax: " >> $dest
-run_cmd $workload_priv
-echo "Shared ext4-dax: " >> $dest
-run_cmd $workload_shar
+echo "ext4-dax: " >> $dest
+run_cmd $workload
 echo "Finished ext4-dax bench"
 echo "Unmounting ext4-dax"
 sudo umount $pmem &> /dev/null
@@ -79,19 +71,15 @@ echo "Creating and Mounting xfs-dax on $pmem"
 sudo mkfs.xfs -m reflink=0 $pmem -f &> /dev/null
 mount_fs $pmem $mnt
 echo "Running xfs-dax bench"
-echo "Private xfs-dax: " >> $dest
-run_cmd $workload_priv
-echo "Shared xfs-dax: " >> $dest
-run_cmd $workload_shar
+echo "xfs-dax: " >> $dest
+run_cmd $workload
 echo "Finished xfs-dax bench"
 echo "Unmounting xfs-dax"
 sudo umount $pmem &> /dev/null
 
 echo "Running MAP_ANONYMOUS"
-echo "Private map_anon: " >> $dest
-run_cmd $workload_priv_anon
-echo "Shared map_anon: " >> $dest
-run_cmd $workload_shar_anon
+echo "map_anon: " >> $dest
+run_cmd $workload_anon
 echo "Finished MAP_ANONYMOUS bench"
 
 echo "Results:"
