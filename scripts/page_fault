@@ -13,6 +13,17 @@ if [[ "$PWD" == *"scripts"* ]]; then
     cd ..
 fi
 
+if [ ! -e $ram ]; then
+    echo "$ram doesn't exists"
+    exit 1
+fi
+
+if [ ! -e $pmem ]; then
+    echo "$pmem doesn't exists"
+    exit 1
+fi
+
+exit 1
 mkdir -p results/page_fault
 touch $dest
 
