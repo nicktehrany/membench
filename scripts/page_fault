@@ -1,16 +1,26 @@
 #!/usr/bin/env bash
 
-dest="results/page_fault/page_fault_costs"
+dest="results/page_fault/page_fault_costs.csv"
 res="results.out"
 ram="/dev/ram0"
 pmem="/dev/pmem0"
 mnt="/mnt/mem"
 workload="workloads/page_fault/page_fault_reg.txt"
 workload_anon="workloads/page_fault/page_fault_anon.txt"
+iters=10
 
 cd ..
 mkdir -p results/page_fault
 touch $dest
+
+file_setup() {
+    echo -n "File System" >> $dest
+    for i in $(seq 0 $1)
+    do
+       echo -n ",Run $i" >> $dest
+    done
+    echo "" >> $dest
+}
 
 mount_fs() {
     if [[ $1 == *"pmem"* ]]; then
@@ -24,25 +34,32 @@ umount_fs() {
     sudo umount $1
 }
 
+add_misc() {
+    echo "mean," >> $dest
+    echo " +-," >> $dest
+}
+
 run_cmd() {
-    for i in {1..5}
+    for i in $(seq 0 $2)
     do
         sudo ./Benchmark -file=$1 &>/dev/null
-        echo | awk '{if(/Average latency\t*/) printf("%s ",$3)}' < results.out >> $dest
+        echo | awk '{if(/Average latency\t*/) printf(",%s",($3/1000))}' < results.out >> $dest
     done
     echo "" >> $dest
+    add_misc
 }
 
 sudo mkdir -p $mnt
 echo "Clearing $dest"
 > $dest
+file_setup $iters
 
 echo "Creating and Mounting ext4 on $ram"
 sudo mkfs.ext4 -F $ram &> /dev/null 
 mount_fs $ram $mnt
 echo "Running ext4 bench"
-echo -n "ext4: " >> $dest
-run_cmd $workload
+echo -n "ext4" >> $dest
+run_cmd $workload $iters
 echo "Finished ext4 bench"
 echo "Unmounting ext4"
 sudo umount $ram &> /dev/null
@@ -51,8 +68,8 @@ echo "Creating and Mounting xfs on $ram"
 sudo mkfs.xfs $ram -f &> /dev/null
 mount_fs $ram $mnt
 echo "Running xfs bench"
-echo -n "xfs: " >> $dest
-run_cmd $workload
+echo -n "xfs" >> $dest
+run_cmd $workload $iters
 echo "Finished xfs bench"
 echo "Unmounting xfs"
 umount_fs $ram
@@ -61,8 +78,8 @@ echo "Creating and Mounting ext4-dax on $pmem"
 sudo mkfs.ext4 $pmem -f &> /dev/null
 mount_fs $pmem $mnt
 echo "Running ext4-dax bench"
-echo -n "ext4-dax: " >> $dest
-run_cmd $workload
+echo -n "ext4-dax" >> $dest
+run_cmd $workload $iters
 echo "Finished ext4-dax bench"
 echo "Unmounting ext4-dax"
 sudo umount $pmem &> /dev/null
@@ -71,16 +88,13 @@ echo "Creating and Mounting xfs-dax on $pmem"
 sudo mkfs.xfs -m reflink=0 $pmem -f &> /dev/null
 mount_fs $pmem $mnt
 echo "Running xfs-dax bench"
-echo -n "xfs-dax: " >> $dest
-run_cmd $workload
+echo -n "xfs-dax" >> $dest
+run_cmd $workload $iters
 echo "Finished xfs-dax bench"
 echo "Unmounting xfs-dax"
 sudo umount $pmem &> /dev/null
 
 echo "Running MAP_ANONYMOUS"
-echo -n "map_anon: " >> $dest
-run_cmd $workload_anon
+echo -n "map_anon" >> $dest
+run_cmd $workload_anon $iters
 echo "Finished MAP_ANONYMOUS bench"
-
-echo "Results:"
-cat $dest
