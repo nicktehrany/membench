@@ -12,7 +12,7 @@
 void mmap_engine(Arguments *args)
 {
     Results results = {0, 0, 0, 0, 0};
-    Mapping mapping = {0, 0, 0, 0, 0, ""};
+    Mapping mapping = {0, 0, 0, 0, ""};
 
     mmap_check_args(args);
     mmap_prepare_mapping(&mapping, *args);
@@ -240,7 +240,6 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
 
         close(fd);
 
-        mapping->is_pmem = 0;
         mapping->map_anon = 0;
         mapping->fsize = args.fsize;
         mapping->fpath = args.path;
@@ -259,7 +258,6 @@ void mmap_prepare_map_anon(Mapping *mapping, Arguments args)
         exit(1);
     }
 
-    mapping->is_pmem = 0;
     mapping->map_anon = 1;
     mapping->fsize = args.fsize;
 }
@@ -278,7 +276,6 @@ void mmap_cleanup_mapping(Mapping *mapping)
     mapping->buflen = 0;
     mapping->fpath = "";
     mapping->fsize = 0;
-    mapping->is_pmem = 0;
     mapping->map_anon = 0;
 }
 

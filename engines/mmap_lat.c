@@ -11,7 +11,7 @@
 void mmap_lat_engine(Arguments *args)
 {
     Results results = {0, 0, 0, 0, 0};
-    Mapping mapping = {0, 0, 0, 0, 0, ""};
+    Mapping mapping = {0, 0, 0, 0, ""};
     uint64_t acc_nsecs = 0;
     int fd = 0;
     uint64_t latency = 0;

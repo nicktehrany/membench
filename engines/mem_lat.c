@@ -1,6 +1,10 @@
 #include "mem_lat.h"
 #define DEF_WALKS 10000000
 
+/*
+ * TODO DESCRIPTION
+ * 
+ */
 void mem_lat_engine(Arguments *args)
 {
     Results results = {0, 0, 0, 0, 0};
