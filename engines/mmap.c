@@ -101,7 +101,6 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
         elapsed = NANS_ELAPSED(tend, tstart);
         add_latency(((double)elapsed / (double)loop_iters), results);
         secs_elapsed += elapsed * NANS_TO_SECS;
-        msync(mapping->addr, mapping->fsize, MS_INVALIDATE);
 
         if (args->iterations != 0 && args->iterations <= counter)
             break;
