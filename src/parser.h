@@ -17,16 +17,16 @@ typedef struct Arguments
     int map_shared;
 } Arguments;
 
-void parse(Arguments *, int, char **);
+void parse(Arguments *args, int argc, char **argv);
 void display_help();
-void parse_cmd_line(Arguments *, char *[], int);
-int parse_file(char *, char *[]);
-void set_runtime(char *, Arguments *);
-void set_filesize(char *, Arguments *);
-void set_buflen(char *, Arguments *);
-void set_path(char *, Arguments *);
-void set_mode(char *, Arguments *);
-void set_engine(char *, Arguments *);
+void parse_cmd_line(Arguments *args, char *tokens[], int size);
+int parse_file(char *token, char *tokens[]);
+void set_runtime(char *token, Arguments *args);
+void set_filesize(char *token, Arguments *args);
+void set_buflen(char *token, Arguments *args);
+void set_path(char *token, Arguments *args);
+void set_mode(char *token, Arguments *args);
+void set_engine(char *token, Arguments *args);
 void set_iter(char *token, Arguments *args);
 void set_map_pop(char *token, Arguments *args);
 void set_map_shared(char *token, Arguments *args);
