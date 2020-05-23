@@ -2,8 +2,12 @@
 #define DEF_WALKS 10000000
 
 /*
- * TODO DESCRIPTION
- * 
+ *
+ * This Engine is meant to measure the latency of memory. It achieves this 
+ * by creating a ring of pointers in a malloced buffer in memory, which are 
+ * then walked along. Meaning, each pointer points to another random pointer 
+ * within the buffer, starting from the initial pointer, it'll keep going to 
+ * the next pointer 10,000,000 times. 
  */
 void mem_lat_engine(Arguments *args)
 {
