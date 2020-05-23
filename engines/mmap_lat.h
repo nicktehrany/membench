@@ -3,7 +3,7 @@
 #include "../src/results.h"
 #include "../src/functions.h"
 
-void mmap_lat_engine(Mapping *, Arguments *, Results *);
+void mmap_lat_engine(Arguments *);
 void mmap_lat_check_args(Arguments *);
 int mmap_lat_prep_file(Arguments args);
 

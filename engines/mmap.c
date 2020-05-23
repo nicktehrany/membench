@@ -9,13 +9,16 @@
  * Engine will create and delete a file of the specified sizes (which can take longer 
  * for large files).
 */
-void mmap_engine(Mapping *mapping, Arguments *args, Results *results)
+void mmap_engine(Arguments *args)
 {
+    Results results = {0, 0, 0, 0, 0};
+    Mapping mapping = {0, 0, 0, 0, 0, ""};
+
     mmap_check_args(args);
-    mmap_prepare_mapping(mapping, *args);
-    mmap_run_benchmark(mapping, args, results);
-    mmap_cleanup_mapping(mapping);
-    dump_results(*results, *args);
+    mmap_prepare_mapping(&mapping, *args);
+    mmap_run_benchmark(&mapping, args, &results);
+    mmap_cleanup_mapping(&mapping);
+    dump_results(results, *args);
 }
 
 void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)

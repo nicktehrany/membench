@@ -3,7 +3,7 @@
 #include "../src/results.h"
 #include "../src/functions.h"
 
-void mmap_engine(Mapping *, Arguments *, Results *);
+void mmap_engine(Arguments *);
 void mmap_check_args(Arguments *);
 void mmap_seq_read(Mapping *mapping, Results *results, Arguments *);
 void mmap_rand_read(Mapping *, Results *, Arguments *);

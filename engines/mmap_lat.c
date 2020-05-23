@@ -8,30 +8,32 @@
  * MAP_ANONYMOUS, for no file backing. Each one can be run with or without
  * MAP_POPULATE, to pre populate pages
  */
-void mmap_lat_engine(Mapping *mapping, Arguments *args, Results *results)
+void mmap_lat_engine(Arguments *args)
 {
+    Results results = {0, 0, 0, 0, 0};
+    Mapping mapping = {0, 0, 0, 0, 0, ""};
     uint64_t acc_nsecs = 0;
     int fd = 0;
     uint64_t latency = 0;
 
     mmap_lat_check_args(args);
     fd = mmap_lat_prep_file(*args);
-    mapping->fpath = args->path;
-    mapping->fsize = args->fsize;
-    mapping->map_anon = args->map_anon;
+    mapping.fpath = args->path;
+    mapping.fsize = args->fsize;
+    mapping.map_anon = args->map_anon;
 
     for (uint64_t i = 0; i < args->iterations; i++)
     {
-        latency = mmap_lat_do_mmap(mapping, *args, fd);
-        add_latency(latency, results);
+        latency = mmap_lat_do_mmap(&mapping, *args, fd);
+        add_latency(latency, &results);
         acc_nsecs += latency;
-        mmap_lat_do_unmap(mapping);
+        mmap_lat_do_unmap(&mapping);
     }
 
     args->runtime = acc_nsecs * NANS_TO_SECS;
-    mmap_lat_cleanup_file(mapping, fd);
-    results->avg_lat = (double)acc_nsecs / (double)args->iterations;
-    dump_results(*results, *args);
+    mmap_lat_cleanup_file(&mapping, fd);
+    results.avg_lat = (double)acc_nsecs / (double)args->iterations;
+    dump_results(results, *args);
 }
 
 int mmap_lat_prep_file(Arguments args)

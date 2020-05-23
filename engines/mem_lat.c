@@ -1,22 +1,23 @@
 #include "mem_lat.h"
 #define DEF_WALKS 10000000
 
-void mmem_lat_engine(Arguments *args, Results *results)
+void mem_lat_engine(Arguments *args)
 {
+    Results results = {0, 0, 0, 0, 0};
     MemMap memmap;
     double runtime = 0.0;
     uint64_t iters = (args->iterations > 0) ? args->iterations : 1;
     for (uint64_t i = 0; i < iters; i++)
     {
         init_mem(&memmap, args);
-        runtime += walk_ptrs(memmap, results);
+        runtime += walk_ptrs(memmap, &results);
         free(memmap.base_ptr);
         memmap.base_ptr = NULL;
     }
 
     args->iterations = iters;
-    results->avg_lat = ((runtime / (double)iters) * SECS_TO_NANS) / (double)DEF_WALKS;
-    dump_results(*results, *args);
+    results.avg_lat = ((runtime / (double)iters) * SECS_TO_NANS) / (double)DEF_WALKS;
+    dump_results(results, *args);
 }
 
 void init_mem(MemMap *memmap, Arguments *args)
