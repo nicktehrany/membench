@@ -2,7 +2,7 @@
 
 ## Overview
 
-This Engine is meant to measure the latency of memory. It achieves this by creating a ring of pointers in a malloced buffer in memory, which are then walked along. Meaning, each pointer points to another random pointer within the buffer, starting from the initial pointer, it'll keep going to the next pointer 10,000,000 times. Time is measured for all 10,000,000 walks and the averaged.
+This Engine is meant to measure the latency of memory. It achieves this by creating a ring of pointers in a malloced buffer in memory, which are then walked along. Allocation works by starting with the base pointer, setting it to point to some other random address in the buffer, then the pointer at that address will be set to point to some other random address, and so on. The last pointer to be set will point back to the base pointer, therefore not every pointer in the buffer may point to an address, but this will create a cycle that can be walked multiple times. The walk will start at the base pointer and it'll keep going to the next pointer 10,000,000 times.
 
 ## Usage
 
