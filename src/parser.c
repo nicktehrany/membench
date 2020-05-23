@@ -27,6 +27,12 @@ void parse(Arguments *args, int argc, char **argv)
         tokens[i] = argv[i + 1];
     }
     parse_cmd_line(args, tokens, argc - 1);
+    if (args->engine == -1)
+    {
+        errno = EINVAL;
+        perror("No engine specified");
+        exit(1);
+    }
 }
 
 void parse_cmd_line(Arguments *args, char *tokens[], int size)
@@ -101,7 +107,7 @@ void display_help()
     printf("-copysize=\tSet copy size for memcpy (For example 4K for 4KiB)\n");
     printf("-dir=\t\tPath to directory to use (/dev/null or /dev/zero for MAP_ANONYMOUS, current if none specified)\n");
     printf("-mode=\t\tPossible modes are: read write randread randwrite (Default read)\n");
-    printf("-engine=\tPossible engines are mmap and mmap_lat (Default mmap)\n");
+    printf("-engine=\tPossible engines are mmap, mmap_lat, mem_lat\n");
     printf("-iter=\t\tNumber of iterations to mmap for mmap_lat engine\n");
     printf("-map_pop=\t0|1 to pass MAP_POPULATE to mmap for mmap_lat engine\n");
     printf("-map_shared=\t0|1 to specify to pass MAP_SHARED or MAP_PRIVATE to mmap(Default 0)\n");

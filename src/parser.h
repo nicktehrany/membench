@@ -11,7 +11,7 @@ typedef struct Arguments
     uint64_t buflen;
     int mode;     //0=read 1=write 2=randread 3=randwrite
     int map_anon; // Mapping without backing of file on file system
-    int engine;   // Default mmap engine
+    int engine;
     uint64_t iterations;
     int map_pop;
     int map_shared;
