@@ -221,6 +221,8 @@ void set_engine(char *token, Arguments *args)
         args->engine = 1;
     else if (strncmp(mode, "mmap", 4) == 0)
         args->engine = 0;
+    else if (strncmp(mode, "mem_lat", 7) == 0)
+        args->engine = 2;
     else
     {
         errno = EINVAL;

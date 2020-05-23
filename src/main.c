@@ -11,11 +11,12 @@ int main(int argc, char *argv[])
     Mapping mapping = {0, 0, 0, 0, 0, ""};
     Arguments args = {0, "", 0, 0, 0, 0, 0, 0, 0, 0};
 
-    //parse(&args, argc, argv);
-    // if (args.engine == 0)
-    //     mmap_engine(&mapping, &args, &results);
-    // else if (args.engine == 1)
-    //     mmap_lat_engine(&mapping, &args, &results);
-    mmem_lat_engine();
+    parse(&args, argc, argv);
+    if (args.engine == 0)
+        mmap_engine(&mapping, &args, &results);
+    else if (args.engine == 1)
+        mmap_lat_engine(&mapping, &args, &results);
+    else if (args.engine == 2)
+        mmem_lat_engine(&args, &results);
     return 0;
 }

@@ -12,9 +12,9 @@ void dump_results(Results results, Arguments args)
         exit(1);
     }
     fprintf(fd, "\t\t==== SUMMARY ====\n");
-    if (strcmp(args.path, "file") == 0)
+    if (args.engine != 2 && strcmp(args.path, "file") == 0)
         fprintf(fd, "Directory\t\t\t\tCurrent Directory\n");
-    else
+    else if (args.engine != 2)
         fprintf(fd, "Directory\t\t\t\t%s\n", args.path);
 
     switch (args.engine)
@@ -25,37 +25,48 @@ void dump_results(Results results, Arguments args)
     case 1:
         fprintf(fd, "Engine\t\t\t\t\tmmap_lat\n");
         break;
+    case 2:
+        fprintf(fd, "Engine\t\t\t\t\tmem_lat\n");
+        break;
     }
 
-    fprintf(fd, "Flags\t\t\t\t\t");
-    switch (args.map_anon)
+    if (args.engine != 2)
     {
-    case 1:
-        fprintf(fd, "MAP_ANONYMOUS ");
-        break;
-    default:
-        break;
+        fprintf(fd, "Flags\t\t\t\t\t");
+        switch (args.map_anon)
+        {
+        case 1:
+            fprintf(fd, "MAP_ANONYMOUS ");
+            break;
+        default:
+            break;
+        }
+        switch (args.map_pop)
+        {
+        case 1:
+            fprintf(fd, "MAP_POPULATE ");
+            break;
+        default:
+            break;
+        }
+        switch (args.map_shared)
+        {
+        case 1:
+            fprintf(fd, "MAP_SHARED ");
+            break;
+        default:
+            fprintf(fd, "MAP_PRIVATE ");
+            break;
+        }
+        fprintf(fd, "\n");
     }
-    switch (args.map_pop)
+
+    if (args.engine != 2)
     {
-    case 1:
-        fprintf(fd, "MAP_POPULATE ");
-        break;
-    default:
-        break;
+        fprintf(fd, "Memcpy Iterations\t\t%ld\n", args.iterations);
+        fprintf(fd, "Total Runtime\t\t\t%.6f sec\n", args.runtime);
     }
-    switch (args.map_shared)
-    {
-    case 1:
-        fprintf(fd, "MAP_SHARED ");
-        break;
-    default:
-        fprintf(fd, "MAP_PRIVATE ");
-        break;
-    }
-    fprintf(fd, "\n");
-    fprintf(fd, "Memcpy Iterations\t\t%ld\n", args.iterations);
-    fprintf(fd, "Total Runtime\t\t\t%.6f sec\n", args.runtime);
+
     if (args.fsize >= (1024 * 1024 * 1024))
         fprintf(fd, "File Size\t\t\t\t%ld GiB\n", args.fsize / (1024 * 1024 * 1024));
     else if (args.fsize >= (1024 * 1024))
@@ -69,6 +80,8 @@ void dump_results(Results results, Arguments args)
         results_mmap_eng(args, fd, results);
     else if (args.engine == 1)
         results_mmap_lat_eng(fd, results);
+    else if (args.engine == 2)
+        results_mem_lat_eng(fd, results, args);
     // display_results(fd); TODO IMPLEMENT FULLY
     fclose(fd);
 }
@@ -119,5 +132,11 @@ void results_mmap_lat_eng(FILE *fd, Results results)
 {
     fprintf(fd, "Minimum latency\t\t\t%.2f nsec\n", results.min_lat);
     fprintf(fd, "Maximum latency\t\t\t%.2f nsec\n", results.max_lat);
+    fprintf(fd, "Average latency\t\t\t%.2f nsec\n", results.avg_lat);
+}
+
+void results_mem_lat_eng(FILE *fd, Results results, Arguments args)
+{
+    fprintf(fd, "Iterations\t\t\t\t%ld\n", args.iterations);
     fprintf(fd, "Average latency\t\t\t%.2f nsec\n", results.avg_lat);
 }

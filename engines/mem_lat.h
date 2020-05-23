@@ -9,8 +9,8 @@ typedef struct MemMap
     uint64_t size;
 } MemMap;
 
-void mmem_lat_engine();
-void init_mem(MemMap *);
-void walk_ptrs(MemMap memmap);
+void mmem_lat_engine(Arguments *, Results *);
+void init_mem(MemMap *, Arguments *);
+void walk_ptrs(MemMap memmap, Results *, Arguments *);
 
 #endif
