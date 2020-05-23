@@ -138,5 +138,7 @@ void results_mmap_lat_eng(FILE *fd, Results results)
 void results_mem_lat_eng(FILE *fd, Results results, Arguments args)
 {
     fprintf(fd, "Iterations\t\t\t\t%ld\n", args.iterations);
+    fprintf(fd, "Minimum latency\t\t\t%.2f nsec\n", results.min_lat);
+    fprintf(fd, "Maximum latency\t\t\t%.2f nsec\n", results.max_lat);
     fprintf(fd, "Average latency\t\t\t%.2f nsec\n", results.avg_lat);
 }

@@ -1,13 +1,22 @@
 #include "mem_lat.h"
+#define DEF_WALKS 10000000
 
 void mmem_lat_engine(Arguments *args, Results *results)
 {
     MemMap memmap;
-    init_mem(&memmap, args);
-    walk_ptrs(memmap, results, args);
+    double runtime = 0.0;
+    uint64_t iters = (args->iterations > 0) ? args->iterations : 1;
+    for (uint64_t i = 0; i < iters; i++)
+    {
+        init_mem(&memmap, args);
+        runtime += walk_ptrs(memmap, results);
+        free(memmap.base_ptr);
+        memmap.base_ptr = NULL;
+    }
+
+    args->iterations = iters;
+    results->avg_lat = ((runtime / (double)iters) * SECS_TO_NANS) / (double)DEF_WALKS;
     dump_results(*results, *args);
-    free(memmap.base_ptr);
-    memmap.base_ptr = 0;
 }
 
 void init_mem(MemMap *memmap, Arguments *args)
@@ -34,26 +43,25 @@ void init_mem(MemMap *memmap, Arguments *args)
     args->fsize = size;
 }
 
-void walk_ptrs(MemMap memmap, Results *results, Arguments *args)
+double walk_ptrs(MemMap memmap, Results *results)
 {
-    char **walker;
-    uint64_t iters = (args->iterations > 0) ? args->iterations : 10000000;
     struct timespec tstart = {0, 0}, tend = {0, 0};
     uint64_t elapsed = 0;
-    walker = &memmap.base_ptr[0];
+    char **walker = &memmap.base_ptr[0];
     char **store = (char **)calloc(memmap.size * sizeof(char *), 1);
 
     clock_gettime(CLOCK_MONOTONIC, &tstart);
-    for (uint64_t i = 0; i < iters; i++)
+    for (uint64_t i = 0; i < DEF_WALKS; i++)
     {
         walker = (char **)*walker;
-        store[i % memmap.size] = *walker; // Store walker somewhere otherwise compiler uses ADCE on it when optimizing
+        store[i % memmap.size] = *walker; // Store walking pointer somewhere otherwise compiler uses ADCE on it when optimizing
     }
     clock_gettime(CLOCK_MONOTONIC, &tend);
 
     elapsed = NANS_ELAPSED(tend, tstart);
-    results->avg_lat = elapsed / iters;
-    args->iterations = iters;
+    add_latency(elapsed / DEF_WALKS, results);
     free(store);
     store = NULL;
+
+    return elapsed * NANS_TO_SECS;
 }

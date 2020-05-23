@@ -11,6 +11,6 @@ typedef struct MemMap
 
 void mmem_lat_engine(Arguments *, Results *);
 void init_mem(MemMap *, Arguments *);
-void walk_ptrs(MemMap memmap, Results *, Arguments *);
+double walk_ptrs(MemMap memmap, Results *);
 
 #endif
