@@ -1,5 +1,4 @@
 #include "mem_lat.h"
-#define DEF_MEM_SIZE
 
 void mmem_lat_engine(Arguments *args, Results *results)
 {

@@ -18,5 +18,6 @@ int main(int argc, char *argv[])
         mmap_lat_engine(&mapping, &args, &results);
     else if (args.engine == 2)
         mmem_lat_engine(&args, &results);
+
     return 0;
 }

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This Benchmark was originally created to investigate performance of DAX enabled file systems in persistent memory. It comes with two engines, mmap, which measures memory throughput, and mmap_lat, which measures mmap latencies.
+This Benchmark was originally created to investigate performance of DAX enabled file systems in persistent memory. It includes three engines, mmap, which measures memory throughput, mmap_lat, which measures mmap latencies, and mem_lat, which measures memory latencies.
 
 ## Directory Setup
 
