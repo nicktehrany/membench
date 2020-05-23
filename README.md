@@ -8,7 +8,7 @@ This Benchmark was originally created to investigate performance of DAX enabled 
 
 The project has the following directories:
 
-* doc (Contains documentation for each engine)
+* docs (Contains documentation for each engine)
 * engines (Contains the code for each engine)
 * scripts (Contains script used to run benchmarks. Details are in the scripts README)
 * src (Contains main code for the Benchmark)

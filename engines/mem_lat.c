@@ -27,7 +27,7 @@ void init_mem(MemMap *memmap, Arguments *args)
         next_ptr = temp;
     }
 
-    // Point last pointer back to base pointer to complete circle
+    // Point last pointer back to base pointer to complete cycle
     base[next_ptr] = (char *)&base[0];
     memmap->base_ptr = base;
     memmap->size = size;

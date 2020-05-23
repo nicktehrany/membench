@@ -49,4 +49,4 @@ with arguments.txt containing:
 
 ```
 
-This would run the engine for 1000 iterations of 4 byte memcpy, at random offsets, from the mapped file to a destination in memory. The file will be 1GiB large, and page table entries will be pre populated, as well as the mmap call getting flag MAP_PRIVATE. The runtime will be 1 by default, but in case the run will take longer than 1 second, it's good to specify a large enough random runtime.
+This would run the engine for 1,000 iterations of 4 byte memcpy, at random offsets, from the mapped file to a destination in memory. The file will be 1GiB large, and page table entries will be pre populated, as well as the mmap call getting flag MAP_PRIVATE. The runtime will be 1 by default, but in case the run will take longer than 1 second, it's good to specify a large enough random runtime.

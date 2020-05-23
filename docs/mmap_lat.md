@@ -44,4 +44,4 @@ with arguments.txt containing:
 
 ```
 
-This would run the engine for 100000 iterations of mmap. The file will be 1GiB large, and page table entries will not be pre populated, as well as the mmap call getting flag MAP_PRIVATE. The runtime will be 1 by default, but in case the run will take longer than 1 second, it's good to specify a large enough random runtime.
+This would run the engine for 100,000 iterations of mmap. The file will be 1GiB large, and page table entries will not be pre populated, as well as the mmap call getting flag MAP_PRIVATE. The runtime will be 1 by default, but in case the run will take longer than 1 second, it's good to specify a large enough random runtime.
