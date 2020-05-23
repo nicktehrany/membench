@@ -48,7 +48,7 @@ void walk_ptrs(MemMap memmap, Results *results, Arguments *args)
     for (uint64_t i = 0; i < iters; i++)
     {
         walker = (char **)*walker;
-        store[i] = *walker; // Store walker somewhere otherwise compiler uses ADCE on it when optimizing
+        store[i % memmap.size] = *walker; // Store walker somewhere otherwise compiler uses ADCE on it when optimizing
     }
     clock_gettime(CLOCK_MONOTONIC, &tend);
 
