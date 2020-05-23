@@ -13,7 +13,6 @@ The engine takes several commands, which can be provided via cmd line or a file.
 ```shell
 -engine=mem_lat
 -fsize= *specify the size of buffer to use for pointers given in K/M/G*
--map_pop= *0|1 to pass MAP_POPULATE to mmap call (Default 0)*
 -iter= *Number of times to walk to the next pointer (Default 10,000,000)*
 ```
 
