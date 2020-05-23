@@ -37,12 +37,12 @@ Running the following command:
 with arguments.txt containing:
 
 ```shell
+-engine=mmap
 -runtime=4
 -dir=/dev/zero
 -fsize=1G
 -copysize=4
 -mode=randread
--engine=mmap
 -map_pop=1
 -map_shared=0
 -iter=1000

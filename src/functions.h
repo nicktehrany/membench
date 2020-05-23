@@ -26,8 +26,8 @@ typedef struct Mapping
     const char *fpath;
 } Mapping;
 
-void get_bandwidth(uint64_t, long double, uint64_t, Results *);
-void add_latency(uint64_t latency, Results *results);
+void get_bandwidth(uint64_t, double, uint64_t, Results *);
+void add_latency(double latency, Results *results);
 int set_flags(Arguments);
 
 #endif

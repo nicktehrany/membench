@@ -23,7 +23,6 @@ if [ ! -e $pmem ]; then
     exit 1
 fi
 
-exit 1
 mkdir -p results/page_fault
 touch $dest
 
@@ -54,7 +53,7 @@ add_misc() {
 }
 
 run_cmd() {
-    for i in $(seq 0 $2)
+    for i in $(seq 0 $iters)
     do
         sudo ./Benchmark -file=$1 &>/dev/null
         echo | awk '{if(/Average latency\t*/) printf(",%s",($3/1000))}' < results.out >> $dest
@@ -73,7 +72,7 @@ sudo mkfs.ext4 -F $ram &> /dev/null
 mount_fs $ram $mnt
 echo "Running ext4 bench"
 echo -n "ext4" >> $dest
-run_cmd $workload $iters
+run_cmd $workload
 echo "Finished ext4 bench"
 echo "Unmounting ext4"
 sudo umount $ram &> /dev/null
@@ -83,7 +82,7 @@ sudo mkfs.xfs $ram -f &> /dev/null
 mount_fs $ram $mnt
 echo "Running xfs bench"
 echo -n "xfs" >> $dest
-run_cmd $workload $iters
+run_cmd $workload
 echo "Finished xfs bench"
 echo "Unmounting xfs"
 umount_fs $ram
@@ -93,7 +92,7 @@ sudo mkfs.ext4 $pmem -f &> /dev/null
 mount_fs $pmem $mnt
 echo "Running ext4-dax bench"
 echo -n "ext4-dax" >> $dest
-run_cmd $workload $iters
+run_cmd $workload
 echo "Finished ext4-dax bench"
 echo "Unmounting ext4-dax"
 sudo umount $pmem &> /dev/null
@@ -103,12 +102,12 @@ sudo mkfs.xfs -m reflink=0 $pmem -f &> /dev/null
 mount_fs $pmem $mnt
 echo "Running xfs-dax bench"
 echo -n "xfs-dax" >> $dest
-run_cmd $workload $iters
+run_cmd $workload
 echo "Finished xfs-dax bench"
 echo "Unmounting xfs-dax"
 sudo umount $pmem &> /dev/null
 
 echo "Running MAP_ANONYMOUS"
 echo -n "map_anon" >> $dest
-run_cmd $workload_anon $iters
+run_cmd $workload_anon
 echo "Finished MAP_ANONYMOUS bench"

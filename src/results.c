@@ -110,14 +110,14 @@ void results_mmap_eng(Arguments args, FILE *fd, Results results)
     }
 
     fprintf(fd, "I/O Data\t\t\t\t%f GiB\n", results.io_data);
-    fprintf(fd, "Minimum latency\t\t\t%.0f nsec\n", results.min_lat);
-    fprintf(fd, "Maximum latency\t\t\t%.0f nsec\n", results.max_lat);
-    fprintf(fd, "Average latency\t\t\t%.0f nsec\n", results.avg_lat);
+    fprintf(fd, "Minimum latency\t\t\t%.2f nsec\n", results.min_lat);
+    fprintf(fd, "Maximum latency\t\t\t%.2f nsec\n", results.max_lat);
+    fprintf(fd, "Average latency\t\t\t%.2f nsec\n", results.avg_lat);
 }
 
 void results_mmap_lat_eng(FILE *fd, Results results)
 {
-    fprintf(fd, "Minimum latency\t\t\t%.0f nsec\n", results.min_lat);
-    fprintf(fd, "Maximum latency\t\t\t%.0f nsec\n", results.max_lat);
-    fprintf(fd, "Average latency\t\t\t%.0f nsec\n", results.avg_lat);
+    fprintf(fd, "Minimum latency\t\t\t%.2f nsec\n", results.min_lat);
+    fprintf(fd, "Maximum latency\t\t\t%.2f nsec\n", results.max_lat);
+    fprintf(fd, "Average latency\t\t\t%.2f nsec\n", results.avg_lat);
 }
