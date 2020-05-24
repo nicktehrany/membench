@@ -25,6 +25,7 @@ void mmap_engine(Arguments *args)
     }
 
     results.avg_lat = ((double)elapsed / (double)args->iterations / (double)args->cpy_iter) * SECS_TO_NANS;
+    results.io_data = (double)args->iterations * (double)args->cpy_iter * (double)args->buflen;
     dump_results(results, *args);
 }
 

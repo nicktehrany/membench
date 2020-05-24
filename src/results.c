@@ -76,7 +76,15 @@ void results_mmap_eng(FILE *fd, Results results, Arguments args)
         break;
     }
 
-    fprintf(fd, "I/O Data\t\t\t\t%f GiB\n", results.io_data);
+    if (results.io_data >= (1024 * 1024 * 1024))
+        fprintf(fd, "I/O Data\t\t\t\t%ld GiB\n", results.io_data / ((1024 * 1024 * 1024)));
+    else if (results.io_data >= (1024 * 1024))
+        fprintf(fd, "I/O Data\t\t\t\t%ld MiB\n", results.io_data / ((1024 * 1024)));
+    else if (results.io_data >= 1024)
+        fprintf(fd, "I/O Data\t\t\t\t%ld KiB\n", results.io_data / 1024);
+    else
+        fprintf(fd, "I/O Data\t\t\t\t%ld Bytes\n", results.io_data);
+
     fprintf(fd, "Minimum latency\t\t\t%.2f nsec\n", results.min_lat);
     fprintf(fd, "Maximum latency\t\t\t%.2f nsec\n", results.max_lat);
     fprintf(fd, "Average latency\t\t\t%.2f nsec\n", results.avg_lat);
