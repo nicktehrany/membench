@@ -77,13 +77,13 @@ void results_mmap_eng(FILE *fd, Results results, Arguments args)
     }
 
     if (results.io_data >= (1024 * 1024 * 1024))
-        fprintf(fd, "I/O Data\t\t\t\t%ld GiB\n", results.io_data / ((1024 * 1024 * 1024)));
+        fprintf(fd, "Data Copied\t\t\t\t%ld GiB\n", results.io_data / ((1024 * 1024 * 1024)));
     else if (results.io_data >= (1024 * 1024))
-        fprintf(fd, "I/O Data\t\t\t\t%ld MiB\n", results.io_data / ((1024 * 1024)));
+        fprintf(fd, "Data Copied\t\t\t\t%ld MiB\n", results.io_data / ((1024 * 1024)));
     else if (results.io_data >= 1024)
-        fprintf(fd, "I/O Data\t\t\t\t%ld KiB\n", results.io_data / 1024);
+        fprintf(fd, "Data Copied\t\t\t\t%ld KiB\n", results.io_data / 1024);
     else
-        fprintf(fd, "I/O Data\t\t\t\t%ld Bytes\n", results.io_data);
+        fprintf(fd, "Data Copied\t\t\t\t%ld Bytes\n", results.io_data);
 
     fprintf(fd, "Minimum latency\t\t\t%.2f nsec\n", results.min_lat);
     fprintf(fd, "Maximum latency\t\t\t%.2f nsec\n", results.max_lat);
@@ -160,6 +160,7 @@ void print_misc(FILE *fd, Arguments args)
 
     fprintf(fd, "Iterations\t\t\t\t%ld\n", args.iterations);
     fprintf(fd, "Memcpy Iterations\t\t%ld\n", args.cpy_iter);
+    fprintf(fd, "Total Memcpy Calls\t\t%ld\n", args.iterations * args.cpy_iter);
     fprintf(fd, "Total Runtime\t\t\t%.6f sec\n", args.runtime);
     if (args.fsize >= (1024 * 1024 * 1024))
         fprintf(fd, "File Size\t\t\t\t%ld GiB\n", args.fsize / (1024 * 1024 * 1024));

@@ -1,9 +1,10 @@
 -runtime=5
 -dir=/mnt/mem
 -fsize=3G
--copysize=4
+-copysize=8
 -mode=randread
 -engine=mmap
 -map_pop=1
 -map_shared=0
--iter=10000
+-iter=10
+-cpy_iter=100K

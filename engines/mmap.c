@@ -26,6 +26,7 @@ void mmap_engine(Arguments *args)
 
     results.avg_lat = ((double)elapsed / (double)args->iterations / (double)args->cpy_iter) * SECS_TO_NANS;
     results.io_data = (double)args->iterations * (double)args->cpy_iter * (double)args->buflen;
+    args->runtime = elapsed;
     dump_results(results, *args);
 }
 
@@ -69,7 +70,6 @@ double mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
 
     get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
     args->cpy_iter = counter;
-    args->runtime = secs_elapsed;
 
     free(dest);
     dest = NULL;
@@ -117,7 +117,6 @@ double mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
 
     get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
     args->cpy_iter = counter;
-    args->runtime = secs_elapsed;
 
     free(dest);
     dest = NULL;
@@ -166,7 +165,6 @@ double mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
 
     get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
     args->cpy_iter = counter;
-    args->runtime = secs_elapsed;
 
     free(src);
     src = NULL;
@@ -216,7 +214,6 @@ double mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
 
     get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
     args->cpy_iter = counter;
-    args->runtime = secs_elapsed;
 
     free(src);
     src = NULL;
