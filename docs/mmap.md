@@ -15,9 +15,10 @@ The engine takes several commands, which can be provided via cmd line or a file.
 -dir= *specify the location to mmap in (/dev/zero or /dev/null for MAP_ANONYMOUS)*
 -fsize= *specify the size of file to mmap given as number with possible extensions K/M/G*
 -copysize= *specify the size to memcpy at a time given as number with possible extension K/M/G*
--runtime= *specify time to run in seconds*
+-cpy_iter= *Specify number of times to call memcpy*
 -mode= *read/write/randread/randwrite*
--iter= *specify number of times to call memcpy*
+-iter= *specify number of times to run engine*
+-runtime= *specify time per iteration to run in seconds*
 -map_pop= *0|1 to pass MAP_POPULATE to mmap*
 -map_shared= *0|1 to specify to pass MAP_SHARED or MAP_PRIVATE to mmap (Default 0/MAP_PRIVATE)*
 ```
@@ -42,11 +43,12 @@ with arguments.txt containing:
 -dir=/dev/zero
 -fsize=1G
 -copysize=4
+-cpy_iter=1000
 -mode=randread
 -map_pop=1
 -map_shared=0
--iter=1000
+-iter=10
 
 ```
 
-This would run the engine for 1,000 iterations of 4 byte memcpy, at random offsets, from the mapped file to a destination in memory. The file will be 1GiB large, and page table entries will be pre populated, as well as the mmap call getting flag MAP_PRIVATE. The runtime will be 1 by default, but in case the run will take longer than 1 second, it's good to specify a large enough random runtime.
+This would run the engine 10 times, for 1,000 iterations of 4 byte memcpy, at random offsets, from the mapped file to a destination in memory. The file will be 1GiB large, and page table entries will be pre populated, as well as the mmap call getting flag MAP_PRIVATE. The runtime will be 1 by default, but in case the run will take longer than 1 second, it's good to specify a large enough random runtime.

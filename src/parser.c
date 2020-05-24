@@ -107,10 +107,11 @@ void display_help()
     printf("-runtime=\tSet runtime seconds\n");
     printf("-fsize=\t\tSet file size (For example 2M for 2MiB file)\n");
     printf("-copysize=\tSet copy size for memcpy (For example 4K for 4KiB)\n");
+    printf("-cpy_iter=\tNumber of times to call memcpy for mmap_eng (Defult 100,000)\n");
     printf("-dir=\t\tPath to directory to use (/dev/null or /dev/zero for MAP_ANONYMOUS, current if none specified)\n");
     printf("-mode=\t\tPossible modes are: read write randread randwrite (Default read)\n");
     printf("-engine=\tPossible engines are mmap, mmap_lat, mem_lat\n");
-    printf("-iter=\t\tNumber of iterations to mmap for mmap_lat engine\n");
+    printf("-iter=\t\tNumber of times to run engine (Default 1\n");
     printf("-map_pop=\t0|1 to pass MAP_POPULATE to mmap for mmap_lat engine\n");
     printf("-map_shared=\t0|1 to specify to pass MAP_SHARED or MAP_PRIVATE to mmap(Default 0)\n");
     printf("\nFor usage of engine specific commands consult the documentation\n");

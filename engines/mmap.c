@@ -279,6 +279,7 @@ void mmap_cleanup_mapping(Mapping *mapping)
     {
         errno = EINVAL;
         perror("Error deleting file");
+        exit(1);
     }
 
     mapping->addr = 0;
