@@ -1,5 +1,5 @@
 #include "mem_lat.h"
-#define DEF_WALKS 10000000
+#define DEF_STEPS 10000000
 
 /*
  *
@@ -28,7 +28,7 @@ void mem_lat_engine(Arguments *args)
     }
 
     args->iterations = iters;
-    results.avg_lat = ((runtime / (double)iters) * SECS_TO_NANS) / (double)DEF_WALKS;
+    results.avg_lat = ((runtime / (double)iters) * SECS_TO_NANS) / (double)DEF_STEPS;
     dump_results(results, *args);
 }
 
@@ -64,7 +64,7 @@ double walk_ptrs(MemMap memmap, Results *results)
     char **store = (char **)calloc(memmap.size * sizeof(char *), 1);
 
     clock_gettime(CLOCK_MONOTONIC, &tstart);
-    for (uint64_t i = 0; i < DEF_WALKS; i++)
+    for (uint64_t i = 0; i < DEF_STEPS; i++)
     {
         walker = (char **)*walker;
         store[i % memmap.size] = *walker; // Store walking pointer somewhere otherwise compiler uses ADCE on it when optimizing
@@ -72,7 +72,7 @@ double walk_ptrs(MemMap memmap, Results *results)
     clock_gettime(CLOCK_MONOTONIC, &tend);
 
     elapsed = NANS_ELAPSED(tend, tstart);
-    add_latency(elapsed / DEF_WALKS, results);
+    add_latency(elapsed / DEF_STEPS, results);
     free(store);
     store = NULL;
 

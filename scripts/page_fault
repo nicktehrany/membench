@@ -7,7 +7,7 @@ pmem="/dev/pmem0"
 mnt="/mnt/mem"
 workload="workloads/page_fault/page_fault_reg.txt"
 workload_anon="workloads/page_fault/page_fault_anon.txt"
-iters=100
+iters=50
 
 if [[ "$PWD" == *"scripts"* ]]; then
     cd ..

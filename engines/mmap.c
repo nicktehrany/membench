@@ -176,7 +176,7 @@ void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
     char **block_index = (char **)malloc(max_ind * sizeof(char *));
 
     for (uint64_t i = 0; i < max_ind; i++)
-        block_index[i] = (char *)(mapping->addr + ((rand() % max_ind) * chunk_size));
+        block_index[i] = (char *)(mapping->addr + (rand() % mapping->fsize));
 
     srand(time(NULL));
     for (uint64_t i = 0; i < mapping->buflen; i++)
