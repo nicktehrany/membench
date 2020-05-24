@@ -15,6 +15,7 @@ typedef struct Arguments
     uint64_t iterations;
     int map_pop;
     int map_shared;
+    uint64_t cpy_iter; // For mmap_eng number of memcpy calls on single mapping
 } Arguments;
 
 void parse(Arguments *args, int argc, char **argv);
@@ -30,5 +31,6 @@ void set_engine(char *token, Arguments *args);
 void set_iter(char *token, Arguments *args);
 void set_map_pop(char *token, Arguments *args);
 void set_map_shared(char *token, Arguments *args);
+void set_cpy_iter(char *token, Arguments *args);
 
 #endif

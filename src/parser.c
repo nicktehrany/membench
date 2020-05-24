@@ -57,6 +57,8 @@ void parse_cmd_line(Arguments *args, char *tokens[], int size)
             set_map_pop(tokens[i], args);
         else if (strncmp(tokens[i], "-map_shared=", 12) == 0)
             set_map_shared(tokens[i], args);
+        else if (strncmp(tokens[i], "-cpy_iter=", 10) == 0)
+            set_cpy_iter(tokens[i], args);
         else
         {
             printf("Unknow command %s\n", tokens[i]);
@@ -281,6 +283,28 @@ void set_map_shared(char *token, Arguments *args)
     {
         errno = EINVAL;
         perror("Invalid value for map_pop. Needs to be 0|1");
+        exit(1);
+    }
+}
+
+void set_cpy_iter(char *token, Arguments *args)
+{
+    char *temp = token;
+
+    char *unit = temp + strlen(temp) - 1;
+    int multiplier = 1;
+    char K = 'K', M = 'M';
+    if (*unit == K)
+        multiplier = 1000;
+    else if (*unit == M)
+        multiplier = 1000 * 1000;
+
+    char *ptr;
+    args->cpy_iter = strtoul(temp + 10, &ptr, 10) * multiplier;
+    if (args->cpy_iter < 1)
+    {
+        errno = EINVAL;
+        perror("Invalid cpy iterations. Needs to be at least 1");
         exit(1);
     }
 }
