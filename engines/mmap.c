@@ -13,22 +13,29 @@ void mmap_engine(Arguments *args)
 {
     Results results = {0, 0, 0, 0, 0};
     Mapping mapping = {0, 0, 0, 0, ""};
+    double elapsed = 0.0;
 
     mmap_check_args(args);
-    mmap_prepare_mapping(&mapping, *args);
-    mmap_run_benchmark(&mapping, args, &results);
-    mmap_cleanup_mapping(&mapping);
+
+    for (uint64_t i = 0; i < args->iterations; i++)
+    {
+        mmap_prepare_mapping(&mapping, *args);
+        elapsed += mmap_run_benchmark(&mapping, args, &results);
+        mmap_cleanup_mapping(&mapping);
+    }
+
+    results.avg_lat = ((double)elapsed / (double)args->iterations / (double)args->cpy_iter) * SECS_TO_NANS;
     dump_results(results, *args);
 }
 
-void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
+double mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
 {
     uint64_t counter = 0, elapsed = 0;
 
     // If buflen > PAGE_SIZE, divide file into buflen size chunks else PAGE_SIZE chunks
     uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
     uint64_t max_ind = mapping->fsize / chunk_size;
-    uint64_t loop_iters = (max_ind > args->iterations && args->iterations != 0) ? args->iterations : max_ind;
+    uint64_t loop_iters = (max_ind > args->cpy_iter && args->cpy_iter != 0) ? args->cpy_iter : max_ind;
     double secs_elapsed = 0;
     unsigned char *dest = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
     char **block_index = (char **)malloc(max_ind * sizeof(char *));
@@ -55,32 +62,33 @@ void mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
         // Used to keep track of runtime
         secs_elapsed += elapsed * NANS_TO_SECS;
 
-        if (args->iterations != 0 && args->iterations <= counter)
+        if (args->cpy_iter != 0 && args->cpy_iter <= counter)
             break;
     }
 
     get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
-    results->avg_lat = (secs_elapsed * SECS_TO_NANS) / counter;
-    args->iterations = counter;
+    args->cpy_iter = counter;
     args->runtime = secs_elapsed;
 
     free(dest);
     dest = NULL;
     free(block_index);
     block_index = NULL;
+
+    return secs_elapsed;
 }
 
-void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
+double mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
 {
     uint64_t counter = 0, elapsed = 0;
     uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
     uint64_t max_ind = mapping->fsize / chunk_size;
-    uint64_t loop_iters = (max_ind > args->iterations && args->iterations != 0) ? args->iterations : max_ind;
+    uint64_t loop_iters = (max_ind > args->cpy_iter && args->cpy_iter != 0) ? args->cpy_iter : max_ind;
     double secs_elapsed = 0;
     unsigned char *dest = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
     char **block_index = (char **)malloc(max_ind * sizeof(char *));
 
-    // Storing random pointers from file in random order
+    // Storing random pointers from mapped file
     srand(time(NULL));
     for (uint64_t i = 0; i < max_ind; i++)
         block_index[i] = (char *)(mapping->addr + (rand() % mapping->fsize));
@@ -102,27 +110,28 @@ void mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
         add_latency(((double)elapsed / (double)loop_iters), results);
         secs_elapsed += elapsed * NANS_TO_SECS;
 
-        if (args->iterations != 0 && args->iterations <= counter)
+        if (args->cpy_iter != 0 && args->cpy_iter <= counter)
             break;
     }
 
     get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
-    results->avg_lat = (secs_elapsed * SECS_TO_NANS) / counter;
-    args->iterations = counter;
+    args->cpy_iter = counter;
     args->runtime = secs_elapsed;
 
     free(dest);
     dest = NULL;
     free(block_index);
     block_index = NULL;
+
+    return secs_elapsed;
 }
 
-void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
+double mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
 {
     uint64_t counter = 0, elapsed = 0;
     uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
     uint64_t max_ind = mapping->fsize / chunk_size;
-    uint64_t loop_iters = (max_ind > args->iterations && args->iterations != 0) ? args->iterations : max_ind;
+    uint64_t loop_iters = (max_ind > args->cpy_iter && args->cpy_iter != 0) ? args->cpy_iter : max_ind;
     double secs_elapsed = 0;
     unsigned char *src = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
     char **block_index = (char **)malloc(max_ind * sizeof(char *));
@@ -150,27 +159,28 @@ void mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
         add_latency(((double)elapsed / (double)loop_iters), results);
         secs_elapsed += elapsed * NANS_TO_SECS;
 
-        if (args->iterations != 0 && args->iterations <= counter)
+        if (args->cpy_iter != 0 && args->cpy_iter <= counter)
             break;
     }
 
     get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
-    results->avg_lat = (secs_elapsed * SECS_TO_NANS) / counter;
-    args->iterations = counter;
+    args->cpy_iter = counter;
     args->runtime = secs_elapsed;
 
     free(src);
     src = NULL;
     free(block_index);
     block_index = NULL;
+
+    return secs_elapsed;
 }
 
-void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
+double mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
 {
     uint64_t counter = 0, elapsed = 0;
     uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
     uint64_t max_ind = mapping->fsize / chunk_size;
-    uint64_t loop_iters = (max_ind > args->iterations && args->iterations != 0) ? args->iterations : max_ind;
+    uint64_t loop_iters = (max_ind > args->cpy_iter && args->cpy_iter != 0) ? args->cpy_iter : max_ind;
     double secs_elapsed = 0;
     unsigned char *src = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
     char **block_index = (char **)malloc(max_ind * sizeof(char *));
@@ -199,19 +209,20 @@ void mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
         add_latency(((double)elapsed / (double)loop_iters), results);
         secs_elapsed += elapsed * NANS_TO_SECS;
 
-        if (args->iterations != 0 && args->iterations <= counter)
+        if (args->cpy_iter != 0 && args->cpy_iter <= counter)
             break;
     }
 
     get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
-    results->avg_lat = (secs_elapsed * SECS_TO_NANS) / counter;
-    args->iterations = counter;
+    args->cpy_iter = counter;
     args->runtime = secs_elapsed;
 
     free(src);
     src = NULL;
     free(block_index);
     block_index = NULL;
+
+    return secs_elapsed;
 }
 
 void mmap_prepare_mapping(Mapping *mapping, Arguments args)
@@ -279,28 +290,31 @@ void mmap_cleanup_mapping(Mapping *mapping)
     mapping->map_anon = 0;
 }
 
-void mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
+double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
 {
+    double elapsed = 0.0;
     mapping->buflen = args->buflen;
     switch (args->mode)
     {
     case 0:
-        mmap_seq_read(mapping, results, args);
+        elapsed = mmap_seq_read(mapping, results, args);
         break;
     case 1:
-        mmap_seq_write(mapping, results, args);
+        elapsed = mmap_seq_write(mapping, results, args);
         break;
     case 2:
-        mmap_rand_read(mapping, results, args);
+        elapsed = mmap_rand_read(mapping, results, args);
         break;
     case 3:
-        mmap_rand_write(mapping, results, args);
+        elapsed = mmap_rand_write(mapping, results, args);
         break;
     default:
         errno = EINVAL;
         perror("Invalid Mode");
         exit(1);
     }
+
+    return elapsed;
 }
 
 // Check if all args are valid for engine to start

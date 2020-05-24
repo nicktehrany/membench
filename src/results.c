@@ -150,7 +150,8 @@ void print_flags(FILE *fd, Arguments args)
 void print_misc(FILE *fd, Arguments args)
 {
 
-    fprintf(fd, "Memcpy Iterations\t\t%ld\n", args.iterations);
+    fprintf(fd, "Iterations\t\t\t\t%ld\n", args.iterations);
+    fprintf(fd, "Memcpy Iterations\t\t%ld\n", args.cpy_iter);
     fprintf(fd, "Total Runtime\t\t\t%.6f sec\n", args.runtime);
     if (args.fsize >= (1024 * 1024 * 1024))
         fprintf(fd, "File Size\t\t\t\t%ld GiB\n", args.fsize / (1024 * 1024 * 1024));

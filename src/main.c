@@ -8,7 +8,7 @@
 
 int main(int argc, char *argv[])
 {
-    Arguments args = {0, "", 0, 0, 0, 0, -1, 0, 0, 0, (uint64_t)DEF_CPY_ITER};
+    Arguments args = {0, "", 0, 0, 0, 0, -1, 1, 0, 0, (uint64_t)DEF_CPY_ITER};
 
     parse(&args, argc, argv);
     if (args.engine == 0)
