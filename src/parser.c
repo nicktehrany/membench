@@ -223,6 +223,8 @@ void set_engine(char *token, Arguments *args)
         args->engine = 0;
     else if (strncmp(mode, "mem_lat", 7) == 0)
         args->engine = 2;
+    else if (strncmp(mode, "page_fault", 10) == 0)
+        args->engine = 3;
     else
     {
         errno = EINVAL;

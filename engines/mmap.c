@@ -86,7 +86,6 @@ void mmap_prepare_map_anon(Mapping *mapping, Arguments args)
     mapping->map_anon = 1;
     mapping->size = args.size;
     mmap_init_mem(mapping);
-    msync(mapping->addr, mapping->size, MS_INVALIDATE);
 }
 
 void mmap_init_mem(Mapping *mapping)

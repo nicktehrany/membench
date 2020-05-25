@@ -3,6 +3,7 @@
 #include "../engines/mmap.h"
 #include "../engines/mmap_lat.h"
 #include "../engines/mem_lat.h"
+#include "../engines/page_fault.h"
 #include "parser.h"
 
 int main(int argc, char *argv[])
@@ -16,6 +17,8 @@ int main(int argc, char *argv[])
         mmap_lat_engine(&args);
     else if (args.engine == 2)
         mem_lat_engine(&args);
+    else if (args.engine == 3)
+        page_fault_lat_engine(&args);
 
     return 0;
 }
