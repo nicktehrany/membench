@@ -168,22 +168,10 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
 // Check if all args are valid for engine to start
 void mmap_check_args(Arguments *args)
 {
-    if (args->buflen <= 0 || args->size <= 0)
-    {
-        errno = EINVAL;
-        perror("Invalid or missing file or copy size");
-        exit(1);
-    }
     if (args->runtime < 1)
     {
         errno = EINVAL;
         perror("Runtime should be greater than 1sec");
-        exit(1);
-    }
-    if (args->buflen > args->size)
-    {
-        errno = EINVAL;
-        perror("Copy size can't be larger than file size");
         exit(1);
     }
     if (args->size % args->buflen != 0)
