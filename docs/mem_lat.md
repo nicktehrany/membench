@@ -12,7 +12,7 @@ The engine takes several commands, which can be provided via cmd line or a file.
 
 ```shell
 -engine=mem_lat
--fsize= *specify the size of buffer to use for pointers given in K/M/G*
+-size= *specify the size of buffer to use for pointers given in K/M/G*
 -iter= *Number of times to run the engine*
 ```
 
@@ -25,7 +25,7 @@ The results will be shown in the results.out file in the root directory.
 Running the following command:
 
 ```shell
-./Benchmark -engine=mem_lat -fsize=400M -iter=10
+./Benchmark -engine=mem_lat -size=400M -iter=10
 ```
 
 This would run the engine 10 times (10,000,000 pointer walks each time). The buffer of pointers will be 400MiB large.

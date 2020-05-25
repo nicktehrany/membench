@@ -1,6 +1,6 @@
 -runtime=5
 -dir=/dev/null
--fsize=3G
+-size=800M
 -copysize=4
 -mode=randread
 -engine=mmap
