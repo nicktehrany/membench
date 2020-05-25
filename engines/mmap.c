@@ -27,6 +27,8 @@ void mmap_engine(Arguments *args)
     results.avg_lat = ((double)elapsed / (double)args->iterations / (double)args->cpy_iter) * SECS_TO_NANS;
     results.io_data = (double)args->iterations * (double)args->cpy_iter * (double)args->buflen;
     args->runtime = elapsed;
+    args->size = mapping.size;
+    mapping.size = 0;
     dump_results(results, *args);
 }
 
@@ -37,22 +39,20 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
     else
     {
         int fd;
-
-        // Open/Create file and truncate it to given size
-        if (((fd = open(args.path, O_RDWR, 0666)) < 0))
+        if ((fd = open(args.path, O_RDWR, 0666)) < 0)
         {
             perror("File Error");
             exit(1);
         }
 
         mapping->size = lseek(fd, 0, SEEK_END);
+        mapping->size -= mapping->size % PAGESIZE; // Align size to PAGE_SIZE
 
         int flags = set_flags(args);
         if ((mapping->addr = (char *)mmap(0, mapping->size, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
         {
             perror("mmap");
             close(fd);
-            remove(args.path);
             exit(1);
         }
 
@@ -66,6 +66,7 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
 // Mapping is anonymous
 void mmap_prepare_map_anon(Mapping *mapping, Arguments args)
 {
+    args.size -= args.size % PAGESIZE; // Align size to PAGE_SIZE
     if (args.size < 1)
     {
         errno = EINVAL;
@@ -84,7 +85,14 @@ void mmap_prepare_map_anon(Mapping *mapping, Arguments args)
 
     mapping->map_anon = 1;
     mapping->size = args.size;
-    mapping->addr[0] = 1; // Write to first byte of anon mapping to invalidate flag that mapping is all 0s
+    mmap_init_mem(mapping);
+    msync(mapping->addr, mapping->size, MS_INVALIDATE);
+}
+
+void mmap_init_mem(Mapping *mapping)
+{
+    srand(time(NULL));
+    memset(mapping->addr, rand(), mapping->size);
 }
 
 void mmap_cleanup_mapping(Mapping *mapping)
@@ -94,7 +102,6 @@ void mmap_cleanup_mapping(Mapping *mapping)
     mapping->addr = 0;
     mapping->buflen = 0;
     mapping->fpath = "";
-    mapping->size = 0;
     mapping->map_anon = 0;
 }
 
@@ -105,7 +112,7 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
 
     // If buflen > PAGE_SIZE, divide file into buflen size chunks else PAGE_SIZE chunks
     uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
-    uint64_t max_ind = mapping->size / chunk_size;
+    uint64_t max_ind = (mapping->size / chunk_size) - 1;
     uint64_t loop_iters = (args->cpy_iter != 0 && max_ind > args->cpy_iter) ? args->cpy_iter : max_ind;
     double secs_elapsed = 0;
     unsigned char *buf = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
@@ -121,14 +128,15 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
     {
         srand(time(NULL));
         for (uint64_t i = 0; i < max_ind; i++)
-            block_index[i] = (char *)(mapping->addr + (rand() % mapping->size));
+            block_index[i] = (char *)(mapping->addr + ((rand() % max_ind) * chunk_size));
         madvise(mapping->addr, mapping->size, MADV_RANDOM);
     }
 
     struct timespec tstart = {0, 0}, tend = {0, 0};
-
+    clock_t dummy = clock();
     while (secs_elapsed < args->runtime)
     {
+        msync(mapping->addr, mapping->size, MS_INVALIDATE); // In case data is in page cache drop it
         clock_gettime(CLOCK_MONOTONIC, &tstart);
 
         if (args->mode == 0 || args->mode == 2)
@@ -155,6 +163,7 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
     }
 
     get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
+    args->runtime = dummy;
     args->cpy_iter = counter;
 
     free(buf);
@@ -172,12 +181,6 @@ void mmap_check_args(Arguments *args)
     {
         errno = EINVAL;
         perror("Runtime should be greater than 1sec");
-        exit(1);
-    }
-    if (args->size % args->buflen != 0)
-    {
-        errno = EINVAL;
-        perror("Not aligned file size and copy size"); // TODO ALIGN AUTOMATICALLY TO PAGE_SIZE
         exit(1);
     }
     if (args->mode < 0 || args->mode > 3)
