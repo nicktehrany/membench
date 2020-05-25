@@ -20,7 +20,7 @@ typedef struct Mapping
 {
     char *addr;
     int map_anon; // MAP_ANONYMOUS (not backed by file)
-    uint64_t fsize;
+    uint64_t size;
     uint64_t buflen;
     const char *fpath;
 } Mapping;

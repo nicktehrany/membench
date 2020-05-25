@@ -41,8 +41,8 @@ void parse_cmd_line(Arguments *args, char *tokens[], int size)
     {
         if (strncmp(tokens[i], "-runtime=", 9) == 0)
             set_runtime(tokens[i], args);
-        else if (strncmp(tokens[i], "-fsize=", 7) == 0)
-            set_filesize(tokens[i], args);
+        else if (strncmp(tokens[i], "-size=", 6) == 0)
+            set_size(tokens[i], args);
         else if (strncmp(tokens[i], "-copysize=", 10) == 0)
             set_buflen(tokens[i], args);
         else if (strncmp(tokens[i], "-dir=", 5) == 0)
@@ -105,7 +105,7 @@ void display_help()
     printf("Possible commands are:\n");
     printf("-file=\t\tProvide an input file with commands as shown in examples\n");
     printf("-runtime=\tSet runtime seconds\n");
-    printf("-fsize=\t\tSet file size (For example 2M for 2MiB file)\n");
+    printf("-size=\t\tSet file size (For example 2M for 2MiB file)\n");
     printf("-copysize=\tSet copy size for memcpy (For example 4K for 4KiB)\n");
     printf("-cpy_iter=\tNumber of times to call memcpy for mmap_eng (Defult 100,000)\n");
     printf("-dir=\t\tPath to directory to use (/dev/null or /dev/zero for MAP_ANONYMOUS, current if none specified)\n");
@@ -131,7 +131,7 @@ void set_runtime(char *token, Arguments *args)
     }
 }
 
-void set_filesize(char *token, Arguments *args)
+void set_size(char *token, Arguments *args)
 {
     char *temp = token;
 
@@ -147,7 +147,7 @@ void set_filesize(char *token, Arguments *args)
         multiplier = 1024 * 1024 * 1024;
 
     char *ptr;
-    args->fsize = strtoul(temp + 7, &ptr, 10) * multiplier;
+    args->size = strtoul(temp + 6, &ptr, 10) * multiplier;
 }
 
 void set_buflen(char *token, Arguments *args)
@@ -183,15 +183,6 @@ void set_path(char *token, Arguments *args)
     strcpy(dir, temp + 5);
     if (strcmp(dir, "/dev/null") == 0 || strcmp(dir, "/dev/zero") == 0)
         args->map_anon = 1;
-    else
-    {
-        char *slash = temp + strlen(temp) - 1;
-        char sl = '/';
-        if (*slash == sl)
-            dir = strcat(dir, "file");
-        else
-            dir = strcat(dir, "/file");
-    }
     if (!(args->path = malloc(strlen(dir) + 1)))
     {
         errno = EINVAL;

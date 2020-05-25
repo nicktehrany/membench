@@ -7,7 +7,7 @@ typedef struct Arguments
 {
     double runtime;
     char *path;
-    uint64_t fsize;
+    uint64_t size;
     uint64_t buflen;
     int mode;     //0=read 1=write 2=randread 3=randwrite
     int map_anon; // Mapping without backing of file on file system
@@ -23,7 +23,7 @@ void display_help();
 void parse_cmd_line(Arguments *args, char *tokens[], int size);
 int parse_file(char *token, char *tokens[]);
 void set_runtime(char *token, Arguments *args);
-void set_filesize(char *token, Arguments *args);
+void set_size(char *token, Arguments *args);
 void set_buflen(char *token, Arguments *args);
 void set_path(char *token, Arguments *args);
 void set_mode(char *token, Arguments *args);

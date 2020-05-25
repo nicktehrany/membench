@@ -45,8 +45,10 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
             exit(1);
         }
 
+        mapping->size = lseek(fd, 0, SEEK_END);
+
         int flags = set_flags(args);
-        if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
+        if ((mapping->addr = (char *)mmap(0, mapping->size, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
         {
             perror("mmap");
             close(fd);
@@ -57,7 +59,6 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
         close(fd);
 
         mapping->map_anon = 0;
-        mapping->fsize = args.fsize;
         mapping->fpath = args.path;
     }
 }
@@ -68,24 +69,26 @@ void mmap_prepare_map_anon(Mapping *mapping, Arguments args)
     int flags = set_flags(args);
 
     // MAP_ANONYMOUS not backed by file on file system
-    if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, flags, -1, 0)) == MAP_FAILED)
+    if ((mapping->addr = (char *)mmap(0, args.size, PROT_WRITE | PROT_READ, flags, -1, 0)) == MAP_FAILED)
     {
         perror("mmap");
         exit(1);
     }
 
+    // TODO init_mem?
+
     mapping->map_anon = 1;
-    mapping->fsize = args.fsize;
+    mapping->size = args.size;
 }
 
 void mmap_cleanup_mapping(Mapping *mapping)
 {
-    munmap(mapping->addr, mapping->fsize);
+    munmap(mapping->addr, mapping->size);
 
     mapping->addr = 0;
     mapping->buflen = 0;
     mapping->fpath = "";
-    mapping->fsize = 0;
+    mapping->size = 0;
     mapping->map_anon = 0;
 }
 
@@ -96,7 +99,7 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
 
     // If buflen > PAGE_SIZE, divide file into buflen size chunks else PAGE_SIZE chunks
     uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
-    uint64_t max_ind = mapping->fsize / chunk_size;
+    uint64_t max_ind = mapping->size / chunk_size;
     uint64_t loop_iters = (args->cpy_iter != 0 && max_ind > args->cpy_iter) ? args->cpy_iter : max_ind;
     double secs_elapsed = 0;
     unsigned char *buf = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
@@ -112,8 +115,8 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
     {
         srand(time(NULL));
         for (uint64_t i = 0; i < max_ind; i++)
-            block_index[i] = (char *)(mapping->addr + (rand() % mapping->fsize));
-        madvise(mapping->addr, mapping->fsize, MADV_RANDOM);
+            block_index[i] = (char *)(mapping->addr + (rand() % mapping->size));
+        madvise(mapping->addr, mapping->size, MADV_RANDOM);
     }
 
     struct timespec tstart = {0, 0}, tend = {0, 0};
@@ -125,9 +128,7 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
         if (args->mode == 0 || args->mode == 2)
         {
             for (uint64_t i = 0; i < loop_iters; i++)
-            {
                 memcpy(buf, block_index[i], mapping->buflen * sizeof(char));
-            }
         }
         else
         {
@@ -161,11 +162,7 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
 // Check if all args are valid for engine to start
 void mmap_check_args(Arguments *args)
 {
-    if (strcmp(args->path, "") == 0)
-    {
-        args->path = "file";
-    }
-    if (args->buflen <= 0 || args->fsize <= 0)
+    if (args->buflen <= 0 || args->size <= 0)
     {
         errno = EINVAL;
         perror("Invalid or missing file or copy size");
@@ -177,13 +174,13 @@ void mmap_check_args(Arguments *args)
         perror("Runtime should be greater than 1sec");
         exit(1);
     }
-    if (args->buflen > args->fsize)
+    if (args->buflen > args->size)
     {
         errno = EINVAL;
         perror("Copy size can't be larger than file size");
         exit(1);
     }
-    if (args->fsize % args->buflen != 0)
+    if (args->size % args->buflen != 0)
     {
         errno = EINVAL;
         perror("Not aligned file size and copy size"); // TODO ALIGN AUTOMATICALLY TO PAGE_SIZE

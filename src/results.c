@@ -102,14 +102,14 @@ void results_mmap_lat_eng(FILE *fd, Results results, Arguments args)
 
 void results_mem_lat_eng(FILE *fd, Results results, Arguments args)
 {
-    if (args.fsize >= (1024 * 1024 * 1024))
-        fprintf(fd, "Buffer Size\t\t\t\t%ld GiB\n", args.fsize / (1024 * 1024 * 1024));
-    else if (args.fsize >= (1024 * 1024))
-        fprintf(fd, "Buffer Size\t\t\t\t%ld MiB\n", args.fsize / (1024 * 1024));
-    else if (args.fsize >= 1024)
-        fprintf(fd, "Buffer Size\t\t\t\t%ld KiB\n", args.fsize / 1024);
+    if (args.size >= (1024 * 1024 * 1024))
+        fprintf(fd, "Buffer Size\t\t\t\t%ld GiB\n", args.size / (1024 * 1024 * 1024));
+    else if (args.size >= (1024 * 1024))
+        fprintf(fd, "Buffer Size\t\t\t\t%ld MiB\n", args.size / (1024 * 1024));
+    else if (args.size >= 1024)
+        fprintf(fd, "Buffer Size\t\t\t\t%ld KiB\n", args.size / 1024);
     else
-        fprintf(fd, "File Size\t\t\t\t%ld Bytes\n", args.fsize);
+        fprintf(fd, "File Size\t\t\t\t%ld Bytes\n", args.size);
     fprintf(fd, "Iterations\t\t\t\t%ld\n", args.iterations);
     fprintf(fd, "Minimum latency\t\t\t%.2f nsec\n", results.min_lat);
     fprintf(fd, "Maximum latency\t\t\t%.2f nsec\n", results.max_lat);
@@ -162,12 +162,12 @@ void print_misc(FILE *fd, Arguments args)
     fprintf(fd, "Memcpy Iterations\t\t%ld\n", args.cpy_iter);
     fprintf(fd, "Total Memcpy Calls\t\t%ld\n", args.iterations * args.cpy_iter);
     fprintf(fd, "Total Runtime\t\t\t%.6f sec\n", args.runtime);
-    if (args.fsize >= (1024 * 1024 * 1024))
-        fprintf(fd, "File Size\t\t\t\t%ld GiB\n", args.fsize / (1024 * 1024 * 1024));
-    else if (args.fsize >= (1024 * 1024))
-        fprintf(fd, "File Size\t\t\t\t%ld MiB\n", args.fsize / (1024 * 1024));
-    else if (args.fsize >= 1024)
-        fprintf(fd, "File Size\t\t\t\t%ld KiB\n", args.fsize / 1024);
+    if (args.size >= (1024 * 1024 * 1024))
+        fprintf(fd, "File Size\t\t\t\t%ld GiB\n", args.size / (1024 * 1024 * 1024));
+    else if (args.size >= (1024 * 1024))
+        fprintf(fd, "File Size\t\t\t\t%ld MiB\n", args.size / (1024 * 1024));
+    else if (args.size >= 1024)
+        fprintf(fd, "File Size\t\t\t\t%ld KiB\n", args.size / 1024);
     else
-        fprintf(fd, "File Size\t\t\t\t%ld Bytes\n", args.fsize);
+        fprintf(fd, "File Size\t\t\t\t%ld Bytes\n", args.size);
 }

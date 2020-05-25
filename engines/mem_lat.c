@@ -34,7 +34,7 @@ void mem_lat_engine(Arguments *args)
 
 void init_mem(MemMap *memmap, Arguments *args)
 {
-    uint64_t size = (args->fsize > 0) ? args->fsize : 1024 * 1024 * 300; // Default 300MiB memory allocation
+    uint64_t size = (args->size > 0) ? args->size : 1024 * 1024 * 300; // Default 300MiB memory allocation
     char **base = (char **)calloc(size * sizeof(char *), 1);
     int next_ptr = 0, temp;
 
@@ -53,7 +53,7 @@ void init_mem(MemMap *memmap, Arguments *args)
     base[next_ptr] = (char *)&base[0];
     memmap->base_ptr = base;
     memmap->size = size;
-    args->fsize = size;
+    args->size = size;
 }
 
 double walk_ptrs(MemMap memmap, Results *results)
