@@ -1,5 +1,5 @@
 #include "page_fault.h"
-#define ITERATIONS 10
+#define ITERATIONS 100
 #define FACTOR 25
 
 void page_fault_lat_engine(Arguments *args)
@@ -52,7 +52,7 @@ double page_fault_benchmark(PageMap *pagemap, Results *results)
     for (uint64_t i = 0; i < num_pages; i++)
         page_index[i] = i;
 
-    shuffle(page_index, num_pages);
+    shuffle_page_index(page_index, num_pages);
     num_pages = num_pages / FACTOR; // Only using a percentage of mapping to avoid any kind of prefetching or caching
 
     clock_gettime(CLOCK_MONOTONIC, &tstart);
@@ -77,19 +77,15 @@ void page_fault_unmap(PageMap *pagemap)
     pagemap->size = 0;
 }
 
-void shuffle(uint64_t *array, size_t n)
+// Shuffling the page indices around for random access
+void shuffle_page_index(uint64_t *page_index, size_t size)
 {
-
     srand(time(NULL));
-    if (n > 1)
+    for (uint64_t i = 0; i < size - 1; i++)
     {
-        uint64_t i;
-        for (i = 0; i < n - 1; i++)
-        {
-            size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
-            int t = array[j];
-            array[j] = array[i];
-            array[i] = t;
-        }
+        uint64_t j = rand() % size;
+        int t = page_index[j];
+        page_index[j] = page_index[i];
+        page_index[i] = t;
     }
 }
