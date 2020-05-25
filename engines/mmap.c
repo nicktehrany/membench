@@ -75,10 +75,16 @@ void mmap_prepare_map_anon(Mapping *mapping, Arguments args)
         exit(1);
     }
 
-    // TODO init_mem?
-
     mapping->map_anon = 1;
     mapping->size = args.size;
+    mmap_init_mem(mapping);
+    msync(mapping->addr, mapping->size, MS_INVALIDATE);
+}
+
+void mmap_init_mem(Mapping *mapping)
+{
+    srand(time(NULL));
+    memset(mapping->addr, rand(), mapping->size);
 }
 
 void mmap_cleanup_mapping(Mapping *mapping)
