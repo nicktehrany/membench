@@ -20,5 +20,6 @@ void print_dir(FILE *fd, Arguments args);
 void print_flags(FILE *fd, Arguments args);
 void print_misc(FILE *fd, Arguments args);
 void display_results(FILE *fd);
+void results_page_fault_eng(FILE *fd, Results results, Arguments args);
 
 #endif

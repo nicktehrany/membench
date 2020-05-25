@@ -24,6 +24,9 @@ void dump_results(Results results, Arguments args)
     case 2:
         fprintf(fd, "Engine\t\t\t\t\tmem_lat\n");
         break;
+    case 3:
+        fprintf(fd, "Engine\t\t\t\t\tpage_fault\n");
+        break;
     }
 
     if (args.engine == 0)
@@ -32,6 +35,8 @@ void dump_results(Results results, Arguments args)
         results_mmap_lat_eng(fd, results, args);
     else if (args.engine == 2)
         results_mem_lat_eng(fd, results, args);
+    else if (args.engine == 3)
+        results_page_fault_eng(fd, results, args);
 
     // display_results(fd); TODO IMPLEMENT FULLY
     fclose(fd);
@@ -170,4 +175,12 @@ void print_misc(FILE *fd, Arguments args)
         fprintf(fd, "File Size\t\t\t\t%ld KiB\n", args.size / 1024);
     else
         fprintf(fd, "File Size\t\t\t\t%ld Bytes\n", args.size);
+}
+
+void results_page_fault_eng(FILE *fd, Results results, Arguments args)
+{
+    print_dir(fd, args);
+    fprintf(fd, "Minimum latency\t\t\t%.2f nsec\n", results.min_lat);
+    fprintf(fd, "Maximum latency\t\t\t%.2f nsec\n", results.max_lat);
+    fprintf(fd, "Average latency\t\t\t%.2f nsec\n", results.avg_lat);
 }

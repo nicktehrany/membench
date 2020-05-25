@@ -1,18 +1,21 @@
 #include "page_fault.h"
-#define ITERATIONS 1
+#define ITERATIONS 10
 #define FACTOR 25
 
 void page_fault_lat_engine(Arguments *args)
 {
     PageMap pagemap;
     Results results = {0, 0, 0, 0, 0};
+    double latency = 0.0;
 
     for (int i = 0; i < ITERATIONS; i++)
     {
         page_fault_setup(&pagemap, args);
-        page_fault_benchmark(&pagemap, &results);
+        latency += page_fault_benchmark(&pagemap, &results);
         page_fault_unmap(&pagemap);
     }
+    results.avg_lat = latency / ITERATIONS;
+    dump_results(results, *args);
 }
 
 void page_fault_setup(PageMap *pagemap, Arguments *args)
@@ -39,11 +42,12 @@ void page_fault_setup(PageMap *pagemap, Arguments *args)
     msync(pagemap->base_ptr, pagemap->size, MS_INVALIDATE); // Invalidate mapping in case it's cached
 }
 
-void page_fault_benchmark(PageMap *pagemap, Results *results)
+double page_fault_benchmark(PageMap *pagemap, Results *results)
 {
     uint64_t num_pages = pagemap->size / PAGESIZE;
     struct timespec tstart = {0, 0}, tend = {0, 0};
     uint64_t *page_index = (size_t *)malloc(num_pages * sizeof(size_t));
+    uint64_t elapsed = 0;
 
     for (uint64_t i = 0; i < num_pages; i++)
         page_index[i] = i;
@@ -56,8 +60,14 @@ void page_fault_benchmark(PageMap *pagemap, Results *results)
         pagemap->sum += *(pagemap->base_ptr + page_index[i] * PAGESIZE);
 
     clock_gettime(CLOCK_MONOTONIC, &tend);
+
+    elapsed = NANS_ELAPSED(tend, tstart);
+    add_latency(elapsed / num_pages, results);
+
     free(page_index);
     page_index = NULL;
+
+    return elapsed / num_pages;
 }
 
 void page_fault_unmap(PageMap *pagemap)
