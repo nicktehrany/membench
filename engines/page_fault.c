@@ -1,6 +1,6 @@
 #include "page_fault.h"
-#define ITERATIONS 100
-#define FACTOR 25
+#define ITERATIONS 1000
+#define FACTOR 100
 
 void page_fault_lat_engine(Arguments *args)
 {
@@ -28,7 +28,7 @@ void page_fault_setup(PageMap *pagemap, Arguments *args)
     }
 
     pagemap->size = lseek(fd, 0, SEEK_END);
-    pagemap->size -= pagemap->size % PAGESIZE; // Align size to PAGE_SIZE
+    pagemap->size -= pagemap->size % PAGESIZE; // Allign size to PAGE_SIZE
 
     if ((pagemap->base_ptr = (char *)mmap(0, pagemap->size, PROT_WRITE | PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
     {
@@ -42,6 +42,7 @@ void page_fault_setup(PageMap *pagemap, Arguments *args)
     msync(pagemap->base_ptr, pagemap->size, MS_INVALIDATE); // Invalidate mapping in case it's cached
 }
 
+// Accessing mapping at random PAGESIZE offsets
 double page_fault_benchmark(PageMap *pagemap, Results *results)
 {
     uint64_t num_pages = pagemap->size / PAGESIZE;
