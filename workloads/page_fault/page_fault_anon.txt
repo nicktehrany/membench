@@ -1,10 +1,10 @@
 -runtime=5
 -dir=/dev/null
--size=800M
+-size=3G
 -copysize=4
 -mode=randread
 -engine=mmap
 -map_pop=0
--map_shared=0
+-map_shared=1
 -cpy_iter=100000
 -iter=10

@@ -66,6 +66,13 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
 // Mapping is anonymous
 void mmap_prepare_map_anon(Mapping *mapping, Arguments args)
 {
+    if (args.size < 1)
+    {
+        errno = EINVAL;
+        perror("Specify file size");
+        exit(1);
+    }
+
     int flags = set_flags(args);
 
     // MAP_ANONYMOUS not backed by file on file system
@@ -77,7 +84,7 @@ void mmap_prepare_map_anon(Mapping *mapping, Arguments args)
 
     mapping->map_anon = 1;
     mapping->size = args.size;
-    mapping->addr[0] = 1; // Write to first byte of anon mapping to invalidate HUGE ZERO flag
+    mapping->addr[0] = 1; // Write to first byte of anon mapping to invalidate flag that mapping is all 0s
 }
 
 void mmap_cleanup_mapping(Mapping *mapping)

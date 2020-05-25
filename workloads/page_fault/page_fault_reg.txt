@@ -4,6 +4,6 @@
 -mode=randread
 -engine=mmap
 -map_pop=0
--map_shared=0
+-map_shared=1
 -cpy_iter=100000
 -iter=10

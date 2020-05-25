@@ -1,5 +1,6 @@
 -runtime=5
--dir=/mnt/mem/file
+-dir=/dev/zero
+-size=3G
 -copysize=8
 -mode=randread
 -engine=mmap
