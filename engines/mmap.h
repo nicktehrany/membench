@@ -5,10 +5,6 @@
 
 void mmap_engine(Arguments *args);
 void mmap_check_args(Arguments *args);
-double mmap_seq_read(Mapping *mapping, Results *results, Arguments *args);
-double mmap_rand_read(Mapping *mapping, Results *results, Arguments *args);
-double mmap_seq_write(Mapping *mapping, Results *results, Arguments *args);
-double mmap_rand_write(Mapping *mapping, Results *results, Arguments *args);
 void mmap_prepare_mapping(Mapping *mapping, Arguments args);
 void mmap_cleanup_mapping(Mapping *mapping);
 double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results);

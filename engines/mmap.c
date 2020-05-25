@@ -30,199 +30,6 @@ void mmap_engine(Arguments *args)
     dump_results(results, *args);
 }
 
-double mmap_seq_read(Mapping *mapping, Results *results, Arguments *args)
-{
-    uint64_t counter = 0, elapsed = 0;
-
-    // If buflen > PAGE_SIZE, divide file into buflen size chunks else PAGE_SIZE chunks
-    uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
-    uint64_t max_ind = mapping->fsize / chunk_size;
-    uint64_t loop_iters = (max_ind > args->cpy_iter && args->cpy_iter != 0) ? args->cpy_iter : max_ind;
-    double secs_elapsed = 0;
-    unsigned char *dest = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
-    char **block_index = (char **)malloc(max_ind * sizeof(char *));
-
-    // Storing pointers to beginning of every consecutive buflen/PAGE_SIZE sized chunk from file
-    for (uint64_t i = 0; i < max_ind; i++)
-        block_index[i] = (char *)(mapping->addr + (i * chunk_size));
-
-    struct timespec tstart = {0, 0}, tend = {0, 0};
-
-    while (secs_elapsed < args->runtime)
-    {
-        clock_gettime(CLOCK_MONOTONIC, &tstart);
-
-        // Reading from every consecutive chunk_size part of file at least once
-        for (uint64_t i = 0; i < loop_iters; i++)
-            memcpy(dest, block_index[i], mapping->buflen * sizeof(char));
-
-        clock_gettime(CLOCK_MONOTONIC, &tend);
-        counter += loop_iters;
-        elapsed = NANS_ELAPSED(tend, tstart);
-        add_latency(((double)elapsed / (double)loop_iters), results); // Adding the average latency for the run to be stored
-
-        // Used to keep track of runtime
-        secs_elapsed += elapsed * NANS_TO_SECS;
-
-        if (args->cpy_iter != 0 && args->cpy_iter <= counter)
-            break;
-    }
-
-    get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
-    args->cpy_iter = counter;
-
-    free(dest);
-    dest = NULL;
-    free(block_index);
-    block_index = NULL;
-
-    return secs_elapsed;
-}
-
-double mmap_rand_read(Mapping *mapping, Results *results, Arguments *args)
-{
-    uint64_t counter = 0, elapsed = 0;
-    uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
-    uint64_t max_ind = mapping->fsize / chunk_size;
-    uint64_t loop_iters = (max_ind > args->cpy_iter && args->cpy_iter != 0) ? args->cpy_iter : max_ind;
-    double secs_elapsed = 0;
-    unsigned char *dest = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
-    char **block_index = (char **)malloc(max_ind * sizeof(char *));
-
-    // Storing random pointers from mapped file
-    srand(time(NULL));
-    for (uint64_t i = 0; i < max_ind; i++)
-        block_index[i] = (char *)(mapping->addr + (rand() % mapping->fsize));
-
-    struct timespec tstart = {0, 0}, tend = {0, 0};
-
-    madvise(mapping->addr, mapping->fsize, MADV_RANDOM);
-
-    while (secs_elapsed < args->runtime)
-    {
-        clock_gettime(CLOCK_MONOTONIC, &tstart);
-
-        for (uint64_t i = 0; i < loop_iters; i++)
-            memcpy(dest, block_index[i], mapping->buflen * sizeof(char));
-
-        clock_gettime(CLOCK_MONOTONIC, &tend);
-        counter += loop_iters;
-        elapsed = NANS_ELAPSED(tend, tstart);
-        add_latency(((double)elapsed / (double)loop_iters), results);
-        secs_elapsed += elapsed * NANS_TO_SECS;
-
-        if (args->cpy_iter != 0 && args->cpy_iter <= counter)
-            break;
-    }
-
-    get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
-    args->cpy_iter = counter;
-
-    free(dest);
-    dest = NULL;
-    free(block_index);
-    block_index = NULL;
-
-    return secs_elapsed;
-}
-
-double mmap_seq_write(Mapping *mapping, Results *results, Arguments *args)
-{
-    uint64_t counter = 0, elapsed = 0;
-    uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
-    uint64_t max_ind = mapping->fsize / chunk_size;
-    uint64_t loop_iters = (max_ind > args->cpy_iter && args->cpy_iter != 0) ? args->cpy_iter : max_ind;
-    double secs_elapsed = 0;
-    unsigned char *src = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
-    char **block_index = (char **)malloc(max_ind * sizeof(char *));
-
-    for (uint64_t i = 0; i < max_ind; i++)
-        block_index[i] = (char *)(mapping->addr + (i * chunk_size));
-
-    // Filling src with rand bytes to memcpy to dest
-    srand(time(NULL));
-    for (uint64_t i = 0; i < mapping->buflen; i++)
-        src[i] = rand() % 256;
-
-    struct timespec tstart = {0, 0}, tend = {0, 0};
-
-    while (secs_elapsed < args->runtime)
-    {
-        clock_gettime(CLOCK_MONOTONIC, &tstart);
-
-        for (uint64_t i = 0; i < loop_iters; i++)
-            memcpy(block_index[i], src, mapping->buflen * sizeof(char));
-
-        clock_gettime(CLOCK_MONOTONIC, &tend);
-        counter += loop_iters;
-        elapsed = NANS_ELAPSED(tend, tstart);
-        add_latency(((double)elapsed / (double)loop_iters), results);
-        secs_elapsed += elapsed * NANS_TO_SECS;
-
-        if (args->cpy_iter != 0 && args->cpy_iter <= counter)
-            break;
-    }
-
-    get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
-    args->cpy_iter = counter;
-
-    free(src);
-    src = NULL;
-    free(block_index);
-    block_index = NULL;
-
-    return secs_elapsed;
-}
-
-double mmap_rand_write(Mapping *mapping, Results *results, Arguments *args)
-{
-    uint64_t counter = 0, elapsed = 0;
-    uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
-    uint64_t max_ind = mapping->fsize / chunk_size;
-    uint64_t loop_iters = (max_ind > args->cpy_iter && args->cpy_iter != 0) ? args->cpy_iter : max_ind;
-    double secs_elapsed = 0;
-    unsigned char *src = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
-    char **block_index = (char **)malloc(max_ind * sizeof(char *));
-
-    for (uint64_t i = 0; i < max_ind; i++)
-        block_index[i] = (char *)(mapping->addr + (rand() % mapping->fsize));
-
-    srand(time(NULL));
-    for (uint64_t i = 0; i < mapping->buflen; i++)
-        src[i] = rand() % 256;
-
-    struct timespec tstart = {0, 0}, tend = {0, 0};
-
-    madvise(mapping->addr, mapping->fsize, MADV_RANDOM);
-
-    while (secs_elapsed < args->runtime)
-    {
-        clock_gettime(CLOCK_MONOTONIC, &tstart);
-
-        for (uint64_t i = 0; i < loop_iters; i++)
-            memcpy(block_index[i], src, mapping->buflen * sizeof(char));
-
-        clock_gettime(CLOCK_MONOTONIC, &tend);
-        counter += loop_iters;
-        elapsed = NANS_ELAPSED(tend, tstart);
-        add_latency(((double)elapsed / (double)loop_iters), results);
-        secs_elapsed += elapsed * NANS_TO_SECS;
-
-        if (args->cpy_iter != 0 && args->cpy_iter <= counter)
-            break;
-    }
-
-    get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
-    args->cpy_iter = counter;
-
-    free(src);
-    src = NULL;
-    free(block_index);
-    block_index = NULL;
-
-    return secs_elapsed;
-}
-
 void mmap_prepare_mapping(Mapping *mapping, Arguments args)
 {
     if (args.map_anon)
@@ -232,7 +39,7 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
         int fd;
 
         // Open/Create file and truncate it to given size
-        if (((fd = open(args.path, O_CREAT | O_RDWR, 0666)) < 0) || (ftruncate(fd, args.fsize) != 0))
+        if (((fd = open(args.path, O_RDWR, 0666)) < 0))
         {
             perror("File Error");
             exit(1);
@@ -275,12 +82,12 @@ void mmap_cleanup_mapping(Mapping *mapping)
 {
     munmap(mapping->addr, mapping->fsize);
 
-    if (!mapping->map_anon && remove(mapping->fpath) != 0)
-    {
-        errno = EINVAL;
-        perror("Error deleting file");
-        exit(1);
-    }
+    // if (!mapping->map_anon && remove(mapping->fpath) != 0)
+    // {
+    //     errno = EINVAL;
+    //     perror("Error deleting file");
+    //     exit(1);
+    // }
 
     mapping->addr = 0;
     mapping->buflen = 0;
@@ -291,29 +98,71 @@ void mmap_cleanup_mapping(Mapping *mapping)
 
 double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
 {
-    double elapsed = 0.0;
     mapping->buflen = args->buflen;
-    switch (args->mode)
+    uint64_t counter = 0, elapsed = 0;
+
+    // If buflen > PAGE_SIZE, divide file into buflen size chunks else PAGE_SIZE chunks
+    uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
+    uint64_t max_ind = mapping->fsize / chunk_size;
+    uint64_t loop_iters = (args->cpy_iter != 0 && max_ind > args->cpy_iter) ? args->cpy_iter : max_ind;
+    double secs_elapsed = 0;
+    unsigned char *buf = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
+    char **block_index = (char **)malloc(max_ind * sizeof(char *));
+
+    // Storing pointers to beginning of every consecutive buflen/PAGE_SIZE sized chunk from file
+    if (args->mode < 2)
     {
-    case 0:
-        elapsed = mmap_seq_read(mapping, results, args);
-        break;
-    case 1:
-        elapsed = mmap_seq_write(mapping, results, args);
-        break;
-    case 2:
-        elapsed = mmap_rand_read(mapping, results, args);
-        break;
-    case 3:
-        elapsed = mmap_rand_write(mapping, results, args);
-        break;
-    default:
-        errno = EINVAL;
-        perror("Invalid Mode");
-        exit(1);
+        for (uint64_t i = 0; i < max_ind; i++)
+            block_index[i] = (char *)(mapping->addr + (i * chunk_size));
+    }
+    else // Storing random pointers from mapped file
+    {
+        srand(time(NULL));
+        for (uint64_t i = 0; i < max_ind; i++)
+            block_index[i] = (char *)(mapping->addr + (rand() % mapping->fsize));
+        madvise(mapping->addr, mapping->fsize, MADV_RANDOM);
     }
 
-    return elapsed;
+    struct timespec tstart = {0, 0}, tend = {0, 0};
+
+    while (secs_elapsed < args->runtime)
+    {
+        clock_gettime(CLOCK_MONOTONIC, &tstart);
+
+        if (args->mode == 0 || args->mode == 2)
+        {
+            for (uint64_t i = 0; i < loop_iters; i++)
+            {
+                memcpy(buf, block_index[i], mapping->buflen * sizeof(char));
+            }
+        }
+        else
+        {
+            for (uint64_t i = 0; i < loop_iters; i++)
+                memcpy(block_index[i], buf, mapping->buflen * sizeof(char));
+        }
+
+        clock_gettime(CLOCK_MONOTONIC, &tend);
+        counter += loop_iters;
+        elapsed = NANS_ELAPSED(tend, tstart);
+        add_latency(((double)elapsed / (double)loop_iters), results); // Adding the average latency for the run to be stored
+
+        // Used to keep track of runtime
+        secs_elapsed += elapsed * NANS_TO_SECS;
+
+        if (args->cpy_iter != 0 && args->cpy_iter <= counter)
+            break;
+    }
+
+    get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
+    args->cpy_iter = counter;
+
+    free(buf);
+    buf = NULL;
+    free(block_index);
+    block_index = NULL;
+
+    return secs_elapsed;
 }
 
 // Check if all args are valid for engine to start
@@ -344,7 +193,13 @@ void mmap_check_args(Arguments *args)
     if (args->fsize % args->buflen != 0)
     {
         errno = EINVAL;
-        perror("Not aligned file size and copy size");
+        perror("Not aligned file size and copy size"); // TODO ALIGN AUTOMATICALLY TO PAGE_SIZE
+        exit(1);
+    }
+    if (args->mode < 0 || args->mode > 3)
+    {
+        errno = EINVAL;
+        perror("Invalid mode");
         exit(1);
     }
 }
