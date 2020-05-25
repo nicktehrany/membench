@@ -1,7 +1,11 @@
 #include "page_fault.h"
 #define ITERATIONS 1000
-#define FACTOR 100
+#define FACTOR 1000
 
+/*
+ *
+ * sudo sysctl -w vm.drop_caches=3 run to drop page cache
+*/
 void page_fault_lat_engine(Arguments *args)
 {
     PageMap pagemap;
@@ -38,7 +42,7 @@ void page_fault_setup(PageMap *pagemap, Arguments *args)
     }
 
     close(fd);
-    madvise(pagemap->base_ptr, pagemap->size, MADV_RANDOM);
+    //madvise(pagemap->base_ptr, pagemap->size, MADV_RANDOM); // TODO CHECK IF ACTUALLY MAKES A DIFFERENCE HERE
     msync(pagemap->base_ptr, pagemap->size, MS_INVALIDATE); // Invalidate mapping in case it's cached
 }
 
