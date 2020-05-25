@@ -7,7 +7,7 @@ pmem="/dev/pmem0"
 mnt="/mnt/mem"
 workload="workloads/page_fault/page_fault_reg.txt"
 workload_anon="workloads/page_fault/page_fault_anon.txt"
-iters=50
+iters=10
 
 if [[ "$PWD" == *"scripts"* ]]; then
     cd ..
@@ -105,6 +105,15 @@ echo -n "xfs-dax" >> $dest
 run_cmd $workload
 echo "Finished xfs-dax bench"
 echo "Unmounting xfs-dax"
+sudo umount $pmem &> /dev/null
+
+echo "Creating and Mounting NOVA on $pmem"
+sudo mount -t NOVA -o init $pmem $mnt
+echo "Running NOVA bench"
+echo -n "NOVA" >> $dest
+run_cmd $workload
+echo "Finished NOVA bench"
+echo "Unmounting NOVA"
 sudo umount $pmem &> /dev/null
 
 echo "Running MAP_ANONYMOUS"

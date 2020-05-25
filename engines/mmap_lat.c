@@ -19,7 +19,7 @@ void mmap_lat_engine(Arguments *args)
     mmap_lat_check_args(args);
     fd = mmap_lat_prep_file(*args);
     mapping.fpath = args->path;
-    mapping.fsize = args->fsize;
+    mapping.size = args->size;
     mapping.map_anon = args->map_anon;
 
     for (uint64_t i = 0; i < args->iterations; i++)
@@ -44,17 +44,9 @@ int mmap_lat_prep_file(Arguments args)
         fd = -1;
     else
     {
-        if ((fd = open(args.path, O_CREAT | O_RDWR, 0666)) < 0)
+        if ((fd = open(args.path, O_RDWR, 0666)) < 0)
         {
             perror("File Open");
-            exit(1);
-        }
-
-        if (ftruncate(fd, args.fsize) != 0)
-        {
-            perror("truncate");
-            close(fd);
-            remove(args.path);
             exit(1);
         }
     }
@@ -72,7 +64,7 @@ uint64_t mmap_lat_do_mmap(Mapping *mapping, Arguments args, int fd)
         int flags = set_flags(args);
 
         clock_gettime(CLOCK_MONOTONIC, &tstart);
-        if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
+        if ((mapping->addr = (char *)mmap(0, args.size, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
         {
             perror("mmap");
             close(fd);
@@ -95,7 +87,7 @@ uint64_t mmap_lat_do_mmap_anon(Mapping *mapping, Arguments args, int fd)
     clock_gettime(CLOCK_MONOTONIC, &tstart);
 
     // MAP_ANONYMOUS not backed by file on file system
-    if ((mapping->addr = (char *)mmap(0, args.fsize, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
+    if ((mapping->addr = (char *)mmap(0, args.size, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
     {
         perror("mmap");
         exit(1);
@@ -108,7 +100,7 @@ uint64_t mmap_lat_do_mmap_anon(Mapping *mapping, Arguments args, int fd)
 
 void mmap_lat_do_unmap(Mapping *mapping)
 {
-    munmap(mapping->addr, mapping->fsize);
+    munmap(mapping->addr, mapping->size);
 }
 
 void mmap_lat_cleanup_file(Mapping *mapping, int fd)
@@ -124,7 +116,7 @@ void mmap_lat_cleanup_file(Mapping *mapping, int fd)
 // Check if all args are valid for engine to start
 void mmap_lat_check_args(Arguments *args)
 {
-    if (args->fsize <= 0)
+    if (args->size <= 0)
     {
         errno = EINVAL;
         perror("Invalid or missing file or copy size");

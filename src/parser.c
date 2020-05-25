@@ -41,8 +41,8 @@ void parse_cmd_line(Arguments *args, char *tokens[], int size)
     {
         if (strncmp(tokens[i], "-runtime=", 9) == 0)
             set_runtime(tokens[i], args);
-        else if (strncmp(tokens[i], "-fsize=", 7) == 0)
-            set_filesize(tokens[i], args);
+        else if (strncmp(tokens[i], "-size=", 6) == 0)
+            set_size(tokens[i], args);
         else if (strncmp(tokens[i], "-copysize=", 10) == 0)
             set_buflen(tokens[i], args);
         else if (strncmp(tokens[i], "-dir=", 5) == 0)
@@ -57,6 +57,8 @@ void parse_cmd_line(Arguments *args, char *tokens[], int size)
             set_map_pop(tokens[i], args);
         else if (strncmp(tokens[i], "-map_shared=", 12) == 0)
             set_map_shared(tokens[i], args);
+        else if (strncmp(tokens[i], "-cpy_iter=", 10) == 0)
+            set_cpy_iter(tokens[i], args);
         else
         {
             printf("Unknow command %s\n", tokens[i]);
@@ -103,12 +105,13 @@ void display_help()
     printf("Possible commands are:\n");
     printf("-file=\t\tProvide an input file with commands as shown in examples\n");
     printf("-runtime=\tSet runtime seconds\n");
-    printf("-fsize=\t\tSet file size (For example 2M for 2MiB file)\n");
+    printf("-size=\t\tSet file size (For example 2M for 2MiB file)\n");
     printf("-copysize=\tSet copy size for memcpy (For example 4K for 4KiB)\n");
+    printf("-cpy_iter=\tNumber of times to call memcpy for mmap_eng (Defult 100,000)\n");
     printf("-dir=\t\tPath to directory to use (/dev/null or /dev/zero for MAP_ANONYMOUS, current if none specified)\n");
     printf("-mode=\t\tPossible modes are: read write randread randwrite (Default read)\n");
     printf("-engine=\tPossible engines are mmap, mmap_lat, mem_lat\n");
-    printf("-iter=\t\tNumber of iterations to mmap for mmap_lat engine\n");
+    printf("-iter=\t\tNumber of times to run engine (Default 1\n");
     printf("-map_pop=\t0|1 to pass MAP_POPULATE to mmap for mmap_lat engine\n");
     printf("-map_shared=\t0|1 to specify to pass MAP_SHARED or MAP_PRIVATE to mmap(Default 0)\n");
     printf("\nFor usage of engine specific commands consult the documentation\n");
@@ -128,7 +131,7 @@ void set_runtime(char *token, Arguments *args)
     }
 }
 
-void set_filesize(char *token, Arguments *args)
+void set_size(char *token, Arguments *args)
 {
     char *temp = token;
 
@@ -144,7 +147,7 @@ void set_filesize(char *token, Arguments *args)
         multiplier = 1024 * 1024 * 1024;
 
     char *ptr;
-    args->fsize = strtoul(temp + 7, &ptr, 10) * multiplier;
+    args->size = strtoul(temp + 6, &ptr, 10) * multiplier;
 }
 
 void set_buflen(char *token, Arguments *args)
@@ -180,15 +183,6 @@ void set_path(char *token, Arguments *args)
     strcpy(dir, temp + 5);
     if (strcmp(dir, "/dev/null") == 0 || strcmp(dir, "/dev/zero") == 0)
         args->map_anon = 1;
-    else
-    {
-        char *slash = temp + strlen(temp) - 1;
-        char sl = '/';
-        if (*slash == sl)
-            dir = strcat(dir, "file");
-        else
-            dir = strcat(dir, "/file");
-    }
     if (!(args->path = malloc(strlen(dir) + 1)))
     {
         errno = EINVAL;
@@ -281,6 +275,28 @@ void set_map_shared(char *token, Arguments *args)
     {
         errno = EINVAL;
         perror("Invalid value for map_pop. Needs to be 0|1");
+        exit(1);
+    }
+}
+
+void set_cpy_iter(char *token, Arguments *args)
+{
+    char *temp = token;
+
+    char *unit = temp + strlen(temp) - 1;
+    int multiplier = 1;
+    char K = 'K', M = 'M';
+    if (*unit == K)
+        multiplier = 1000;
+    else if (*unit == M)
+        multiplier = 1000 * 1000;
+
+    char *ptr;
+    args->cpy_iter = strtoul(temp + 10, &ptr, 10) * multiplier;
+    if (args->cpy_iter < 1)
+    {
+        errno = EINVAL;
+        perror("Invalid cpy iterations. Needs to be at least 1");
         exit(1);
     }
 }
