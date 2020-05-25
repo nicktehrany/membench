@@ -36,7 +36,7 @@ void page_fault_setup(PageMap *pagemap, Arguments *args)
 
     close(fd);
     madvise(pagemap->base_ptr, pagemap->size, MADV_RANDOM);
-    //msync(pagemap->base_ptr, pagemap->size, MS_INVALIDATE); // Drop it in case it's cached
+    msync(pagemap->base_ptr, pagemap->size, MS_INVALIDATE); // Invalidate mapping in case it's cached
 }
 
 void page_fault_benchmark(PageMap *pagemap, Results *results)
@@ -49,19 +49,15 @@ void page_fault_benchmark(PageMap *pagemap, Results *results)
         page_index[i] = i;
 
     shuffle(page_index, num_pages);
-    num_pages = 10; // Only using 4 percent of mapping to avoid any kind of prefetching or caching
+    num_pages = num_pages / FACTOR; // Only using a percentage of mapping to avoid any kind of prefetching or caching
 
-    clock_t dummy = clock(); // DUMMY
     clock_gettime(CLOCK_MONOTONIC, &tstart);
     for (uint64_t i = 0; i < num_pages; i++)
         pagemap->sum += *(pagemap->base_ptr + page_index[i] * PAGESIZE);
 
     clock_gettime(CLOCK_MONOTONIC, &tend);
-    dummy = clock();                                                 // DUMMY
-    printf("%f %ld", NANS_ELAPSED(tend, tstart) / num_pages, dummy); // DUMMY
     free(page_index);
     page_index = NULL;
-    printf("%d ", pagemap->sum); // DUMMY
 }
 
 void page_fault_unmap(PageMap *pagemap)
