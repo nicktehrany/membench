@@ -1,5 +1,4 @@
 #include "mmap.h"
-#define PAGESIZE sysconf(_SC_PAGE_SIZE)
 
 /*
  *

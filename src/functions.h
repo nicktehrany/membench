@@ -14,6 +14,7 @@
 #define SECS_ELAPSED(tend, tstart) (((double)tend.tv_sec + NANS_TO_SECS * tend.tv_nsec) - \
                                     ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec))
 #define NANS_ELAPSED(tend, tstart) (((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec))
+#define PAGESIZE sysconf(_SC_PAGE_SIZE)
 #include "results.h"
 
 typedef struct Mapping
