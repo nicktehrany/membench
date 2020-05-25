@@ -82,13 +82,6 @@ void mmap_cleanup_mapping(Mapping *mapping)
 {
     munmap(mapping->addr, mapping->fsize);
 
-    // if (!mapping->map_anon && remove(mapping->fpath) != 0)
-    // {
-    //     errno = EINVAL;
-    //     perror("Error deleting file");
-    //     exit(1);
-    // }
-
     mapping->addr = 0;
     mapping->buflen = 0;
     mapping->fpath = "";
