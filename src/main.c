@@ -20,7 +20,8 @@ int main(int argc, char *argv[])
     else if (args.engine == 3)
         page_fault_lat_engine(&args);
 
-    free(args.path);
+    if (strlen(args.path) > 0)
+        free(args.path);
 
     return 0;
 }

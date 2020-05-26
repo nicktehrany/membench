@@ -99,7 +99,7 @@ int parse_file(char *token, char *tokens[])
         tokens[counter] = temp;
         counter++;
     }
-    free_tok(line); // Freeing mallocs from getline()
+    free_tok(line); // Freeing malloc from getline()
     fclose(fp);
     return counter + 1; // Account for program call in cmd line (./Benchmark)
 }
@@ -133,8 +133,6 @@ void set_runtime(char *token, Arguments *args)
         perror("Invalid runtime");
         exit(1);
     }
-
-    free_tok(token); // Free token once it's processed
 }
 
 void set_size(char *token, Arguments *args)
@@ -154,7 +152,6 @@ void set_size(char *token, Arguments *args)
 
     char *ptr;
     args->size = strtoul(temp + 6, &ptr, 10) * multiplier;
-    free_tok(token);
 }
 
 void set_buflen(char *token, Arguments *args)
@@ -181,7 +178,6 @@ void set_buflen(char *token, Arguments *args)
         perror("Invalid copy size");
         exit(1);
     }
-    free_tok(token);
 }
 
 void set_path(char *token, Arguments *args)
@@ -198,7 +194,6 @@ void set_path(char *token, Arguments *args)
     }
     strcpy(args->path, dir);
     free_tok(dir);
-    free_tok(token);
 }
 
 void set_mode(char *token, Arguments *args)
@@ -219,7 +214,6 @@ void set_mode(char *token, Arguments *args)
         perror("Invalid mode");
         exit(1);
     }
-    free_tok(token);
 }
 
 void set_engine(char *token, Arguments *args)
@@ -240,7 +234,6 @@ void set_engine(char *token, Arguments *args)
         perror("Invalid engine");
         exit(1);
     }
-    free_tok(token);
 }
 
 void set_iter(char *token, Arguments *args)
@@ -263,7 +256,6 @@ void set_iter(char *token, Arguments *args)
         perror("Invalid Iterations. Needs to be at least 1");
         exit(1);
     }
-    free_tok(token);
 }
 
 void set_map_pop(char *token, Arguments *args)
@@ -277,7 +269,6 @@ void set_map_pop(char *token, Arguments *args)
         perror("Invalid value for map_pop. Needs to be 0|1");
         exit(1);
     }
-    free_tok(token);
 }
 
 void set_map_shared(char *token, Arguments *args)
@@ -291,7 +282,6 @@ void set_map_shared(char *token, Arguments *args)
         perror("Invalid value for map_pop. Needs to be 0|1");
         exit(1);
     }
-    free_tok(token);
 }
 
 void set_cpy_iter(char *token, Arguments *args)
@@ -314,7 +304,6 @@ void set_cpy_iter(char *token, Arguments *args)
         perror("Invalid cpy iterations. Needs to be at least 1");
         exit(1);
     }
-    free_tok(token);
 }
 
 void free_tok(char *token)

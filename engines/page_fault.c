@@ -1,5 +1,5 @@
 #include "page_fault.h"
-#define ITERATIONS 1
+#define ITERATIONS 1000
 #define FACTOR 1000
 
 /*
