@@ -32,7 +32,7 @@ touch /mnt/mem/file
 dd if=/dev/urandom of=/mnt/mem/file bs=100M count=8
 ```
 
-To create the file and initialize from dev/urandom
+To create a file and initialize it from dev/urandom. (Though /urandom is slow so if you're planning on moving the file multiple times, store it somewhere on a mounted fs and move it from there)
 
 ```shell
 ./Benchmark -file=arguments.txt
@@ -41,6 +41,7 @@ To create the file and initialize from dev/urandom
 with arguments.txt containing:
 
 ```shell
+# comments can be added like this per line using the hash symbol in the beginning
 -runtime=40
 -engine=mmap_lat
 -dir=/mnt/mem/file

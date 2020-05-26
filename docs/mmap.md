@@ -45,6 +45,7 @@ To create the file and initialize from dev/urandom
 with arguments.txt containing:
 
 ```shell
+# comments can be added like this per line using the hash symbol in the beginning
 -engine=mmap
 -runtime=4
 -dir=/mnt/mem/file

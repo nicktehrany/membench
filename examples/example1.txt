@@ -1,10 +1,9 @@
 -runtime=5
+# Comments can be added per line using the symbol in the beginning
 -dir=/dev/zero
 -size=3G
--copysize=8
+-copysize=4K
 -mode=randread
 -engine=mmap
 -map_pop=1
 -map_shared=0
--iter=10
--cpy_iter=100K
