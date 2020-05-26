@@ -4,5 +4,12 @@ This engine is meant to measure the cost of setting up a page table entry, along
 
 ## Usage
 
+This engine only takes the path to a file that will be mapped into memory.
+
 ## Example Run
 
+```shell
+sudo ./Benchmark -engine=page_fault -dir=/mnt/mem/file
+```
+
+The file needs to exist and contain some data, preferably the file should be at least 1GiB but larger is always better for the possibility to avoid prefetching and trigger more page faults.
