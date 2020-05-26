@@ -32,5 +32,6 @@ void set_iter(char *token, Arguments *args);
 void set_map_pop(char *token, Arguments *args);
 void set_map_shared(char *token, Arguments *args);
 void set_cpy_iter(char *token, Arguments *args);
+void free_tok(char *token);
 
 #endif

@@ -1,10 +1,12 @@
 #include "page_fault.h"
-#define ITERATIONS 1000
+#define ITERATIONS 1
 #define FACTOR 1000
 
 /*
  *
- * sudo sysctl -w vm.drop_caches=3 run to drop page cache
+ * run sudo sysctl -w vm.drop_caches=3 to drop page cache if
+ * copied file to mount using dd or other, without invalidating
+ * cache
 */
 void page_fault_lat_engine(Arguments *args)
 {
@@ -89,7 +91,7 @@ void shuffle_page_index(uint64_t *page_index, size_t size)
     for (uint64_t i = 0; i < size - 1; i++)
     {
         uint64_t j = rand() % size;
-        int t = page_index[j];
+        uint64_t t = page_index[j];
         page_index[j] = page_index[i];
         page_index[i] = t;
     }

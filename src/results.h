@@ -13,13 +13,13 @@ typedef struct Results
 } Results;
 
 void dump_results(Results results, Arguments args);
-void results_mmap_eng(FILE *fd, Results results, Arguments args);
-void results_mmap_lat_eng(FILE *fd, Results results, Arguments args);
-void results_mem_lat_eng(FILE *fd, Results results, Arguments args);
-void print_dir(FILE *fd, Arguments args);
-void print_flags(FILE *fd, Arguments args);
-void print_misc(FILE *fd, Arguments args);
-void display_results(FILE *fd);
-void results_page_fault_eng(FILE *fd, Results results, Arguments args);
+void results_mmap_eng(FILE *fp, Results results, Arguments args);
+void results_mmap_lat_eng(FILE *fp, Results results, Arguments args);
+void results_mem_lat_eng(FILE *fp, Results results, Arguments args);
+void print_dir(FILE *fp, Arguments args);
+void print_flags(FILE *fp, Arguments args);
+void print_misc(FILE *fp, Arguments args);
+void display_results(FILE *fp);
+void results_page_fault_eng(FILE *fp, Results results, Arguments args);
 
 #endif

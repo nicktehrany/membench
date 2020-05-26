@@ -59,9 +59,12 @@ void parse_cmd_line(Arguments *args, char *tokens[], int size)
             set_map_shared(tokens[i], args);
         else if (strncmp(tokens[i], "-cpy_iter=", 10) == 0)
             set_cpy_iter(tokens[i], args);
+        else if (strncmp(tokens[i], "#", 1) == 0)
+            free_tok(tokens[i]);
         else
         {
             printf("Unknow command %s\n", tokens[i]);
+            free_tok(tokens[i]);
             exit(1);
         }
     }
@@ -90,14 +93,15 @@ int parse_file(char *token, char *tokens[])
             perror("Too many commands");
             exit(1);
         }
-        char *x = calloc(strlen(line), 1);
+        char *temp = calloc(strlen(line), 1);
         size_t len = strlen(line) - 1;
-        memcpy(x, line, len);
-        tokens[counter] = x;
+        memcpy(temp, line, len);
+        tokens[counter] = temp;
         counter++;
     }
+    free_tok(line); // Freeing mallocs from getline()
     fclose(fp);
-    return counter + 1; // Account for program call in cmd line
+    return counter + 1; // Account for program call in cmd line (./Benchmark)
 }
 
 void display_help()
@@ -129,6 +133,8 @@ void set_runtime(char *token, Arguments *args)
         perror("Invalid runtime");
         exit(1);
     }
+
+    free_tok(token); // Free token once it's processed
 }
 
 void set_size(char *token, Arguments *args)
@@ -148,6 +154,7 @@ void set_size(char *token, Arguments *args)
 
     char *ptr;
     args->size = strtoul(temp + 6, &ptr, 10) * multiplier;
+    free_tok(token);
 }
 
 void set_buflen(char *token, Arguments *args)
@@ -174,6 +181,7 @@ void set_buflen(char *token, Arguments *args)
         perror("Invalid copy size");
         exit(1);
     }
+    free_tok(token);
 }
 
 void set_path(char *token, Arguments *args)
@@ -189,8 +197,8 @@ void set_path(char *token, Arguments *args)
         perror("Invalid Directory.");
     }
     strcpy(args->path, dir);
-    free(dir);
-    dir = NULL;
+    free_tok(dir);
+    free_tok(token);
 }
 
 void set_mode(char *token, Arguments *args)
@@ -211,6 +219,7 @@ void set_mode(char *token, Arguments *args)
         perror("Invalid mode");
         exit(1);
     }
+    free_tok(token);
 }
 
 void set_engine(char *token, Arguments *args)
@@ -231,6 +240,7 @@ void set_engine(char *token, Arguments *args)
         perror("Invalid engine");
         exit(1);
     }
+    free_tok(token);
 }
 
 void set_iter(char *token, Arguments *args)
@@ -253,6 +263,7 @@ void set_iter(char *token, Arguments *args)
         perror("Invalid Iterations. Needs to be at least 1");
         exit(1);
     }
+    free_tok(token);
 }
 
 void set_map_pop(char *token, Arguments *args)
@@ -266,6 +277,7 @@ void set_map_pop(char *token, Arguments *args)
         perror("Invalid value for map_pop. Needs to be 0|1");
         exit(1);
     }
+    free_tok(token);
 }
 
 void set_map_shared(char *token, Arguments *args)
@@ -279,6 +291,7 @@ void set_map_shared(char *token, Arguments *args)
         perror("Invalid value for map_pop. Needs to be 0|1");
         exit(1);
     }
+    free_tok(token);
 }
 
 void set_cpy_iter(char *token, Arguments *args)
@@ -301,4 +314,11 @@ void set_cpy_iter(char *token, Arguments *args)
         perror("Invalid cpy iterations. Needs to be at least 1");
         exit(1);
     }
+    free_tok(token);
+}
+
+void free_tok(char *token)
+{
+    free(token);
+    token = NULL;
 }
