@@ -8,6 +8,7 @@ void parse(Arguments *args, int argc, char **argv)
 {
 
     char *tokens[100]; // Max 100 tokens in file or cmd line
+    int file_parse = 0;
 
     if (argc > 100)
     {
@@ -22,6 +23,7 @@ void parse(Arguments *args, int argc, char **argv)
         else if (strncmp(argv[i + 1], "-file=", 5) == 0)
         {
             argc = parse_file(argv[i + 1], tokens);
+            file_parse = 1;
             break;
         }
         tokens[i] = argv[i + 1];
@@ -32,6 +34,11 @@ void parse(Arguments *args, int argc, char **argv)
         errno = EINVAL;
         perror("No engine specified");
         exit(1);
+    }
+    if (file_parse)
+    {
+        for (int i = 0; i < argc - 1; i++)
+            free_tok(tokens[i]); // Freeing all mallocs from file parsing
     }
 }
 
@@ -60,11 +67,12 @@ void parse_cmd_line(Arguments *args, char *tokens[], int size)
         else if (strncmp(tokens[i], "-cpy_iter=", 10) == 0)
             set_cpy_iter(tokens[i], args);
         else if (strncmp(tokens[i], "#", 1) == 0)
-            free_tok(tokens[i]);
+            ;
         else
         {
             printf("Unknow command %s\n", tokens[i]);
-            free_tok(tokens[i]);
+            for (int i = 0; i < size; i++)
+                free_tok(tokens[i]);
             exit(1);
         }
     }
