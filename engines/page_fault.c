@@ -51,7 +51,7 @@ void page_fault_setup(PageMap *pagemap, Arguments *args)
 
     close(fd);
     msync(pagemap->base_ptr, pagemap->size, MS_INVALIDATE); // Invalidate mapping in case it's cached
-    madvise(pagemap->base_ptr, pagemap->size, MADV_RANDOM); // TODO CHECK IF ACTUALLY MAKES A DIFFERENCE HERE
+    madvise(pagemap->base_ptr, pagemap->size, MADV_RANDOM);
 }
 
 // Accessing mapping at random PAGESIZE offsets
