@@ -11,7 +11,8 @@
  * begins again. This process is repeated 1,000 times. Caches are invalidated before every iteration
  * of accesses.
  * 
- * run sudo sysctl -w vm.drop_caches=3 before running benchmark to drop page cache before
+ * run sysctl -w vm.drop_caches=3 before running benchmark to drop page cache if file was copied
+ * to mount directory and is in page cache
 */
 void page_fault_lat_engine(Arguments *args)
 {
