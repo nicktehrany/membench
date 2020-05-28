@@ -15,7 +15,7 @@ The project has the following directories:
 
 ## Usage
 
-Running make from the root directory will compile the program and create an executable called Benchmark in the root directory. Information about each engine and how to use them is in their respective file in the documentation.
+Running ```make``` from the root directory will compile the program and create an executable called Benchmark in the root directory. Information about each engine and how to use them is in their respective file in the documentation.
 
 mmap and mmap_lat engines need an already existing file, therefore if no file exists, quickly create a file and fill it with random bytes using these commands:
 

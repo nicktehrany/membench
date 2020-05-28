@@ -5,16 +5,12 @@ Benchmark
 
 file
 
-input.txt
-
 *.png
 
 plot.py
 
 *.dat
 
-temp.txt
+temp*.txt
 
 results/
-
-scripts/
