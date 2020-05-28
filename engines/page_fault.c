@@ -6,9 +6,10 @@
  * This engine will mmap a file as a private mapping, divide the mapping up into PAGE_SIZE chunks,
  * and access the begining of 0.1 percent of these chunks in random order to cause page faults and 
  * fs I/O. It only accesses 0.1 percent, because larger amounts caused prefetching to increase, 
- * bringing down the number of page faults caused. After the 1,000 page faults, the file will be 
- * unmapped, remapped, caches are Invalidated, and access begins again. This process is repeated 
- * 1,000 times. Caches are invalidated before every iteration of accesses.
+ * bringing down the number of page faults caused. For example, a 4GiB file will result in 1,048 
+ * page faults, after which the file will be unmapped, remapped, caches are Invalidated, and access 
+ * begins again. This process is repeated 1,000 times. Caches are invalidated before every iteration
+ * of accesses.
  * 
  * run sudo sysctl -w vm.drop_caches=3 before running benchmark to drop page cache before
 */
