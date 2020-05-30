@@ -6,7 +6,6 @@ BM_DEPS = src/main.c src/results.c engines/mmap.c \
 engines/mmap_lat.c engines/mem_lat.c engines/page_fault.c \
 src/parser.c src/functions.c
 BM_Target = Benchmark
-OBJ = obj/
 OUT = out
 
 .PHONY: all clean
@@ -17,4 +16,4 @@ $(BM): $(BM_DEPS)
 	$(CC) $(CFLAGS) $^ -o $(BM_Target)
 
 clean:
-	$(RM) -r $(OBJ)* $(BM_Target) *.out *.dat
+	$(RM) -r $(BM_Target) *.out *.dat
