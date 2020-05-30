@@ -11,7 +11,6 @@ The engine takes several commands, which can be provided via cmd line or a file.
 ## Possible Flags
 
 ```shell
-# comments can be added like this per line using the hash symbol in the beginning
 -engine=mem_lat
 -size= *specify the size of buffer to use for pointers given in K/M/G*
 -iter= *Number of times to run the engine*
