@@ -39,10 +39,7 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
     {
         int fd;
         if ((fd = open(args.path, O_RDWR, 0666)) < 0)
-        {
-            perror("File Error");
-            exit(1);
-        }
+            LOG(FATAL, errno, "File Error");
 
         mapping->size = lseek(fd, 0, SEEK_END);
         mapping->size -= mapping->size % PAGESIZE; // Align size to PAGE_SIZE
@@ -50,9 +47,8 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
         int flags = set_flags(args);
         if ((mapping->addr = (char *)mmap(0, mapping->size, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
         {
-            perror("mmap");
             close(fd);
-            exit(1);
+            LOG(FATAL, errno, "mmap");
         }
 
         close(fd);
@@ -67,20 +63,13 @@ void mmap_prepare_map_anon(Mapping *mapping, Arguments args)
 {
     args.size -= args.size % PAGESIZE; // Align size to PAGE_SIZE
     if (args.size < 1)
-    {
-        errno = EINVAL;
-        perror("Specify file size");
-        exit(1);
-    }
+        LOG(FATAL, EINVAL, "Specify file size");
 
     int flags = set_flags(args);
 
     // MAP_ANONYMOUS not backed by file on file system
     if ((mapping->addr = (char *)mmap(0, args.size, PROT_WRITE | PROT_READ, flags, -1, 0)) == MAP_FAILED)
-    {
-        perror("mmap");
-        exit(1);
-    }
+        LOG(FATAL, errno, "mmap");
 
     mapping->map_anon = 1;
     mapping->size = args.size;
@@ -176,15 +165,5 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
 void mmap_check_args(Arguments *args)
 {
     if (args->runtime < 1)
-    {
-        errno = EINVAL;
-        perror("Runtime should be greater than 1sec");
-        exit(1);
-    }
-    if (args->mode < 0 || args->mode > 3)
-    {
-        errno = EINVAL;
-        perror("Invalid mode");
-        exit(1);
-    }
+        LOG(FATAL, EINVAL, "Runtime should be greater than 1sec");
 }
