@@ -29,16 +29,16 @@ void parse(Arguments *args, int argc, char **argv)
         tokens[i] = argv[i + 1];
     }
     parse_cmd_line(args, tokens, argc - 1);
+    if (file_parse)
+    {
+        for (int i = 0; i < argc - 1; i++)
+            free_tok(tokens[i]); // Freeing all mallocs from file parsing
+    }
     if (args->engine == -1)
     {
         errno = EINVAL;
         perror("No engine specified");
         exit(1);
-    }
-    if (file_parse)
-    {
-        for (int i = 0; i < argc - 1; i++)
-            free_tok(tokens[i]); // Freeing all mallocs from file parsing
     }
 }
 

@@ -15,6 +15,10 @@
                                     ((double)tstart.tv_sec + NANS_TO_SECS * tstart.tv_nsec))
 #define NANS_ELAPSED(tend, tstart) (((tend.tv_sec - tstart.tv_sec) * SECS_TO_NANS) + (tend.tv_nsec - tstart.tv_nsec))
 #define PAGESIZE sysconf(_SC_PAGE_SIZE)
+#define FATAL -1
+#define ERROR 1
+#define LOG(type, error_val, message) \
+    (type == FATAL) ? (errno = error_val, perror(message), exit(1)) : (void)printf("%s\n", message)
 #include "results.h"
 
 typedef struct Mapping
