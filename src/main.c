@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     else if (args.engine == 3)
         page_fault_lat_engine(&args);
     else
-        LOG(FATAL, EINVAL, "Invalid Engine");
+        LOG(FATAL, EINVAL, "Engine");
 
     if (strlen(args.path) > 0)
         free(args.path);

@@ -34,12 +34,6 @@ void parse(Arguments *args, int argc, char **argv)
         for (int i = 0; i < argc - 1; i++)
             free_tok(tokens[i]); // Freeing all mallocs from file parsing
     }
-    if (args->engine == -1)
-    {
-        errno = EINVAL;
-        perror("No engine specified");
-        exit(1);
-    }
 }
 
 void parse_cmd_line(Arguments *args, char *tokens[], int size)
@@ -236,12 +230,6 @@ void set_engine(char *token, Arguments *args)
         args->engine = 2;
     else if (strncmp(mode, "page_fault", 10) == 0)
         args->engine = 3;
-    else
-    {
-        errno = EINVAL;
-        perror("Invalid engine");
-        exit(1);
-    }
 }
 
 void set_iter(char *token, Arguments *args)

@@ -17,8 +17,10 @@
 #define PAGESIZE sysconf(_SC_PAGE_SIZE)
 #define FATAL -1
 #define ERROR 1
+#define DEBUG 0
+// LOG ERROR DEBUG or FATAL as type, errno value as error_val, and error Message as message
 #define LOG(type, error_val, message) \
-    (type == FATAL) ? (errno = error_val, perror(message), exit(1)) : (void)printf("%s\n", message)
+    (type == DEBUG) ? (void)printf("DEBUG: %s\n", message) : ((type == FATAL) ? (errno = error_val, perror(message), exit(1)) : (void)printf("Error: %s\n", message))
 #include "results.h"
 
 typedef struct Mapping
