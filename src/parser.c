@@ -11,11 +11,7 @@ void parse(Arguments *args, int argc, char **argv)
     int file_parse = 0;
 
     if (argc > 100)
-    {
-        errno = EINVAL;
-        perror("Too many commands");
-        exit(1);
-    }
+        LOG(FATAL, EINVAL, "Too many commands");
     for (int i = 0; i < argc - 1; i++)
     {
         if (strncmp(argv[i + 1], "-h", 2) == 0)
@@ -64,10 +60,9 @@ void parse_cmd_line(Arguments *args, char *tokens[], int size)
             ;
         else
         {
-            printf("Unknow command %s\n", tokens[i]);
-            for (int i = 0; i < size; i++)
-                free_tok(tokens[i]);
-            exit(1);
+            char buf[256];
+            snprintf(buf, sizeof(buf), "Unknow command %s", tokens[i]);
+            LOG(FATAL, EINVAL, buf);
         }
     }
 }
@@ -90,11 +85,7 @@ int parse_file(char *token, char *tokens[])
     while (getline(&line, &len, fp) != -1)
     {
         if (counter > 100)
-        {
-            errno = EINVAL;
-            perror("Too many commands");
-            exit(1);
-        }
+            LOG(FATAL, EINVAL, "Too many commands");
         char *temp = calloc(strlen(line), 1);
         size_t len = strlen(line) - 1;
         memcpy(temp, line, len);
@@ -130,11 +121,7 @@ void set_runtime(char *token, Arguments *args)
     char *temp = (char *)token;
     args->runtime = atoi(temp + 9);
     if (args->runtime <= 0)
-    {
-        errno = EINVAL;
-        perror("Invalid runtime");
-        exit(1);
-    }
+        LOG(FATAL, EINVAL, "Invalid runtime");
 }
 
 void set_size(char *token, Arguments *args)
@@ -175,11 +162,7 @@ void set_buflen(char *token, Arguments *args)
     char *ptr;
     args->buflen = strtoul(temp + 10, &ptr, 10) * multiplier;
     if (args->buflen <= 0)
-    {
-        errno = EINVAL;
-        perror("Invalid copy size");
-        exit(1);
-    }
+        LOG(FATAL, EINVAL, "Invalid copy size");
 }
 
 void set_path(char *token, Arguments *args)
@@ -190,10 +173,7 @@ void set_path(char *token, Arguments *args)
     if (strcmp(dir, "/dev/null") == 0 || strcmp(dir, "/dev/zero") == 0)
         args->map_anon = 1;
     if (!(args->path = malloc(strlen(dir) + 1)))
-    {
-        errno = EINVAL;
-        perror("Invalid Directory.");
-    }
+        LOG(FATAL, EINVAL, "Invalid Directory.");
     strcpy(args->path, dir);
     free_tok(dir);
 }
@@ -211,11 +191,7 @@ void set_mode(char *token, Arguments *args)
     else if (strncmp(mode, "randwrite", 9) == 0)
         args->mode = 3;
     else
-    {
-        errno = EINVAL;
-        perror("Invalid mode");
-        exit(1);
-    }
+        LOG(ERROR, EINVAL, "Invalid mode. Running default read");
 }
 
 void set_engine(char *token, Arguments *args)
@@ -248,9 +224,8 @@ void set_iter(char *token, Arguments *args)
     args->iterations = strtoul(temp + 6, &ptr, 10) * multiplier;
     if (args->iterations < 1)
     {
-        errno = EINVAL;
-        perror("Invalid Iterations. Needs to be at least 1");
-        exit(1);
+        LOG(ERROR, EINVAL, "Invalid Iterations. Running default 1 iteration");
+        args->iterations = 1;
     }
 }
 
@@ -262,8 +237,8 @@ void set_map_pop(char *token, Arguments *args)
     if (args->map_pop > 1 || args->map_pop < 0)
     {
         errno = EINVAL;
-        perror("Invalid value for map_pop. Needs to be 0|1");
-        exit(1);
+        LOG(ERROR, EINVAL, "Invalid value for map_pop. Running default 0");
+        args->map_pop = 0;
     }
 }
 
@@ -274,9 +249,8 @@ void set_map_shared(char *token, Arguments *args)
     args->map_shared = strtoul(temp + 12, &ptr, 10);
     if (args->map_shared > 1 || args->map_shared < 0)
     {
-        errno = EINVAL;
-        perror("Invalid value for map_pop. Needs to be 0|1");
-        exit(1);
+        LOG(ERROR, EINVAL, "Invalid value for map_shared. Running default 0");
+        args->map_shared = 0;
     }
 }
 
@@ -296,9 +270,8 @@ void set_cpy_iter(char *token, Arguments *args)
     args->cpy_iter = strtoul(temp + 10, &ptr, 10) * multiplier;
     if (args->cpy_iter < 1)
     {
-        errno = EINVAL;
-        perror("Invalid cpy iterations. Needs to be at least 1");
-        exit(1);
+        LOG(ERROR, EINVAL, "Invalid cpy iterations. Running default 1 iteration");
+        args->cpy_iter = 1;
     }
 }
 

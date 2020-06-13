@@ -7,10 +7,7 @@ void dump_results(Results results, Arguments args)
 {
     FILE *fp = fopen("results.out", "w+");
     if (fp == NULL)
-    {
-        perror("Failed opening results.out file. Delete it or run as sudo!");
-        exit(1);
-    }
+        LOG(FATAL, EINVAL, "Failed opening results.out file. Delete it or run as sudo!");
     fprintf(fp, "\t\t==== SUMMARY ====\n");
 
     switch (args.engine)
