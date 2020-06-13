@@ -19,8 +19,11 @@ int main(int argc, char *argv[])
         mem_lat_engine(&args);
     else if (args.engine == 3)
         page_fault_lat_engine(&args);
-    else
-        LOG(FATAL, EINVAL, "Engine");
+#ifdef PMEM
+    printf("YEAH");
+#endif
+    // else
+    //     LOG(FATAL, EINVAL, "Engine");
 
     if (strlen(args.path) > 0)
         free(args.path);
