@@ -206,6 +206,8 @@ void set_engine(char *token, Arguments *args)
         args->engine = 2;
     else if (strncmp(mode, "page_fault", 10) == 0)
         args->engine = 3;
+    else if (strncmp(mode, "pmem_cline", 10) == 0)
+        args->engine = 4;
 }
 
 void set_iter(char *token, Arguments *args)

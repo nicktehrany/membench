@@ -5,6 +5,9 @@
 #include "../engines/mem_lat.h"
 #include "../engines/page_fault.h"
 #include "parser.h"
+#ifdef PMEM
+#include "../engines/pmem_cline.h"
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -20,10 +23,16 @@ int main(int argc, char *argv[])
     else if (args.engine == 3)
         page_fault_lat_engine(&args);
 #ifdef PMEM
-    printf("YEAH");
+    else if (args.engine == 4)
+        printf("pmem"); // call engine
 #endif
-    // else
-    //     LOG(FATAL, EINVAL, "Engine");
+    else
+    {
+        if (args.engine == 4)
+            LOG(FATAL, ENOTSUP, "Running basic version. Run \"make full\" for pmem engine");
+        else
+            LOG(FATAL, EINVAL, "Engine");
+    }
 
     if (strlen(args.path) > 0)
         free(args.path);
