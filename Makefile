@@ -15,7 +15,7 @@ engines/mem_lat.h engines/page_fault.h src/parser.h src/functions.h
 BM_Target = Benchmark
 OUT = out
 
-.PHONY: all clean
+.PHONY: all clean basic
 
 all: full
 
