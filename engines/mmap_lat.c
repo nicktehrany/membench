@@ -45,7 +45,7 @@ int mmap_lat_prep_file(Arguments args)
     else
     {
         if ((fd = open(args.path, O_RDWR, 0666)) < 0)
-            LOG(FATAL, errno, "File Open");
+            LOG(ERROR, errno, "File Open");
     }
     return fd;
 }
@@ -65,7 +65,7 @@ uint64_t mmap_lat_do_mmap(Mapping *mapping, Arguments args, int fd)
         {
             close(fd);
             remove(args.path);
-            LOG(FATAL, errno, "mmap");
+            LOG(ERROR, errno, "mmap");
         }
         clock_gettime(CLOCK_MONOTONIC, &tend);
         nsecs_elapsed = NANS_ELAPSED(tend, tstart);
@@ -84,7 +84,7 @@ uint64_t mmap_lat_do_mmap_anon(Mapping *mapping, Arguments args, int fd)
 
     // MAP_ANONYMOUS not backed by file on file system
     if ((mapping->addr = (char *)mmap(0, args.size, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
-        LOG(FATAL, errno, "mmap");
+        LOG(ERROR, errno, "mmap");
 
     clock_gettime(CLOCK_MONOTONIC, &tend);
     nsecs_elapsed = NANS_ELAPSED(tend, tstart);
@@ -101,14 +101,14 @@ void mmap_lat_cleanup_file(Mapping *mapping, int fd)
 {
     close(fd);
     if (!mapping->map_anon && remove(mapping->fpath) != 0)
-        LOG(FATAL, errno, "Error deleting file");
+        LOG(ERROR, errno, "Error deleting file");
 }
 
 // Check if all args are valid for engine to start
 void mmap_lat_check_args(Arguments *args)
 {
     if (args->size <= 0)
-        LOG(FATAL, EINVAL, "Invalid or missing file or copy size");
+        LOG(ERROR, EINVAL, "Invalid or missing file or copy size");
     if (strcmp(args->path, "") == 0)
     {
         args->path = "file";

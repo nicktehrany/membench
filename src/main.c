@@ -24,14 +24,14 @@ int main(int argc, char *argv[])
         page_fault_lat_engine(&args);
 #ifdef PMEM
     else if (args.engine == 4)
-        printf("pmem"); // call engine
+        pmem_cline_engine(&args);
 #endif
     else
     {
         if (args.engine == 4)
-            LOG(FATAL, ENOTSUP, "Running basic version. Run \"make full\" for pmem engine");
+            LOG(ERROR, ENOTSUP, "Running basic version. Run \"make full\" for pmem engine");
         else
-            LOG(FATAL, EINVAL, "Engine");
+            LOG(ERROR, EINVAL, "Engine");
     }
 
     if (strlen(args.path) > 0)
