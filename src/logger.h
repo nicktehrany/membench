@@ -2,16 +2,14 @@
 #include <errno.h>
 #include <time.h>
 #include <stdio.h>
-// LOG DEBUG ERROR or INFO as type, errno as value if ERROR otherwise int64_t value to be logged,
+// Logging DEBUG ERROR or INFO as type, errno as value if ERROR otherwise int64_t value to be logged,
 // and error Message as message
 static inline char *gettime();
 static inline char *format_message();
 static inline char *format_error();
-#define LOG(type, value, message)                                                                         \
-    (type == DEBUG) ? (void)printf("%s | DEBUG | %s:%d | %s\n", gettime(), __FILE__, __LINE__,            \
-                                   format_message(message, value))                                        \
-                    : (type == ERROR ? (errno = value, perror(format_error(message, __FILE__, __LINE__)), \
-                                        exit(1))                                                          \
+#define LOG(type, value, message)                                                                                              \
+    (type == DEBUG) ? (void)printf("%s | DEBUG | %s:%d | %s\n", gettime(), __FILE__, __LINE__, format_message(message, value)) \
+                    : (type == ERROR ? (errno = value, perror(format_error(message, __FILE__, __LINE__)), exit(1))             \
                                      : (void)printf("LOG %s\n", message))
 
 enum LOG_TYPES
