@@ -7,10 +7,12 @@
 static inline char *gettime();
 static inline char *format_message();
 static inline char *format_error();
-#define LOG(type, value, message) \
-    (type == DEBUG) ? (void)printf("%s | DEBUG | %s:%d | %s\n", gettime(), __FILE__, __LINE__, \
-    format_message(message, value)) : (type == ERROR ? (errno = value, perror(format_error(message, __FILE__, __LINE__)), \
-    exit(1)) : (void)printf("%s\n", message))
+#define LOG(type, value, message)                                                                         \
+    (type == DEBUG) ? (void)printf("%s | DEBUG | %s:%d | %s\n", gettime(), __FILE__, __LINE__,            \
+                                   format_message(message, value))                                        \
+                    : (type == ERROR ? (errno = value, perror(format_error(message, __FILE__, __LINE__)), \
+                                        exit(1))                                                          \
+                                     : (void)printf("LOG %s\n", message))
 
 enum LOG_TYPES
 {
@@ -39,10 +41,10 @@ static inline char *format_message(char *message, int64_t value)
     return buf;
 }
 
-static inline char *format_error(char *message, char* file, int line)
+static inline char *format_error(char *message, char *file, int line)
 {
     static char buf[256];
-    snprintf(buf, sizeof(buf), "ERROR | %s:%d | %.229s", file, line , message);
+    snprintf(buf, sizeof(buf), "ERROR | %s:%d | %.229s", file, line, message);
     return buf;
 }
 
