@@ -1,7 +1,7 @@
 #include "functions.h"
 #include <sys/mman.h>
 
-// Calculates bandwidth using the counter, runtime, and block size
+// Calculates bandwidth using the counter, runtime, and copy size
 void get_bandwidth(uint64_t counter, double runtime, uint64_t bsize, Results *results)
 {
     results->bandwidth = (double)counter / runtime * (double)bsize / 1024.0 / 1024.0;
