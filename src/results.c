@@ -45,44 +45,30 @@ void results_mmap_eng(FILE *fp, Results results, Arguments args)
     print_dir(fp, args);
     print_flags(fp, args);
     print_misc(fp, args);
-    if (args.buflen >= (1024 * 1024 * 1024))
-    {
-        fprintf(fp, "Copy Size\t\t\t\t%ld GiB\n", args.buflen / ((1024 * 1024 * 1024)));
-        printf("Copy Size: %ld GiB\n", args.buflen / ((1024 * 1024 * 1024)));
-    }
-    else if (args.buflen >= (1024 * 1024))
-    {
-        fprintf(fp, "Copy Size\t\t\t\t%ld MiB\n", args.buflen / ((1024 * 1024)));
-        printf("Copy Size: %ld MiB\n", args.buflen / ((1024 * 1024)));
-    }
-    else if (args.buflen >= 1024)
-    {
-        fprintf(fp, "Copy Size\t\t\t\t%ld KiB\n", args.buflen / 1024);
-        printf("Copy Size: %ld KiB\n", args.buflen / 1024);
-    }
-    else
-    {
-        fprintf(fp, "Copy Size\t\t\t\t%ld Bytes\n", args.buflen);
-        printf("Copy Size: %ld Bytes\n", args.buflen);
-    }
+    Size_Unit size_unit;
 
+    format_size(&size_unit, args.buflen);
+    fprintf(fp, "Copy Size\t\t\t\t%Lf %s\n", size_unit.size, size_unit.unit);
+    printf("Copy Size: %Lf %s\n", size_unit.size, size_unit.unit);
+
+    format_size(&size_unit, results.bandwidth);
     switch (args.mode)
     {
     case 0:
-        fprintf(fp, "Sequential Read\t\t\t%f GiB/s\n", results.bandwidth / 1024);
-        printf("Sequential Read: %f GiB/s\n", results.bandwidth / 1024);
+        fprintf(fp, "Sequential Read\t\t\t%Lf %s/s\n", size_unit.size, size_unit.unit);
+        printf("Sequential Read: %Lf %s/s\n", size_unit.size, size_unit.unit);
         break;
     case 1:
-        fprintf(fp, "Sequential Write\t\t%f GiB/s\n", results.bandwidth / 1024);
-        printf("Sequential Write: %f GiB/s\n", results.bandwidth / 1024);
+        fprintf(fp, "Sequential Write\t\t%Lf %s/s\n", size_unit.size, size_unit.unit);
+        printf("Sequential Write: %Lf %s/s\n", size_unit.size, size_unit.unit);
         break;
     case 2:
-        fprintf(fp, "Random Read\t\t\t\t%f GiB/s\n", results.bandwidth / 1024);
-        printf("Random Read: %f GiB/s\n", results.bandwidth / 1024);
+        fprintf(fp, "Random Read\t\t\t\t%Lf %s/s\n", size_unit.size, size_unit.unit);
+        printf("Random Read: %Lf %s/s\n", size_unit.size, size_unit.unit);
         break;
     case 3:
-        fprintf(fp, "Random Write\t\t\t%f GiB/s\n", results.bandwidth / 1024);
-        printf("Random Write: %f GiB/s\n", results.bandwidth / 1024);
+        fprintf(fp, "Random Write\t\t\t%Lf %s/s\n", size_unit.size, size_unit.unit);
+        printf("Random Write: %Lf %s/s\n", size_unit.size, size_unit.unit);
         break;
     }
 
@@ -247,4 +233,28 @@ void results_page_fault_eng(FILE *fp, Results results, Arguments args)
     printf("Maximum latency: %.2f nsec\n", results.max_lat);
     fprintf(fp, "Average latency\t\t\t%.2f nsec\n", results.avg_lat);
     printf("Average latency: %.2f nsec\n", results.avg_lat);
+}
+
+void format_size(Size_Unit *size_unit, uint64_t size)
+{
+    if (size >= (1024 * 1024 * 1024))
+    {
+        size_unit->size = size / ((1024.0 * 1024.0 * 1024.0));
+        size_unit->unit = "GiB";
+    }
+    else if (size >= (1024 * 1024))
+    {
+        size_unit->size = size / ((1024.0 * 1024.0));
+        size_unit->unit = "MiB";
+    }
+    else if (size >= 1024)
+    {
+        size_unit->size = size / 1024.0;
+        size_unit->unit = "KiB";
+    }
+    else
+    {
+        size_unit->size = size;
+        size_unit->unit = "B";
+    }
 }
