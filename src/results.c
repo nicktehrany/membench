@@ -76,12 +76,7 @@ void results_mmap_eng(FILE *fp, Results results, Arguments args)
     fprintf(fp, "Data Copied\t\t\t\t%Lf %s\n", size_unit.size, size_unit.unit);
     printf("Data Copied: %Lf %s\n", size_unit.size, size_unit.unit);
 
-    fprintf(fp, "Minimum latency\t\t\t%.2f nsec\n", results.min_lat);
-    printf("Minimum latency: %.2f nsec\n", results.min_lat);
-    fprintf(fp, "Maximum latency\t\t\t%.2f nsec\n", results.max_lat);
-    printf("Maximum latency: %.2f nsec\n", results.max_lat);
-    fprintf(fp, "Average latency\t\t\t%.2f nsec\n", results.avg_lat);
-    printf("Average latency: %.2f nsec\n", results.avg_lat);
+    results_latencies(fp, results);
 }
 
 void results_mmap_lat_eng(FILE *fp, Results results, Arguments args)
@@ -89,12 +84,7 @@ void results_mmap_lat_eng(FILE *fp, Results results, Arguments args)
     print_dir(fp, args);
     print_flags(fp, args);
     print_misc(fp, args);
-    fprintf(fp, "Minimum latency\t\t\t%.2f nsec\n", results.min_lat);
-    printf("Minimum latency: %.2f nsec\n", results.min_lat);
-    fprintf(fp, "Maximum latency\t\t\t%.2f nsec\n", results.max_lat);
-    printf("Maximum latency: %.2f nsec\n", results.max_lat);
-    fprintf(fp, "Average latency\t\t\t%.2f nsec\n", results.avg_lat);
-    printf("Average latency: %.2f nsec\n", results.avg_lat);
+    results_latencies(fp, results);
 }
 
 void results_mem_lat_eng(FILE *fp, Results results, Arguments args)
@@ -108,12 +98,7 @@ void results_mem_lat_eng(FILE *fp, Results results, Arguments args)
 
     fprintf(fp, "Iterations\t\t\t\t%ld\n", args.iterations);
     printf("Iterations: %ld\n", args.iterations);
-    fprintf(fp, "Minimum latency\t\t\t%.2f nsec\n", results.min_lat);
-    printf("Minimum latency: %.2f nsec\n", results.min_lat);
-    fprintf(fp, "Maximum latency\t\t\t%.2f nsec\n", results.max_lat);
-    printf("Maximum latency: %.2f nsec\n", results.max_lat);
-    fprintf(fp, "Average latency\t\t\t%.2f nsec\n", results.avg_lat);
-    printf("Average latency: %.2f nsec\n", results.avg_lat);
+    results_latencies(fp, results);
 }
 
 void print_dir(FILE *fp, Arguments args)
@@ -180,15 +165,25 @@ void print_misc(FILE *fp, Arguments args)
     printf("File Size: %Lf %s\n", size_unit.size, size_unit.unit);
 }
 
+void results_latencies(FILE *fp, Results results)
+{
+    Size_Unit size_unit;
+
+    format_latency(&size_unit, results.min_lat);
+    fprintf(fp, "Minimum latency\t\t\t%.2LF %s\n", size_unit.size, size_unit.unit);
+    printf("Minimum latency: %.2LF %s\n", size_unit.size, size_unit.unit);
+    format_latency(&size_unit, results.max_lat);
+    fprintf(fp, "Maximum latency\t\t\t%.2LF %s\n", size_unit.size, size_unit.unit);
+    printf("Maximum latency: %.2LF %s\n", size_unit.size, size_unit.unit);
+    format_latency(&size_unit, results.avg_lat);
+    fprintf(fp, "Average latency\t\t\t%.2LF %s\n", size_unit.size, size_unit.unit);
+    printf("Average latency: %.2LF %s\n", size_unit.size, size_unit.unit);
+}
+
 void results_page_fault_eng(FILE *fp, Results results, Arguments args)
 {
     print_dir(fp, args);
-    fprintf(fp, "Minimum latency\t\t\t%.2f nsec\n", results.min_lat);
-    printf("Minimum latency: %.2f nsec\n", results.min_lat);
-    fprintf(fp, "Maximum latency\t\t\t%.2f nsec\n", results.max_lat);
-    printf("Maximum latency: %.2f nsec\n", results.max_lat);
-    fprintf(fp, "Average latency\t\t\t%.2f nsec\n", results.avg_lat);
-    printf("Average latency: %.2f nsec\n", results.avg_lat);
+    results_latencies(fp, results);
 }
 
 void format_size(Size_Unit *size_unit, uint64_t size)
@@ -212,5 +207,24 @@ void format_size(Size_Unit *size_unit, uint64_t size)
     {
         size_unit->size = size;
         size_unit->unit = "B";
+    }
+}
+
+void format_latency(Size_Unit *size_unit, uint64_t latency)
+{
+    if (latency >= (1000 * 1000))
+    {
+        size_unit->size = latency / ((1000.0 * 1000.0));
+        size_unit->unit = "msec";
+    }
+    else if (latency >= 1000)
+    {
+        size_unit->size = latency / 1000.0;
+        size_unit->unit = "usec";
+    }
+    else
+    {
+        size_unit->size = latency;
+        size_unit->unit = "nsec";
     }
 }
