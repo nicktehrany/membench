@@ -5,9 +5,6 @@
 #include "../engines/mem_lat.h"
 #include "../engines/page_fault.h"
 #include "parser.h"
-#ifdef PMEM
-#include "../engines/pmem_cline.h"
-#endif
 
 int main(int argc, char *argv[])
 {
@@ -28,16 +25,8 @@ int main(int argc, char *argv[])
     case 3:
         page_fault_lat_engine(&args);
         break;
-#ifdef PMEM
-    case 4:
-        pmem_cline_engine(&args);
-        break;
-#endif
     default:
-        if (args.engine == 4)
-            LOG(ERROR, ENOTSUP, "Running basic version. Run \"make full\" for pmem engine");
-        else
-            LOG(ERROR, EINVAL, "Engine");
+        LOG(ERROR, EINVAL, "Engine");
         break;
     }
 
