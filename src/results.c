@@ -72,26 +72,9 @@ void results_mmap_eng(FILE *fp, Results results, Arguments args)
         break;
     }
 
-    if (results.io_data >= (1024 * 1024 * 1024))
-    {
-        fprintf(fp, "Data Copied\t\t\t\t%ld GiB\n", results.io_data / ((1024 * 1024 * 1024)));
-        printf("Data Copied: %ld GiB\n", results.io_data / ((1024 * 1024 * 1024)));
-    }
-    else if (results.io_data >= (1024 * 1024))
-    {
-        fprintf(fp, "Data Copied\t\t\t\t%ld MiB\n", results.io_data / ((1024 * 1024)));
-        printf("Data Copied: %ld MiB\n", results.io_data / ((1024 * 1024)));
-    }
-    else if (results.io_data >= 1024)
-    {
-        fprintf(fp, "Data Copied\t\t\t\t%ld KiB\n", results.io_data / 1024);
-        printf("Data Copied: %ld KiB\n", results.io_data / 1024);
-    }
-    else
-    {
-        fprintf(fp, "Data Copied\t\t\t\t%ld Bytes\n", results.io_data);
-        printf("Data Copied: %ld Bytes\n", results.io_data);
-    }
+    format_size(&size_unit, results.io_data);
+    fprintf(fp, "Data Copied\t\t\t\t%Lf %s\n", size_unit.size, size_unit.unit);
+    printf("Data Copied: %Lf %s\n", size_unit.size, size_unit.unit);
 
     fprintf(fp, "Minimum latency\t\t\t%.2f nsec\n", results.min_lat);
     printf("Minimum latency: %.2f nsec\n", results.min_lat);
@@ -116,26 +99,13 @@ void results_mmap_lat_eng(FILE *fp, Results results, Arguments args)
 
 void results_mem_lat_eng(FILE *fp, Results results, Arguments args)
 {
-    if (args.size >= (1024 * 1024 * 1024))
-    {
-        fprintf(fp, "Buffer Size\t\t\t\t%ld GiB\n", args.size / (1024 * 1024 * 1024));
-        printf("Buffer Size: %ld GiB\n", args.size / (1024 * 1024 * 1024));
-    }
-    else if (args.size >= (1024 * 1024))
-    {
-        fprintf(fp, "Buffer Size\t\t\t\t%ld MiB\n", args.size / (1024 * 1024));
-        printf("Buffer Size: %ld MiB\n", args.size / (1024 * 1024));
-    }
-    else if (args.size >= 1024)
-    {
-        fprintf(fp, "Buffer Size\t\t\t\t%ld KiB\n", args.size / 1024);
-        printf("Buffer Size: %ld KiB\n", args.size / 1024);
-    }
-    else
-    {
-        fprintf(fp, "File Size\t\t\t\t%ld Bytes\n", args.size);
-        printf("File Size: %ld Bytes\n", args.size);
-    }
+    Size_Unit size_unit;
+
+    format_size(&size_unit, args.size);
+
+    fprintf(fp, "Buffer Size\t\t\t\t%Lf %s\n", size_unit.size, size_unit.unit);
+    printf("Buffer Size: %Lf %s\n", size_unit.size, size_unit.unit);
+
     fprintf(fp, "Iterations\t\t\t\t%ld\n", args.iterations);
     printf("Iterations: %ld\n", args.iterations);
     fprintf(fp, "Minimum latency\t\t\t%.2f nsec\n", results.min_lat);
@@ -193,6 +163,7 @@ void print_flags(FILE *fp, Arguments args)
 
 void print_misc(FILE *fp, Arguments args)
 {
+    Size_Unit size_unit;
 
     fprintf(fp, "Iterations\t\t\t\t%ld\n", args.iterations);
     printf("Iterations: %ld\n", args.iterations);
@@ -202,26 +173,11 @@ void print_misc(FILE *fp, Arguments args)
     printf("Total Memcpy Calls: %ld\n", args.iterations * args.cpy_iter);
     fprintf(fp, "Total Runtime\t\t\t%.6f sec\n", args.runtime);
     printf("Total Runtime: %.6f sec\n", args.runtime);
-    if (args.size >= (1024 * 1024 * 1024))
-    {
-        fprintf(fp, "File Size\t\t\t\t%ld GiB\n", args.size / (1024 * 1024 * 1024));
-        printf("File Size: %ld GiB\n", args.size / (1024 * 1024 * 1024));
-    }
-    else if (args.size >= (1024 * 1024))
-    {
-        fprintf(fp, "File Size\t\t\t\t%ld MiB\n", args.size / (1024 * 1024));
-        printf("File Size: %ld MiB\n", args.size / (1024 * 1024));
-    }
-    else if (args.size >= 1024)
-    {
-        fprintf(fp, "File Size\t\t\t\t%ld KiB\n", args.size / 1024);
-        printf("File Size: %ld KiB\n", args.size / 1024);
-    }
-    else
-    {
-        fprintf(fp, "File Size\t\t\t\t%ld Bytes\n", args.size);
-        printf("File Size: %ld Bytes\n", args.size);
-    }
+
+    format_size(&size_unit, args.size);
+
+    fprintf(fp, "File Size\t\t\t\t%Lf %s\n", size_unit.size, size_unit.unit);
+    printf("File Size: %Lf %s\n", size_unit.size, size_unit.unit);
 }
 
 void results_page_fault_eng(FILE *fp, Results results, Arguments args)
