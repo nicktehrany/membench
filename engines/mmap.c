@@ -100,7 +100,7 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
     // If buflen > PAGE_SIZE, divide file into buflen size chunks else PAGE_SIZE chunks
     uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
     uint64_t max_ind = (mapping->size / chunk_size) - 1;
-    uint64_t loop_iters = (args->cpy_iter != 0 && max_ind > args->cpy_iter) ? args->cpy_iter : max_ind;
+    uint64_t loop_iters = (args->cpy_iter > 1 && max_ind > args->cpy_iter) ? args->cpy_iter : max_ind;
     double secs_elapsed = 0;
     unsigned char *buf = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
     char **block_index = (char **)malloc(max_ind * sizeof(char *));
@@ -121,6 +121,7 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
 
     struct timespec tstart = {0, 0}, tend = {0, 0};
     clock_t dummy = clock();
+
     while (secs_elapsed < args->runtime)
     {
         msync(mapping->addr, mapping->size, MS_INVALIDATE); // In case data is in page cache drop it
@@ -145,7 +146,7 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
         // Used to keep track of runtime
         secs_elapsed += elapsed * NANS_TO_SECS;
 
-        if (args->cpy_iter != 0 && args->cpy_iter <= counter)
+        if (args->cpy_iter > 1 && args->cpy_iter <= counter)
             break;
     }
 
