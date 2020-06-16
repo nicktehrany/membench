@@ -76,7 +76,7 @@ void results_mmap_eng(FILE *fp, Results results, Arguments args)
     fprintf(fp, "Data Copied\t\t\t\t%Lf %s\n", size_unit.size, size_unit.unit);
     printf("Data Copied: %Lf %s\n", size_unit.size, size_unit.unit);
 
-    results_latencies(fp, results);
+    print_latencies(fp, results);
 }
 
 void results_mmap_lat_eng(FILE *fp, Results results, Arguments args)
@@ -84,7 +84,7 @@ void results_mmap_lat_eng(FILE *fp, Results results, Arguments args)
     print_dir(fp, args);
     print_flags(fp, args);
     print_misc(fp, args);
-    results_latencies(fp, results);
+    print_latencies(fp, results);
 }
 
 void results_mem_lat_eng(FILE *fp, Results results, Arguments args)
@@ -98,7 +98,7 @@ void results_mem_lat_eng(FILE *fp, Results results, Arguments args)
 
     fprintf(fp, "Iterations\t\t\t\t%ld\n", args.iterations);
     printf("Iterations: %ld\n", args.iterations);
-    results_latencies(fp, results);
+    print_latencies(fp, results);
 }
 
 void print_dir(FILE *fp, Arguments args)
@@ -165,7 +165,7 @@ void print_misc(FILE *fp, Arguments args)
     printf("File Size: %Lf %s\n", size_unit.size, size_unit.unit);
 }
 
-void results_latencies(FILE *fp, Results results)
+void print_latencies(FILE *fp, Results results)
 {
     Size_Unit size_unit;
 
@@ -183,7 +183,7 @@ void results_latencies(FILE *fp, Results results)
 void results_page_fault_eng(FILE *fp, Results results, Arguments args)
 {
     print_dir(fp, args);
-    results_latencies(fp, results);
+    print_latencies(fp, results);
 }
 
 void format_size(Size_Unit *size_unit, uint64_t size)
