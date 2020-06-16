@@ -17,7 +17,7 @@ void mmap_lat_engine(Arguments *args)
     uint64_t latency = 0;
 
     mmap_lat_check_args(args);
-    fd = mmap_lat_prep_file(*args);
+    fd = mmap_lat_prep_file(args);
     mapping.fpath = args->path;
     mapping.size = args->size;
     mapping.map_anon = args->map_anon;
@@ -31,21 +31,23 @@ void mmap_lat_engine(Arguments *args)
     }
 
     args->runtime = acc_nsecs * NANS_TO_SECS;
-    mmap_lat_cleanup_file(&mapping, fd);
     results.avg_lat = (double)acc_nsecs / (double)args->iterations;
     dump_results(results, *args);
 }
 
-int mmap_lat_prep_file(Arguments args)
+int mmap_lat_prep_file(Arguments *args)
 {
     int fd;
 
-    if (args.map_anon)
+    if (args->map_anon)
         fd = -1;
     else
     {
-        if ((fd = open(args.path, O_RDWR, 0666)) < 0)
+        if ((fd = open(args->path, O_RDWR, 0666)) < 0)
             LOG(ERROR, errno, "File Open");
+
+        args->size = lseek(fd, 0, SEEK_END);
+        args->size -= args->size % PAGESIZE; // Align size to PAGE_SIZE
     }
     return fd;
 }
@@ -64,7 +66,6 @@ uint64_t mmap_lat_do_mmap(Mapping *mapping, Arguments args, int fd)
         if ((mapping->addr = (char *)mmap(0, args.size, PROT_WRITE | PROT_READ, flags, fd, 0)) == MAP_FAILED)
         {
             close(fd);
-            remove(args.path);
             LOG(ERROR, errno, "mmap");
         }
         clock_gettime(CLOCK_MONOTONIC, &tend);
@@ -97,20 +98,9 @@ void mmap_lat_do_unmap(Mapping *mapping)
     munmap(mapping->addr, mapping->size);
 }
 
-void mmap_lat_cleanup_file(Mapping *mapping, int fd)
-{
-    close(fd);
-    if (!mapping->map_anon && remove(mapping->fpath) != 0)
-        LOG(ERROR, errno, "Error deleting file");
-}
-
 // Check if all args are valid for engine to start
 void mmap_lat_check_args(Arguments *args)
 {
-    if (args->size <= 0)
-        LOG(ERROR, EINVAL, "Invalid or missing file or copy size");
     if (strcmp(args->path, "") == 0)
-    {
-        args->path = "file";
-    }
+        LOG(ERROR, EINVAL, "Missing File Path");
 }

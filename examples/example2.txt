@@ -1,6 +1,6 @@
--runtime=1000
+-runtime=100
 -engine=mmap_lat
 -dir=/mnt/mem/file
 -map_pop=1
--iter=1M
+-iter=100
 -map_shared=1
