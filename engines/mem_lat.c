@@ -28,7 +28,10 @@ void mem_lat_engine(Arguments *args)
     }
 
     args->iterations = iters;
-    results.avg_lat = ((runtime / (double)iters) * SECS_TO_NANS) / (double)DEF_STEPS;
+    if (args->iterations == 1)
+        results.avg_lat = results.max_lat;
+    else
+        results.avg_lat = ((runtime / (double)iters) * SECS_TO_NANS) / (double)DEF_STEPS;
     dump_results(results, *args);
 }
 

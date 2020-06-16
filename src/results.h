@@ -2,6 +2,8 @@
 #define RESULTS_H
 #include "parser.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 typedef struct Results
 {
@@ -19,7 +21,6 @@ void results_mem_lat_eng(FILE *fp, Results results, Arguments args);
 void print_dir(FILE *fp, Arguments args);
 void print_flags(FILE *fp, Arguments args);
 void print_misc(FILE *fp, Arguments args);
-void display_results(FILE *fp);
 void results_page_fault_eng(FILE *fp, Results results, Arguments args);
 
 #endif

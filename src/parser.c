@@ -11,7 +11,7 @@ void parse(Arguments *args, int argc, char **argv)
     int file_parse = 0;
 
     if (argc > 100)
-        LOG(FATAL, EINVAL, "Too many commands");
+        LOG(ERROR, EINVAL, "Too many commands");
     for (int i = 0; i < argc - 1; i++)
     {
         if (strncmp(argv[i + 1], "-h", 2) == 0)
@@ -62,7 +62,7 @@ void parse_cmd_line(Arguments *args, char *tokens[], int size)
         {
             char buf[256];
             snprintf(buf, sizeof(buf), "Unknow command %s", tokens[i]);
-            LOG(FATAL, EINVAL, buf);
+            LOG(ERROR, EINVAL, buf);
         }
     }
 }
@@ -85,7 +85,7 @@ int parse_file(char *token, char *tokens[])
     while (getline(&line, &len, fp) != -1)
     {
         if (counter > 100)
-            LOG(FATAL, EINVAL, "Too many commands");
+            LOG(ERROR, EINVAL, "Too many commands");
         char *temp = calloc(strlen(line), 1);
         size_t len = strlen(line) - 1;
         memcpy(temp, line, len);
@@ -121,7 +121,7 @@ void set_runtime(char *token, Arguments *args)
     char *temp = (char *)token;
     args->runtime = atoi(temp + 9);
     if (args->runtime <= 0)
-        LOG(FATAL, EINVAL, "Invalid runtime");
+        LOG(ERROR, EINVAL, "Invalid runtime");
 }
 
 void set_size(char *token, Arguments *args)
@@ -162,7 +162,7 @@ void set_buflen(char *token, Arguments *args)
     char *ptr;
     args->buflen = strtoul(temp + 10, &ptr, 10) * multiplier;
     if (args->buflen <= 0)
-        LOG(FATAL, EINVAL, "Invalid copy size");
+        LOG(ERROR, EINVAL, "Invalid copy size");
 }
 
 void set_path(char *token, Arguments *args)
@@ -173,7 +173,7 @@ void set_path(char *token, Arguments *args)
     if (strcmp(dir, "/dev/null") == 0 || strcmp(dir, "/dev/zero") == 0)
         args->map_anon = 1;
     if (!(args->path = malloc(strlen(dir) + 1)))
-        LOG(FATAL, EINVAL, "Invalid Directory.");
+        LOG(ERROR, EINVAL, "Invalid Directory.");
     strcpy(args->path, dir);
     free_tok(dir);
 }
@@ -206,6 +206,8 @@ void set_engine(char *token, Arguments *args)
         args->engine = 2;
     else if (strncmp(mode, "page_fault", 10) == 0)
         args->engine = 3;
+    else if (strncmp(mode, "pmem_cline", 10) == 0)
+        args->engine = 4;
 }
 
 void set_iter(char *token, Arguments *args)

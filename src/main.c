@@ -11,16 +11,24 @@ int main(int argc, char *argv[])
     Arguments args = {0, "", 0, 0, 0, 0, -1, 1, 0, 0, 1};
 
     parse(&args, argc, argv);
-    if (args.engine == 0)
+    switch (args.engine)
+    {
+    case 0:
         mmap_engine(&args);
-    else if (args.engine == 1)
+        break;
+    case 1:
         mmap_lat_engine(&args);
-    else if (args.engine == 2)
+        break;
+    case 2:
         mem_lat_engine(&args);
-    else if (args.engine == 3)
+        break;
+    case 3:
         page_fault_lat_engine(&args);
-    else
-        LOG(FATAL, EINVAL, "Engine");
+        break;
+    default:
+        LOG(ERROR, EINVAL, "Engine");
+        break;
+    }
 
     if (strlen(args.path) > 0)
         free(args.path);
