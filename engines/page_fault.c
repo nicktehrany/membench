@@ -10,10 +10,7 @@
  * page faults, after which the file will be unmapped, remapped, caches are Invalidated, and access 
  * begins again. This process is repeated 1,000 times. Caches are invalidated before every iteration
  * of accesses.
- * 
- * run sysctl -w vm.drop_caches=3 before running benchmark to drop page cache if file was copied
- * to mount directory and is in page cache
-*/
+ */
 void page_fault_lat_engine(Arguments *args)
 {
     PageMap pagemap;

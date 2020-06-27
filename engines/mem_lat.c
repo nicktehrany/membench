@@ -11,7 +11,8 @@
  * and so on. The last pointer to be set will point back to the base pointer, 
  * therefore not every pointer in the buffer may point to an address, but this
  * will create a cycle that can be walked multiple times. The walk will start 
- * at the base pointer and it'll keep going to the next pointer 10,000,000 times. 
+ * at the base pointer and it'll keep going to the next pointer 10,000,000 times.
+ * Recommended to run at least 5 iterations (pass flag -iter=5), for accurate results.
  */
 void mem_lat_engine(Arguments *args)
 {
@@ -64,13 +65,13 @@ double walk_ptrs(MemMap memmap, Results *results)
     struct timespec tstart = {0, 0}, tend = {0, 0};
     uint64_t elapsed = 0;
     char **walker = &memmap.base_ptr[0];
-    char **store = (char **)calloc(memmap.size * sizeof(char *), 1);
+    char **store = (char **)calloc(PAGESIZE * sizeof(char *), 1);
 
     clock_gettime(CLOCK_MONOTONIC, &tstart);
     for (uint64_t i = 0; i < DEF_STEPS; i++)
     {
         walker = (char **)*walker;
-        store[i % memmap.size] = *walker; // Store walking pointer somewhere otherwise compiler uses ADCE when optimizing
+        store[i % PAGESIZE] = *walker; // Store walking pointer somewhere otherwise compiler uses ADCE when optimizing
     }
     clock_gettime(CLOCK_MONOTONIC, &tend);
 
