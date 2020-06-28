@@ -141,7 +141,10 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
         else
         {
             for (uint64_t i = 0; i < loop_iters; i++)
+            {
+                msync(buf, mapping->buflen, MS_INVALIDATE); // Make sure we copy src to dest from memory to memory, not from cache to memory
                 memcpy(block_index[i], buf, mapping->buflen * sizeof(char));
+            }
         }
 
         clock_gettime(CLOCK_MONOTONIC, &tend);

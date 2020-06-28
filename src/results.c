@@ -48,8 +48,8 @@ void results_mmap_eng(FILE *fp, Results results, Arguments args)
     Size_Unit size_unit;
 
     format_size(&size_unit, args.buflen);
-    fprintf(fp, "Copy Size\t\t\t\t%Lf %s\n", size_unit.size, size_unit.unit);
-    printf("Copy Size: %Lf %s\n", size_unit.size, size_unit.unit);
+    fprintf(fp, "Copy Size\t\t\t\t%.0Lf %s\n", size_unit.size, size_unit.unit);
+    printf("Copy Size: %.0Lf %s\n", size_unit.size, size_unit.unit);
 
     format_size(&size_unit, results.bandwidth);
     switch (args.mode)
@@ -93,8 +93,8 @@ void results_mem_lat_eng(FILE *fp, Results results, Arguments args)
 
     format_size(&size_unit, args.size);
 
-    fprintf(fp, "Buffer Size\t\t\t\t%Lf %s\n", size_unit.size, size_unit.unit);
-    printf("Buffer Size: %Lf %s\n", size_unit.size, size_unit.unit);
+    fprintf(fp, "Buffer Size\t\t\t\t%.0Lf %s\n", size_unit.size, size_unit.unit);
+    printf("Buffer Size: %.0Lf %s\n", size_unit.size, size_unit.unit);
 
     fprintf(fp, "Iterations\t\t\t\t%ld\n", args.iterations);
     printf("Iterations: %ld\n", args.iterations);
@@ -161,8 +161,8 @@ void print_misc(FILE *fp, Arguments args)
 
     format_size(&size_unit, args.size);
 
-    fprintf(fp, "File Size\t\t\t\t%Lf %s\n", size_unit.size, size_unit.unit);
-    printf("File Size: %Lf %s\n", size_unit.size, size_unit.unit);
+    fprintf(fp, "File Size\t\t\t\t%.0Lf %s\n", size_unit.size, size_unit.unit);
+    printf("File Size: %.0Lf %s\n", size_unit.size, size_unit.unit);
 }
 
 void print_latencies(FILE *fp, Results results)
