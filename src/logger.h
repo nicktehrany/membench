@@ -10,7 +10,7 @@ static inline char *format_error();
 #define LOG(type, value, message)                                                                                              \
     (type == DEBUG) ? (void)printf("%s | DEBUG | %s:%d | %s\n", gettime(), __FILE__, __LINE__, format_message(message, value)) \
                     : (type == ERROR ? (errno = value, perror(format_error(message, __FILE__, __LINE__)), exit(1))             \
-                                     : (void)printf("LOG %s\n", message))
+                                     : (void)printf("LOG | %s\n", message))
 
 enum LOG_TYPES
 {

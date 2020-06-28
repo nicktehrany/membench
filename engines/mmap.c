@@ -34,7 +34,7 @@ void mmap_engine(Arguments *args)
 void mmap_prepare_mapping(Mapping *mapping, Arguments args)
 {
     if (args.map_anon)
-        mmap_prepare_map_anon(mapping, args);
+        mmap_prepare_map_anon(mapping, &args);
     else
     {
         int fd;
@@ -59,20 +59,23 @@ void mmap_prepare_mapping(Mapping *mapping, Arguments args)
 }
 
 // Mapping is anonymous
-void mmap_prepare_map_anon(Mapping *mapping, Arguments args)
+void mmap_prepare_map_anon(Mapping *mapping, Arguments *args)
 {
-    args.size -= args.size % PAGESIZE; // Align size to PAGE_SIZE
-    if (args.size < 1)
-        LOG(ERROR, EINVAL, "Specify file size");
+    if (args->size < (uint64_t)PAGESIZE)
+    {
+        LOG(INFO, 0, "Too small size, aligning to minimum PAGE_SIZE");
+        args->size = PAGESIZE;
+    }
+    args->size += args->size % PAGESIZE; // Align size to PAGE_SIZE
 
-    int flags = set_flags(args);
+    int flags = set_flags(*args);
 
     // MAP_ANONYMOUS not backed by file on file system
-    if ((mapping->addr = (char *)mmap(0, args.size, PROT_WRITE | PROT_READ, flags, -1, 0)) == MAP_FAILED)
+    if ((mapping->addr = (char *)mmap(0, args->size, PROT_WRITE | PROT_READ, flags, -1, 0)) == MAP_FAILED)
         LOG(ERROR, errno, "mmap");
 
     mapping->map_anon = 1;
-    mapping->size = args.size;
+    mapping->size = args->size;
     mmap_init_mem(mapping);
 }
 
@@ -170,4 +173,6 @@ void mmap_check_args(Arguments *args)
 {
     if (args->runtime < 1)
         LOG(ERROR, EINVAL, "Runtime should be greater than 1sec");
+    if (args->size < args->buflen)
+        LOG(ERROR, EINVAL, "Copysize can't be larger than size");
 }

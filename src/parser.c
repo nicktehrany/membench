@@ -130,14 +130,15 @@ void set_size(char *token, Arguments *args)
 
     char *unit = temp + strlen(temp) - 1;
     int multiplier = 1;
-    char K = 'K', M = 'M', G = 'G';
-    if (*unit == K)
-        multiplier = 1024;
-    else if (*unit == M)
-        multiplier = 1024 * 1024;
 
-    else if (*unit == G)
+    if (*unit == 'K')
+        multiplier = 1024;
+    else if (*unit == 'M')
+        multiplier = 1024 * 1024;
+    else if (*unit == 'G')
         multiplier = 1024 * 1024 * 1024;
+    else if (*unit != 'B')
+        LOG(ERROR, EINVAL, "Invalid Size");
 
     char *ptr;
     args->size = strtoul(temp + 6, &ptr, 10) * multiplier;
@@ -150,14 +151,15 @@ void set_buflen(char *token, Arguments *args)
     char *unit = temp + strlen(temp) - 1;
 
     int multiplier = 1;
-    char K = 'K', M = 'M', G = 'G';
 
-    if (*unit == K)
+    if (*unit == 'K')
         multiplier = 1024;
-    else if (*unit == M)
+    else if (*unit == 'M')
         multiplier = 1024 * 1024;
-    else if (*unit == G)
+    else if (*unit == 'G')
         multiplier = 1024 * 1024 * 1024;
+    else if (*unit != 'B')
+        LOG(ERROR, EINVAL, "Invalid Size");
 
     char *ptr;
     args->buflen = strtoul(temp + 10, &ptr, 10) * multiplier;
