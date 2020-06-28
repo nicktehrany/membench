@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     }
 
     if (strlen(args.path) > 0)
-        free(args.path);
+        free_tok(args.path);
 
     return 0;
 }

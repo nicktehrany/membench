@@ -119,12 +119,15 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
         madvise(mapping->addr, mapping->size, MADV_RANDOM);
     }
 
+    // Fill buffer with random data for copying to memory
+    for (size_t i = 0; i < mapping->buflen; i++)
+        buf[i] = rand() % 256;
+
     struct timespec tstart = {0, 0}, tend = {0, 0};
-    clock_t dummy = clock();
 
     while (secs_elapsed < args->runtime)
     {
-        msync(mapping->addr, mapping->size, MS_INVALIDATE); // In case data is in page cache drop it
+        msync(mapping->addr, mapping->size, MS_INVALIDATE); // In case data is in cache drop it
         clock_gettime(CLOCK_MONOTONIC, &tstart);
 
         if (args->mode == 0 || args->mode == 2)
@@ -151,7 +154,7 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
     }
 
     get_bandwidth(counter, secs_elapsed, mapping->buflen, results);
-    args->runtime = dummy;
+    args->runtime = secs_elapsed;
     args->cpy_iter = counter;
 
     free(buf);
