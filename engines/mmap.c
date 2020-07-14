@@ -100,37 +100,40 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
     mapping->buflen = args->buflen;
     uint64_t counter = 0, elapsed = 0;
 
-    // If buflen > PAGE_SIZE, divide file into buflen size chunks else PAGE_SIZE chunks
-    uint64_t chunk_size = (mapping->buflen > (uint64_t)PAGESIZE) ? mapping->buflen : (uint64_t)PAGESIZE;
-    uint64_t max_ind = (mapping->size / chunk_size) - 1;
+    // Dividing mapping into buflen sized chunks
+    uint64_t max_ind = mapping->size / mapping->buflen;
+
+    // If user specified iterations run those, otherwise use maximum iterations on mapping
     uint64_t loop_iters = (args->cpy_iter > 1 && max_ind > args->cpy_iter) ? args->cpy_iter : max_ind;
     double secs_elapsed = 0;
     unsigned char *buf = (unsigned char *)calloc(mapping->buflen * sizeof(char), 1);
     char **block_index = (char **)malloc(max_ind * sizeof(char *));
 
-    // Storing pointers to beginning of every consecutive buflen/PAGE_SIZE sized chunk from file
+    // Storing pointers to beginning of every consecutive buflen sized chunk from file
     if (args->mode < 2)
     {
         for (uint64_t i = 0; i < max_ind; i++)
-            block_index[i] = (char *)(mapping->addr + (i * chunk_size));
+            block_index[i] = (char *)(mapping->addr + (mapping->buflen * i));
     }
-    else // Storing random pointers from mapped file
+    else // Storing pointers to buflen sized chunks in random order
     {
         srand(time(NULL));
         for (uint64_t i = 0; i < max_ind; i++)
-            block_index[i] = (char *)(mapping->addr + ((rand() % max_ind) * chunk_size));
+            block_index[i] = (char *)(mapping->addr + (mapping->buflen * (rand() % max_ind)));
         madvise(mapping->addr, mapping->size, MADV_RANDOM);
     }
 
-    // Fill buffer with random data for copying to memory
-    for (size_t i = 0; i < mapping->buflen; i++)
-        buf[i] = rand() % 256;
+    if (args->mode == 1 || args->mode == 3)
+    {
+        // Fill buffer with random data for copying to memory
+        for (size_t i = 0; i < mapping->buflen; i++)
+            buf[i] = rand() % 256;
+    }
 
     struct timespec tstart = {0, 0}, tend = {0, 0};
 
     while (secs_elapsed < args->runtime)
     {
-        msync(mapping->addr, mapping->size, MS_INVALIDATE); // In case data is in cache drop it
         clock_gettime(CLOCK_MONOTONIC, &tstart);
 
         if (args->mode == 0 || args->mode == 2)
