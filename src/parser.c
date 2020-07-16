@@ -175,7 +175,7 @@ void set_path(char *token, Arguments *args)
     if (strcmp(dir, "/dev/null") == 0 || strcmp(dir, "/dev/zero") == 0)
         args->map_anon = 1;
     if (!(args->path = malloc(strlen(dir) + 1)))
-        LOG(ERROR, EINVAL, "Invalid Directory.");
+        LOG(ERROR, EINVAL, "Invalid Directory");
     strcpy(args->path, dir);
     free_tok(dir);
 }
@@ -193,7 +193,7 @@ void set_mode(char *token, Arguments *args)
     else if (strncmp(mode, "randwrite", 9) == 0)
         args->mode = 3;
     else
-        LOG(ERROR, EINVAL, "Invalid mode. Running default read");
+        LOG(ERROR, EINVAL, "Invalid mode");
 }
 
 void set_engine(char *token, Arguments *args)
@@ -228,7 +228,7 @@ void set_iter(char *token, Arguments *args)
     args->iterations = strtoul(temp + 6, &ptr, 10) * multiplier;
     if (args->iterations < 1)
     {
-        LOG(ERROR, EINVAL, "Invalid Iterations. Running default 1 iteration");
+        LOG(INFO, EINVAL, "Invalid Iterations. Running default 1 iteration");
         args->iterations = 1;
     }
 }
@@ -241,7 +241,7 @@ void set_map_pop(char *token, Arguments *args)
     if (args->map_pop > 1 || args->map_pop < 0)
     {
         errno = EINVAL;
-        LOG(ERROR, EINVAL, "Invalid value for map_pop. Running default 0");
+        LOG(INFO, EINVAL, "Invalid value for map_pop. Running default 0");
         args->map_pop = 0;
     }
 }
@@ -253,7 +253,7 @@ void set_map_shared(char *token, Arguments *args)
     args->map_shared = strtoul(temp + 12, &ptr, 10);
     if (args->map_shared > 1 || args->map_shared < 0)
     {
-        LOG(ERROR, EINVAL, "Invalid value for map_shared. Running default 0");
+        LOG(INFO, EINVAL, "Invalid value for map_shared. Running default 0");
         args->map_shared = 0;
     }
 }
@@ -274,7 +274,7 @@ void set_cpy_iter(char *token, Arguments *args)
     args->cpy_iter = strtoul(temp + 10, &ptr, 10) * multiplier;
     if (args->cpy_iter < 1)
     {
-        LOG(ERROR, EINVAL, "Invalid cpy iterations. Running default 1 iteration");
+        LOG(INFO, EINVAL, "Invalid cpy iterations. Running default 1 iteration");
         args->cpy_iter = 1;
     }
 }
