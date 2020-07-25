@@ -100,17 +100,17 @@ int parse_file(char *token, char *tokens[])
 void display_help()
 {
     printf("Possible commands are:\n");
+    printf("-engine=\tPossible engines are mmap, mmap_lat, mem_lat, page_fault\n");
     printf("-file=\t\tProvide an input file with commands as shown in examples\n");
     printf("-runtime=\tSet runtime seconds\n");
     printf("-size=\t\tSet file size (For example 2M for 2MiB file)\n");
     printf("-copysize=\tSet copy size for memcpy (For example 4K for 4KiB)\n");
-    printf("-cpy_iter=\tNumber of times to call memcpy for mmap_eng (Defult 100,000)\n");
-    printf("-dir=\t\tPath to directory to use (/dev/null or /dev/zero for MAP_ANONYMOUS, current if none specified)\n");
+    printf("-cpy_iter=\tNumber of times to call memcpy for mmap_eng\n");
+    printf("-dir=\t\tPath to directory to use (/dev/null or /dev/zero for MAP_ANONYMOUS)\n");
     printf("-mode=\t\tPossible modes are: read write randread randwrite (Default read)\n");
-    printf("-engine=\tPossible engines are mmap, mmap_lat, mem_lat\n");
     printf("-iter=\t\tNumber of times to run engine (Default 1\n");
-    printf("-map_pop=\t0|1 to pass MAP_POPULATE to mmap for mmap_lat engine\n");
-    printf("-map_shared=\t0|1 to specify to pass MAP_SHARED or MAP_PRIVATE to mmap(Default 0)\n");
+    printf("-map_pop=\t0|1 to pass MAP_POPULATE to mmap for mmap_lat engine (Default 0)\n");
+    printf("-map_shared=\t0|1 to specify to pass MAP_SHARED or MAP_PRIVATE to mmap (Default 0)\n");
     printf("\nFor usage of engine specific commands consult the documentation\n");
     printf("Commands invalid for engine will be disregarded\n");
     exit(0);

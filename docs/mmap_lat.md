@@ -6,7 +6,7 @@ This Engine is meant to measure the latencies of mmap calls. It achieves this by
 
 ## Usage
 
-The engine takes several commands, which can be provided via cmd line or a file. Specify to run this engine as shown in the possible flags below. It's possible to run mmap on any mount location, as well as using MAP_ANONYMOUS. It's also possible to measure the latency of mmap with MAP_POPULATE as a flag. If no directory is specified in the flag, the current directory will be used. Runtime is set to 1 second by default.
+The engine takes several commands, which can be provided via cmd line or a file. Specify to run this engine as shown in the possible flags below. It's possible to run mmap on any mount location, as well as using MAP_ANONYMOUS. It's also possible to measure the latency of mmap with MAP_POPULATE as a flag.
 
 ## Possible Flags
 
@@ -21,7 +21,7 @@ The engine takes several commands, which can be provided via cmd line or a file.
 
 ## Results
 
-The results will be shown in the results.out file in the root directory. Results will display the directory used, flags used, how many iterations were run (how many times mmap was called), the total runtime, the specified file size, minimum, maximum, and average latencies for the mmap calls.
+The results will be shown in the results.out file in the root directory, as well as the cmd line. Results will display the directory used, flags used, how many iterations were run (how many times mmap was called), minimum, maximum, and average latencies for the mmap calls.
 
 ## Example run
 
@@ -32,7 +32,7 @@ touch /mnt/mem/file
 dd if=/dev/urandom of=/mnt/mem/file bs=100M count=8
 ```
 
-To create a file and initialize it from dev/urandom. (Though /urandom is slow so if you're planning on moving the file multiple times, store it somewhere on a mounted fs and move it from there)
+To create a file and initialize it from dev/urandom. (/urandom is slow so if you're planning on moving the file multiple times, store it somewhere on a mounted fs and move it from there)
 
 ```shell
 ./Benchmark -file=arguments.txt
@@ -41,8 +41,6 @@ To create a file and initialize it from dev/urandom. (Though /urandom is slow so
 with arguments.txt containing:
 
 ```shell
-# comments can be added like this per line using the hash symbol in the beginning
--runtime=40
 -engine=mmap_lat
 -dir=/mnt/mem/file
 -map_pop=0
@@ -51,4 +49,4 @@ with arguments.txt containing:
 
 ```
 
-This would run the engine for 100,000 iterations of mmap on the 800MiB mapped file and page table entries will not be pre populated, as well as the mmap call getting flag MAP_PRIVATE. The runtime will be 1 by default, but in case the run will take longer than 1 second, it's good to specify a large enough random runtime.
+This would run the engine for 100,000 iterations of mmap on the 800MiB mapped file and page table entries will not be pre-populated, as well as the mmap call getting flag MAP_PRIVATE.
