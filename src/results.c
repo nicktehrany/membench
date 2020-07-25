@@ -83,7 +83,8 @@ void results_mmap_lat_eng(FILE *fp, Results results, Arguments args)
 {
     print_dir(fp, args);
     print_flags(fp, args);
-    print_misc(fp, args);
+    printf("Iterations: %ld\n", args.iterations);
+    fprintf(fp, "Memcpy Calls\t\t%ld\n", args.iterations * args.iterations);
     print_latencies(fp, results);
 }
 

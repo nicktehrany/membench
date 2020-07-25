@@ -1,0 +1,8 @@
+-runtime=60
+-dir=/dev/zero
+-size=3G
+-copysize=4K
+-mode=randread
+-engine=mmap
+-map_pop=1
+-map_shared=0
