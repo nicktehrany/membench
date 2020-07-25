@@ -1,7 +1,7 @@
 # Random runtime that should be longer than the execution
 -runtime=50
 -dir=/mnt/mem/file
--copysize=4
+-copysize=4B
 -mode=randread
 -engine=mmap
 -map_pop=0

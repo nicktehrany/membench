@@ -13,7 +13,7 @@ The engine takes several commands, which can be provided via cmd line or a file.
 ```shell
 -engine=mmap_lat
 -dir= *specify the location of file to mmap (/dev/zero or /dev/null for MAP_ANONYMOUS)*
--size= *specify the size of file to mmap given in K/M/G (only for MAP_ANONYMOUS)*
+-size= *specify the size of file to mmap given in B/K/M/G (only for MAP_ANONYMOUS)*
 -map_pop= *0|1 to pass MAP_POPULATE to mmap call (Default 0)*
 -iter= *Number of iterations to run mmap for*
 -map_shared= *0|1 to specify to pass MAP_SHARED or MAP_PRIVATE to mmap (Default 0/MAP_PRIVATE)*

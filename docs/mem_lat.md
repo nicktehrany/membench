@@ -12,7 +12,7 @@ The engine takes several commands, which can be provided via cmd line or a file.
 
 ```shell
 -engine=mem_lat
--size= *specify the size of buffer to use for pointers given in K/M/G*
+-size= *specify the size of buffer to use for pointers given in B/K/M/G*
 -iter= *Number of times to run the engine*
 ```
 

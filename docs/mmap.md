@@ -13,7 +13,7 @@ The engine takes several commands, which can be provided via cmd line or a file.
 ```shell
 -engine=mmap
 -dir= *specify the location of file to mmap (/dev/zero or /dev/null for MAP_ANONYMOUS)*
--size= *specify the size of file to mmap given in K/M/G (only for MAP_ANONYMOUS)*
+-size= *specify the size of file to mmap given in B/K/M/G (only for MAP_ANONYMOUS)*
 -copysize= *specify the size to memcpy at a time given as number with possible extension K/M/G*
 -cpy_iter= *Specify number of times to call memcpy*
 -mode= *read/write/randread/randwrite*
@@ -49,7 +49,7 @@ with arguments.txt containing:
 -engine=mmap
 -runtime=4
 -dir=/mnt/mem/file
--copysize=4
+-copysize=4B
 -cpy_iter=1000
 -mode=randread
 -map_pop=1
