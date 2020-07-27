@@ -134,6 +134,7 @@ double mmap_run_benchmark(Mapping *mapping, Arguments *args, Results *results)
 
     while (secs_elapsed < args->runtime)
     {
+        msync(mapping->addr, mapping->size, MS_INVALIDATE); // Invalidate cached data
         clock_gettime(CLOCK_MONOTONIC, &tstart);
 
         if (args->mode == 0 || args->mode == 2)
