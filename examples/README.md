@@ -3,7 +3,7 @@
 These are some small example workloads, which can be invoked with the following command (All arguments can also be individually supplied via cmd line):
 
 ```shell
-./Benchmark -file=examples/example1.txt
+./membench -file=examples/example1.txt
 ```
 
 ## Example 1

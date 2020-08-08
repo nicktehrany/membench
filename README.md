@@ -19,5 +19,5 @@ The project has the following directories:
 Running ```make``` from the root directory will compile the program and create an executable called Benchmark in the root directory. Information about each engine and how to use them is in their respective file in the documentation. Executable can then be run using:
 
 ```sh
-./Benchmark -help
+./membench -help
 ```

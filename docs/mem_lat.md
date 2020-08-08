@@ -25,7 +25,7 @@ The results will be shown in the results.out file in the root directory.
 Running the following command:
 
 ```shell
-./Benchmark -engine=mem_lat -size=400M -iter=10
+./membench -engine=mem_lat -size=400M -iter=10
 ```
 
 This would run the engine 10 times (10,000,000 pointer walks each time). The buffer of pointers will be 400MiB large.

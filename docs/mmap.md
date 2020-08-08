@@ -39,7 +39,7 @@ dd if=/dev/urandom of=/mnt/mem/file bs=100M count=8
 To create the file and initialize from dev/urandom
 
 ```shell
-./Benchmark -file=arguments.txt
+./membench -file=arguments.txt
 ```
 
 with arguments.txt containing:

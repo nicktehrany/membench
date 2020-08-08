@@ -35,7 +35,7 @@ dd if=/dev/urandom of=/mnt/mem/file bs=100M count=8
 To create a file and initialize it from dev/urandom. (/urandom is slow so if you're planning on moving the file multiple times, store it somewhere on a mounted fs and move it from there)
 
 ```shell
-./Benchmark -file=arguments.txt
+./membench -file=arguments.txt
 ```
 
 with arguments.txt containing:

@@ -6,7 +6,7 @@ engines/mmap_lat.c engines/mem_lat.c engines/page_fault.c \
 src/parser.c src/functions.c
 FULL_DEPS_H = src/results.h engines/mmap.h engines/mmap_lat.h \
 engines/mem_lat.h engines/page_fault.h src/parser.h src/functions.h
-BM_Target = Benchmark
+BM_Target = membench
 OUT = out
 
 .PHONY: all clean
