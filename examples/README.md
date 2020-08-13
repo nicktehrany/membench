@@ -12,7 +12,7 @@ This example will use the mmap engine to call mmap with MAP_ANONYMOUS MAP_POPULA
 
 ## Example 2
 
-This example will use the mmap_lat engine, to call mmap on the /mnt/mem/file (The file needs to already be there, see docs for help on how that's done easily). It will then map the file into memory with the MAP_SHARED flag and pre populate page table entries, unmap the file, map it again, and repeat this 100 times. This is meant to measure the cost of mmap calls with pre populating page table entries. (This is merely an example and larger iterations should be uses, as well as depending on the file size users should also adjust the iterations)
+This example will use the mmap_lat engine, to call mmap on the /mnt/mem/file (The file needs to already be there, see docs for help on how that's done easily). It will then map the file into memory with the MAP_SHARED flag and pre populate page table entries, unmap the file, map it again, and repeat this 100 times. This is meant to measure the cost of mmap calls with pre populating page table entries. (This is merely an example and larger iterations should be usef, as well as, depending on the file size, users should also adjust the iterations)
 
 ## Example 3
 
