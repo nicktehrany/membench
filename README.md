@@ -1,4 +1,4 @@
-# Benchmarking Memory and File System Performance
+# membench - Benchmarking Memory and File System Performance
 
 ## Overview
 
